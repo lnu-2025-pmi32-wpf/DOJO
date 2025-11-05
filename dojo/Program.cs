@@ -7,7 +7,7 @@ class Program
     static void Main(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<DojoDbContext>();
-        string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password="";
+        string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=";
         optionsBuilder.UseNpgsql(connectionString);
         
         try
@@ -43,4 +43,5 @@ class Program
         }
     }
 }
+
 
