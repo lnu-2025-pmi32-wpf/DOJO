@@ -7,7 +7,7 @@ class Program
     static void Main(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<DojoDbContext>();
-        string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=0673737982vlad";
+        string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=A_p131205Kk%";
         optionsBuilder.UseNpgsql(connectionString);
         
         try
