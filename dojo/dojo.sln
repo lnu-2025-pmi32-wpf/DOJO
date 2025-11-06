@@ -2,6 +2,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dojo", "dojo.csproj", "{431807F2-4416-472E-B2EB-4D0A253C5355}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{BDDF6C8C-41EE-456C-AC06-CB23025BB917}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLL", "BLL\BLL.csproj", "{B8D056C3-F104-46A9-B3FB-3E3BF0E48A7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Presentation", "Presentation\Presentation.csproj", "{3267DDE3-F25D-42A1-AE0D-80BF5BCAE90F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +18,17 @@ Global
 		{431807F2-4416-472E-B2EB-4D0A253C5355}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{431807F2-4416-472E-B2EB-4D0A253C5355}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{431807F2-4416-472E-B2EB-4D0A253C5355}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDDF6C8C-41EE-456C-AC06-CB23025BB917}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDDF6C8C-41EE-456C-AC06-CB23025BB917}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDDF6C8C-41EE-456C-AC06-CB23025BB917}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDDF6C8C-41EE-456C-AC06-CB23025BB917}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8D056C3-F104-46A9-B3FB-3E3BF0E48A7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8D056C3-F104-46A9-B3FB-3E3BF0E48A7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8D056C3-F104-46A9-B3FB-3E3BF0E48A7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8D056C3-F104-46A9-B3FB-3E3BF0E48A7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3267DDE3-F25D-42A1-AE0D-80BF5BCAE90F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3267DDE3-F25D-42A1-AE0D-80BF5BCAE90F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3267DDE3-F25D-42A1-AE0D-80BF5BCAE90F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3267DDE3-F25D-42A1-AE0D-80BF5BCAE90F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
