@@ -1,5 +1,5 @@
-using dojo;
-using dojo.Models;
+using DAL;
+using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BLL.Services

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using dojo.Models;
+using DAL.Models;
 using System.Text.RegularExpressions;
 
-namespace dojo
+namespace DAL
 {
     public class DojoDbContext : DbContext
     {

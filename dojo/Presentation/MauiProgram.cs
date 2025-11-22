@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using dojo;
+using DAL;
 using BLL.Services;
-using Microsoft.Maui;
-using Microsoft.Maui.Hosting;
-using Microsoft.Maui.Controls.Hosting;
 
 
 namespace Presentation
