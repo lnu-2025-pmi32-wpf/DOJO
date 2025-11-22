@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using dojo.Models;
+using DAL.Models;
 using System.Text.RegularExpressions;
 
-namespace dojo
+namespace DAL
 {
     public class DojoDbContext : DbContext
     {
@@ -61,6 +61,11 @@ namespace dojo
                 eb.Property(p => p.StartTime).HasColumnName("start_time");
                 eb.Property(p => p.EndTime).HasColumnName("end_time");
                 eb.Property(p => p.WorkCycles).HasColumnName("work_cycles");
+                
+                eb.HasOne(p => p.Task)
+                  .WithMany()
+                  .HasForeignKey(p => p.TaskId)
+                  .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Attachment>(eb =>

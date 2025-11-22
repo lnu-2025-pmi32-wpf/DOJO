@@ -1,4 +1,4 @@
-namespace dojo.Models
+namespace DAL.Models
 {
     public class Goal
     {
