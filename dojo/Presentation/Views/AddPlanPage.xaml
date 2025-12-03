@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Presentation.ViewModels"
+             x:Class="Presentation.Views.AddPlanPage"
+             x:DataType="viewmodels:AddPlanViewModel"
+             Title="Додати план"
+             BackgroundColor="#F5F5F5">
+
+    <ScrollView>
+        <VerticalStackLayout 
+            Padding="20"
+            Spacing="20"
+            MaximumWidthRequest="800"
+            HorizontalOptions="Center">
+
+            <Label 
+                Text="Створити новий план"
+                FontSize="24"
+                FontAttributes="Bold"
+                TextColor="#333333"/>
+
+            <!-- Title -->
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="Назва *"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#333333"/>
+                
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="{Binding TitleError, Converter={StaticResource ErrorToBorderColorConverter}}"
+                    StrokeThickness="2"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8">
+                    <Entry 
+                        Text="{Binding Title}"
+                        Placeholder="Введіть назву плану"
+                        FontSize="16"
+                        TextColor="#333333"/>
+                </Border>
+                
+                <Label 
+                    Text="{Binding TitleError}"
+                    TextColor="Red"
+                    FontSize="12"
+                    IsVisible="{Binding TitleError, Converter={StaticResource StringToBoolConverter}}"
+                    Margin="5,0,0,0"/>
+            </VerticalStackLayout>
+
+            <!-- Description -->
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="Опис"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#333333"/>
+                
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="#DDD"
+                    StrokeThickness="1"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8">
+                    <Editor 
+                        Text="{Binding Description}"
+                        Placeholder="Введіть опис плану (необов'язково)"
+                        FontSize="16"
+                        TextColor="#333333"
+                        HeightRequest="120"
+                        AutoSize="TextChanges"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Start Date and Time -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                <VerticalStackLayout Grid.Column="0" Spacing="5">
+                    <Label 
+                        Text="Дата початку *"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="#333333"/>
+                    
+                    <Border 
+                        BackgroundColor="White"
+                        Stroke="#DDD"
+                        StrokeThickness="1"
+                        Padding="12"
+                        StrokeShape="RoundRectangle 8">
+                        <DatePicker 
+                            Date="{Binding StartDate}"
+                            FontSize="16"
+                            TextColor="#333333"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1" Spacing="5">
+                    <Label 
+                        Text="Час початку *"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="#333333"/>
+                    
+                    <Border 
+                        BackgroundColor="White"
+                        Stroke="#DDD"
+                        StrokeThickness="1"
+                        Padding="12"
+                        StrokeShape="RoundRectangle 8">
+                        <TimePicker 
+                            Time="{Binding StartTime}"
+                            FontSize="16"
+                            TextColor="#333333"/>
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- End Date and Time -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                <VerticalStackLayout Grid.Column="0" Spacing="5">
+                    <Label 
+                        Text="Дата завершення *"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="#333333"/>
+                    
+                    <Border 
+                        BackgroundColor="White"
+                        Stroke="#DDD"
+                        StrokeThickness="1"
+                        Padding="12"
+                        StrokeShape="RoundRectangle 8">
+                        <DatePicker 
+                            Date="{Binding EndDate}"
+                            FontSize="16"
+                            TextColor="#333333"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1" Spacing="5">
+                    <Label 
+                        Text="Час завершення *"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="#333333"/>
+                    
+                    <Border 
+                        BackgroundColor="White"
+                        Stroke="#DDD"
+                        StrokeThickness="1"
+                        Padding="12"
+                        StrokeShape="RoundRectangle 8">
+                        <TimePicker 
+                            Time="{Binding EndTime}"
+                            FontSize="16"
+                            TextColor="#333333"/>
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label 
+                Text="{Binding DateError}"
+                TextColor="Red"
+                FontSize="12"
+                IsVisible="{Binding DateError, Converter={StaticResource StringToBoolConverter}}"
+                Margin="5,0,0,0"/>
+
+            <!-- Priority -->
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="Пріоритет"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#333333"/>
+                
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="#DDD"
+                    StrokeThickness="1"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8">
+                    <Picker 
+                        SelectedIndex="{Binding Priority}"
+                        FontSize="16"
+                        TextColor="#333333">
+                        <Picker.ItemsSource>
+                            <x:Array Type="{x:Type x:String}">
+                                <x:String>Низький</x:String>
+                                <x:String>Нормальний</x:String>
+                                <x:String>Високий</x:String>
+                            </x:Array>
+                        </Picker.ItemsSource>
+                    </Picker>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Attachment -->
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="Вкладення"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#333333"/>
+                
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="#DDD"
+                    StrokeThickness="1"
+                    Padding="15"
+                    StrokeShape="RoundRectangle 8">
+                    <VerticalStackLayout Spacing="10">
+                        <Button 
+                            Text="📎 Прикріпити файл"
+                            Command="{Binding AttachFileCommand}"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            CornerRadius="5"
+                            Padding="12,8"
+                            HorizontalOptions="Start"/>
+                        
+                        <Label 
+                            Text="{Binding AttachmentPath}"
+                            FontSize="12"
+                            TextColor="#666"
+                            IsVisible="{Binding AttachmentPath, Converter={StaticResource StringToBoolConverter}}"
+                            LineBreakMode="TailTruncation"/>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,20,0,0">
+                <Button 
+                    Grid.Column="0"
+                    Text="Скасувати"
+                    Command="{Binding CancelCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="#666"
+                    BorderColor="#DDD"
+                    BorderWidth="1"
+                    CornerRadius="8"
+                    FontSize="16"
+                    Padding="0,12"/>
+                
+                <Button 
+                    Grid.Column="1"
+                    Text="Зберегти"
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"
+                    CornerRadius="8"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    Padding="0,12"/>
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
+

@@ -1,0 +1,239 @@
+using System.Collections.ObjectModel;
+using System.Windows.Input;
+using Presentation.Helpers;
+using Presentation.Models;
+
+namespace Presentation.ViewModels
+{
+    public class MainViewModel : BaseViewModel
+    {
+        private ViewMode _currentViewMode = ViewMode.Week;
+        private DateTime _selectedDate = DateTime.Today;
+        private string _searchText = string.Empty;
+        private EventModel? _selectedEvent;
+
+        public MainViewModel()
+        {
+            Events = new ObservableCollection<EventModel>();
+            TodoItems = new ObservableCollection<TodoItemModel>();
+            
+            // Commands
+            AddPlanCommand = new RelayCommand(OnAddPlan);
+            NavigateNextCommand = new RelayCommand(OnNavigateNext);
+            NavigatePreviousCommand = new RelayCommand(OnNavigatePrevious);
+            GoToTodayCommand = new RelayCommand(OnGoToToday);
+            ChangeModeCommand = new RelayCommand<ViewMode>(OnChangeMode);
+            SearchCommand = new RelayCommand(OnSearch);
+            EditEventCommand = new RelayCommand<EventModel>(OnEditEvent);
+            DeleteEventCommand = new RelayCommand<EventModel>(OnDeleteEvent);
+            ToggleTodoCommand = new RelayCommand<TodoItemModel>(OnToggleTodo);
+            NavigateToStatisticsCommand = new RelayCommand(OnNavigateToStatistics);
+            
+            LoadSampleData();
+        }
+
+        // Properties
+        public ObservableCollection<EventModel> Events { get; }
+        public ObservableCollection<TodoItemModel> TodoItems { get; }
+
+        public ViewMode CurrentViewMode
+        {
+            get => _currentViewMode;
+            set
+            {
+                if (SetProperty(ref _currentViewMode, value))
+                {
+                    UpdateDateRange();
+                }
+            }
+        }
+
+        public DateTime SelectedDate
+        {
+            get => _selectedDate;
+            set
+            {
+                if (SetProperty(ref _selectedDate, value))
+                {
+                    UpdateDateRange();
+                }
+            }
+        }
+
+        public string SearchText
+        {
+            get => _searchText;
+            set => SetProperty(ref _searchText, value);
+        }
+
+        public EventModel? SelectedEvent
+        {
+            get => _selectedEvent;
+            set => SetProperty(ref _selectedEvent, value);
+        }
+
+        private DateTime _weekStartDate;
+        public DateTime WeekStartDate
+        {
+            get => _weekStartDate;
+            set => SetProperty(ref _weekStartDate, value);
+        }
+
+        private DateTime _weekEndDate;
+        public DateTime WeekEndDate
+        {
+            get => _weekEndDate;
+            set => SetProperty(ref _weekEndDate, value);
+        }
+
+        public string DateRangeText => CurrentViewMode switch
+        {
+            ViewMode.Week => $"{WeekStartDate:dd} — {WeekEndDate:dd MMM yyyy}",
+            ViewMode.Month => SelectedDate.ToString("MMMM yyyy"),
+            ViewMode.Day => SelectedDate.ToString("dd MMMM yyyy"),
+            _ => string.Empty
+        };
+
+        // Commands
+        public ICommand AddPlanCommand { get; }
+        public ICommand NavigateNextCommand { get; }
+        public ICommand NavigatePreviousCommand { get; }
+        public ICommand GoToTodayCommand { get; }
+        public ICommand ChangeModeCommand { get; }
+        public ICommand SearchCommand { get; }
+        public ICommand EditEventCommand { get; }
+        public ICommand DeleteEventCommand { get; }
+        public ICommand ToggleTodoCommand { get; }
+        public ICommand NavigateToStatisticsCommand { get; }
+
+        // Command Handlers
+        private async void OnAddPlan()
+        {
+            await Shell.Current.GoToAsync(nameof(Views.AddPlanPage));
+        }
+
+        private void OnNavigateNext()
+        {
+            SelectedDate = CurrentViewMode switch
+            {
+                ViewMode.Day => SelectedDate.AddDays(1),
+                ViewMode.Week => SelectedDate.AddDays(7),
+                ViewMode.Month => SelectedDate.AddMonths(1),
+                _ => SelectedDate
+            };
+        }
+
+        private void OnNavigatePrevious()
+        {
+            SelectedDate = CurrentViewMode switch
+            {
+                ViewMode.Day => SelectedDate.AddDays(-1),
+                ViewMode.Week => SelectedDate.AddDays(-7),
+                ViewMode.Month => SelectedDate.AddMonths(-1),
+                _ => SelectedDate
+            };
+        }
+
+        private void OnGoToToday()
+        {
+            SelectedDate = DateTime.Today;
+        }
+
+        private void OnChangeMode(ViewMode mode)
+        {
+            CurrentViewMode = mode;
+        }
+
+        private void OnSearch()
+        {
+            // Implement search logic
+        }
+
+        private void OnEditEvent(EventModel? eventModel)
+        {
+            if (eventModel != null)
+            {
+                SelectedEvent = eventModel;
+                // Navigate to edit page
+            }
+        }
+
+        private void OnDeleteEvent(EventModel? eventModel)
+        {
+            if (eventModel != null)
+            {
+                Events.Remove(eventModel);
+            }
+        }
+
+        private void OnToggleTodo(TodoItemModel? todoItem)
+        {
+            if (todoItem != null)
+            {
+                todoItem.IsCompleted = !todoItem.IsCompleted;
+            }
+        }
+
+        private async void OnNavigateToStatistics()
+        {
+            await Shell.Current.GoToAsync(nameof(Views.StatisticsPage));
+        }
+
+        private void UpdateDateRange()
+        {
+            if (CurrentViewMode == ViewMode.Week)
+            {
+                var diff = (7 + (SelectedDate.DayOfWeek - DayOfWeek.Sunday)) % 7;
+                WeekStartDate = SelectedDate.AddDays(-diff).Date;
+                WeekEndDate = WeekStartDate.AddDays(6);
+            }
+            OnPropertyChanged(nameof(DateRangeText));
+        }
+
+        private void LoadSampleData()
+        {
+            // Sample events
+            Events.Add(new EventModel
+            {
+                Id = 1,
+                Title = "Зустріч з командою",
+                Description = "Обговорення проекту",
+                StartDateTime = DateTime.Today.AddHours(10),
+                EndDateTime = DateTime.Today.AddHours(11),
+                Priority = EventPriority.High,
+                Color = Colors.Red
+            });
+
+            Events.Add(new EventModel
+            {
+                Id = 2,
+                Title = "Робота над завданням",
+                Description = "Розробка UI",
+                StartDateTime = DateTime.Today.AddHours(14),
+                EndDateTime = DateTime.Today.AddHours(16),
+                Priority = EventPriority.Normal,
+                Color = Colors.Blue
+            });
+
+            // Sample todos
+            TodoItems.Add(new TodoItemModel
+            {
+                Id = 1,
+                Description = "Завершити дизайн інтерфейсу",
+                IsCompleted = false,
+                Priority = 2
+            });
+
+            TodoItems.Add(new TodoItemModel
+            {
+                Id = 2,
+                Description = "Написати тести",
+                IsCompleted = false,
+                Priority = 1
+            });
+
+            UpdateDateRange();
+        }
+    }
+}
+

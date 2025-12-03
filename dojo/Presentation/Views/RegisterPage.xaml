@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Presentation.ViewModels"
+             x:Class="Presentation.Views.RegisterPage"
+             x:DataType="viewmodels:RegisterViewModel"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#F5F5F5">
+
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout 
+                Padding="40"
+                Spacing="15"
+                VerticalOptions="Center"
+                MaximumWidthRequest="400"
+                HorizontalOptions="Center">
+
+                <!-- Logo and Title -->
+                <Image 
+                    Source="dotnet_bot.png"
+                    HeightRequest="100"
+                    Aspect="AspectFit"
+                    Margin="0,0,0,10"/>
+
+                <Label 
+                    Text="DOJO"
+                    FontSize="32"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"
+                    TextColor="#333333"/>
+
+                <Label 
+                    Text="Створити новий акаунт"
+                    FontSize="16"
+                    HorizontalOptions="Center"
+                    TextColor="#666666"
+                    Margin="0,0,0,20"/>
+
+                <!-- Full Name Entry -->
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="{Binding FullNameError, Converter={StaticResource ErrorToBorderColorConverter}}"
+                    StrokeThickness="2"
+                    Padding="15,10"
+                    StrokeShape="RoundRectangle 8">
+                    <VerticalStackLayout Spacing="5">
+                        <Label 
+                            Text="Повне ім'я"
+                            FontSize="12"
+                            TextColor="#666666"/>
+                        <Entry 
+                            Text="{Binding FullName}"
+                            Placeholder="Андрій Кахновець"
+                            FontSize="16"
+                            TextColor="#333333"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label 
+                    Text="{Binding FullNameError}"
+                    TextColor="Red"
+                    FontSize="12"
+                    IsVisible="{Binding FullNameError, Converter={StaticResource StringToBoolConverter}}"
+                    Margin="5,0,0,0"/>
+
+                <!-- Email Entry -->
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="{Binding EmailError, Converter={StaticResource ErrorToBorderColorConverter}}"
+                    StrokeThickness="2"
+                    Padding="15,10"
+                    StrokeShape="RoundRectangle 8">
+                    <VerticalStackLayout Spacing="5">
+                        <Label 
+                            Text="Email"
+                            FontSize="12"
+                            TextColor="#666666"/>
+                        <Entry 
+                            Text="{Binding Email}"
+                            Placeholder="example@mail.com"
+                            Keyboard="Email"
+                            FontSize="16"
+                            TextColor="#333333"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label 
+                    Text="{Binding EmailError}"
+                    TextColor="Red"
+                    FontSize="12"
+                    IsVisible="{Binding EmailError, Converter={StaticResource StringToBoolConverter}}"
+                    Margin="5,0,0,0"/>
+
+                <!-- Password Entry -->
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="{Binding PasswordError, Converter={StaticResource ErrorToBorderColorConverter}}"
+                    StrokeThickness="2"
+                    Padding="15,10"
+                    StrokeShape="RoundRectangle 8">
+                    <VerticalStackLayout Spacing="5">
+                        <Label 
+                            Text="Пароль"
+                            FontSize="12"
+                            TextColor="#666666"/>
+                        <Entry 
+                            Text="{Binding Password}"
+                            Placeholder="••••••••"
+                            IsPassword="True"
+                            FontSize="16"
+                            TextColor="#333333"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label 
+                    Text="{Binding PasswordError}"
+                    TextColor="Red"
+                    FontSize="12"
+                    IsVisible="{Binding PasswordError, Converter={StaticResource StringToBoolConverter}}"
+                    Margin="5,0,0,0"/>
+
+                <!-- Confirm Password Entry -->
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="{Binding ConfirmPasswordError, Converter={StaticResource ErrorToBorderColorConverter}}"
+                    StrokeThickness="2"
+                    Padding="15,10"
+                    StrokeShape="RoundRectangle 8">
+                    <VerticalStackLayout Spacing="5">
+                        <Label 
+                            Text="Підтвердження паролю"
+                            FontSize="12"
+                            TextColor="#666666"/>
+                        <Entry 
+                            Text="{Binding ConfirmPassword}"
+                            Placeholder="••••••••"
+                            IsPassword="True"
+                            FontSize="16"
+                            TextColor="#333333"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label 
+                    Text="{Binding ConfirmPasswordError}"
+                    TextColor="Red"
+                    FontSize="12"
+                    IsVisible="{Binding ConfirmPasswordError, Converter={StaticResource StringToBoolConverter}}"
+                    Margin="5,0,0,0"/>
+
+                <!-- Register Button -->
+                <Button 
+                    Text="Зареєструватися"
+                    Command="{Binding RegisterCommand}"
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    CornerRadius="8"
+                    Margin="0,10,0,0"/>
+
+                <!-- Loading Indicator -->
+                <ActivityIndicator 
+                    IsRunning="{Binding IsLoading}"
+                    IsVisible="{Binding IsLoading}"
+                    Color="#4CAF50"
+                    HeightRequest="40"/>
+
+                <!-- Back to Login Link -->
+                <HorizontalStackLayout 
+                    HorizontalOptions="Center"
+                    Spacing="5"
+                    Margin="0,15,0,0">
+                    <Label 
+                        Text="Вже маєте акаунт?"
+                        FontSize="14"
+                        TextColor="#666666"/>
+                    <Label 
+                        Text="Увійти"
+                        FontSize="14"
+                        TextColor="#4CAF50"
+                        FontAttributes="Bold">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding BackToLoginCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>
+

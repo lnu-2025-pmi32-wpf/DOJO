@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Presentation.ViewModels"
+             xmlns:controls="clr-namespace:Presentation.Controls"
+             x:Class="Presentation.Views.DashboardPage"
+             x:DataType="viewmodels:MainViewModel"
+             Title="DOJO - Планувальник"
+             BackgroundColor="#F5F5F5">
+
+    <Grid RowDefinitions="60,*" ColumnDefinitions="*,300">
+        
+        <!-- Top Toolbar -->
+        <Border 
+            Grid.Row="0" 
+            Grid.ColumnSpan="2"
+            BackgroundColor="White"
+            Shadow="{Shadow Brush=Black, Opacity=0.1, Radius=5, Offset='0,2'}">
+            <Grid Padding="15,0" ColumnDefinitions="Auto,*,Auto">
+                
+                <!-- Left Buttons -->
+                <HorizontalStackLayout Grid.Column="0" Spacing="10">
+                    <Button 
+                        Text="+ Додати план"
+                        Command="{Binding AddPlanCommand}"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
+                        CornerRadius="5"
+                        FontAttributes="Bold"
+                        Padding="15,8"/>
+                    
+                    <Button 
+                        Text="📋 TODO"
+                        BackgroundColor="Transparent"
+                        TextColor="#333"
+                        CornerRadius="5"
+                        Padding="12,8"
+                        BorderColor="#DDD"
+                        BorderWidth="1"/>
+                    
+                    <Button 
+                        Text="📊 Статистика"
+                        Command="{Binding NavigateToStatisticsCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="#333"
+                        CornerRadius="5"
+                        Padding="12,8"
+                        BorderColor="#DDD"
+                        BorderWidth="1"/>
+                </HorizontalStackLayout>
+
+                <!-- Center - Date Navigation -->
+                <HorizontalStackLayout 
+                    Grid.Column="1" 
+                    Spacing="15"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center">
+                    
+                    <Button 
+                        Text="◀"
+                        Command="{Binding NavigatePreviousCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="#333"
+                        FontSize="20"
+                        WidthRequest="40"/>
+                    
+                    <Label 
+                        Text="{Binding DateRangeText}"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        VerticalOptions="Center"
+                        TextColor="#333"/>
+                    
+                    <Button 
+                        Text="▶"
+                        Command="{Binding NavigateNextCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="#333"
+                        FontSize="20"
+                        WidthRequest="40"/>
+                </HorizontalStackLayout>
+
+                <!-- Right - View Mode and Search -->
+                <HorizontalStackLayout Grid.Column="2" Spacing="10">
+                    <Border 
+                        BackgroundColor="#F0F0F0"
+                        Padding="2"
+                        StrokeShape="RoundRectangle 5"
+                        Stroke="Transparent">
+                        <HorizontalStackLayout Spacing="0">
+                            <Button 
+                                Text="День"
+                                Command="{Binding ChangeModeCommand}"
+                                CommandParameter="Day"
+                                BackgroundColor="{Binding CurrentViewMode, Converter={StaticResource ViewModeToColorConverter}, ConverterParameter=Day}"
+                                TextColor="#333"
+                                CornerRadius="3"
+                                Padding="12,6"
+                                FontSize="12"/>
+                            <Button 
+                                Text="Тиждень"
+                                Command="{Binding ChangeModeCommand}"
+                                CommandParameter="Week"
+                                BackgroundColor="#4CAF50"
+                                TextColor="White"
+                                CornerRadius="3"
+                                Padding="12,6"
+                                FontSize="12"/>
+                            <Button 
+                                Text="Місяць"
+                                Command="{Binding ChangeModeCommand}"
+                                CommandParameter="Month"
+                                BackgroundColor="Transparent"
+                                TextColor="#333"
+                                CornerRadius="3"
+                                Padding="12,6"
+                                FontSize="12"/>
+                        </HorizontalStackLayout>
+                    </Border>
+                    
+                    <Button 
+                        Text="Сьогодні"
+                        Command="{Binding GoToTodayCommand}"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"
+                        CornerRadius="5"
+                        Padding="12,8"/>
+                    
+                    <Border 
+                        BackgroundColor="White"
+                        Stroke="#DDD"
+                        StrokeThickness="1"
+                        Padding="10,5"
+                        WidthRequest="200"
+                        StrokeShape="RoundRectangle 5">
+                        <Entry 
+                            Text="{Binding SearchText}"
+                            Placeholder="🔍 Пошук..."
+                            FontSize="14"
+                            VerticalOptions="Center"/>
+                    </Border>
+                </HorizontalStackLayout>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1" Grid.Column="0" Padding="10">
+            <ScrollView>
+                <VerticalStackLayout Spacing="15">
+                    
+                    <!-- Week Schedule Grid -->
+                    <Border 
+                        BackgroundColor="White"
+                        Stroke="#E0E0E0"
+                        StrokeThickness="1"
+                        Padding="0"
+                        StrokeShape="RoundRectangle 8"
+                        HeightRequest="600">
+                        <controls:WeekScheduleGrid 
+                            Events="{Binding Events}"
+                            WeekStartDate="{Binding WeekStartDate}"/>
+                    </Border>
+
+                    <!-- Bottom Cards Row -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="15">
+                        
+                        <!-- Plan Card -->
+                        <Border 
+                            Grid.Column="0"
+                            BackgroundColor="White"
+                            Stroke="#E0E0E0"
+                            StrokeThickness="1"
+                            Padding="15"
+                            StrokeShape="RoundRectangle 8">
+                            <VerticalStackLayout Spacing="10">
+                                <Label 
+                                    Text="📋 ПЛАН"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="#333"/>
+                                
+                                <CollectionView ItemsSource="{Binding Events}">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <HorizontalStackLayout Spacing="8" Padding="0,5">
+                                                <CheckBox IsChecked="{Binding IsCompleted}"/>
+                                                <Label 
+                                                    Text="{Binding Title}"
+                                                    FontSize="14"
+                                                    VerticalOptions="Center"
+                                                    TextColor="#666"/>
+                                            </HorizontalStackLayout>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- To Do Card -->
+                        <Border 
+                            Grid.Column="1"
+                            BackgroundColor="White"
+                            Stroke="#E0E0E0"
+                            StrokeThickness="1"
+                            Padding="15"
+                            StrokeShape="RoundRectangle 8">
+                            <VerticalStackLayout Spacing="10">
+                                <Label 
+                                    Text="✓ TO DO"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="#333"/>
+                                
+                                <CollectionView ItemsSource="{Binding TodoItems}">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <HorizontalStackLayout Spacing="8" Padding="0,5">
+                                                <CheckBox 
+                                                    IsChecked="{Binding IsCompleted}">
+                                                    <CheckBox.GestureRecognizers>
+                                                        <TapGestureRecognizer 
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=ToggleTodoCommand}"
+                                                            CommandParameter="{Binding .}"/>
+                                                    </CheckBox.GestureRecognizers>
+                                                </CheckBox>
+                                                <Label 
+                                                    Text="{Binding Description}"
+                                                    FontSize="14"
+                                                    VerticalOptions="Center"
+                                                    TextColor="#666"
+                                                    TextDecorations="{Binding IsCompleted, Converter={StaticResource BoolToTextDecorationConverter}}"/>
+                                            </HorizontalStackLayout>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                                
+                                <Button 
+                                    Text="+ Додати завдання"
+                                    BackgroundColor="Transparent"
+                                    TextColor="#4CAF50"
+                                    FontSize="12"
+                                    HorizontalOptions="Start"
+                                    Padding="0"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Statistics Card -->
+                        <Border 
+                            Grid.Column="2"
+                            BackgroundColor="White"
+                            Stroke="#E0E0E0"
+                            StrokeThickness="1"
+                            Padding="15"
+                            StrokeShape="RoundRectangle 8">
+                            <VerticalStackLayout Spacing="10">
+                                <Label 
+                                    Text="📊 СТАТИСТИКА"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    TextColor="#333"/>
+                                
+                                <Label 
+                                    Text="Завершено завдань: 12"
+                                    FontSize="14"
+                                    TextColor="#666"/>
+                                
+                                <Label 
+                                    Text="Час роботи: 8 год"
+                                    FontSize="14"
+                                    TextColor="#666"/>
+                                
+                                <Label 
+                                    Text="Продуктивність: 85%"
+                                    FontSize="14"
+                                    TextColor="#666"/>
+                                
+                                <Button 
+                                    Text="Детальніше"
+                                    BackgroundColor="#2196F3"
+                                    TextColor="White"
+                                    CornerRadius="5"
+                                    Padding="10,5"
+                                    FontSize="12"
+                                    Margin="0,10,0,0"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+
+        <!-- Right Sidebar -->
+        <Border 
+            Grid.Row="1" 
+            Grid.Column="1"
+            BackgroundColor="White"
+            Stroke="#E0E0E0"
+            StrokeThickness="1"
+            Padding="15"
+            Margin="0,10,10,10"
+            StrokeShape="RoundRectangle 8">
+            <VerticalStackLayout Spacing="20">
+                
+                <!-- Mini Calendar -->
+                <VerticalStackLayout Spacing="10">
+                    <Label 
+                        Text="Календар"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="#333"/>
+                    
+                    <!-- Calendar placeholder - will implement custom control -->
+                    <Border 
+                        BackgroundColor="#F9F9F9"
+                        Padding="10"
+                        StrokeShape="RoundRectangle 5"
+                        Stroke="Transparent"
+                        HeightRequest="250">
+                        <Label 
+                            Text="Міні-календар"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"
+                            TextColor="#999"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Pomodoro Timer -->
+                <VerticalStackLayout Spacing="10">
+                    <Label 
+                        Text="⏱️ Помодоро"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="#333"/>
+                    
+                    <Border 
+                        BackgroundColor="#FFF3E0"
+                        Padding="20"
+                        StrokeShape="RoundRectangle 8"
+                        Stroke="#FFB74D">
+                        <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Label 
+                                Text="25:00"
+                                FontSize="32"
+                                FontAttributes="Bold"
+                                HorizontalOptions="Center"
+                                TextColor="#FF6F00"/>
+                            
+                            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                                <Button 
+                                    Text="▶"
+                                    BackgroundColor="#4CAF50"
+                                    TextColor="White"
+                                    WidthRequest="50"
+                                    HeightRequest="50"
+                                    CornerRadius="25"
+                                    FontSize="18"/>
+                                <Button 
+                                    Text="⏸"
+                                    BackgroundColor="#FF9800"
+                                    TextColor="White"
+                                    WidthRequest="50"
+                                    HeightRequest="50"
+                                    CornerRadius="25"
+                                    FontSize="18"/>
+                                <Button 
+                                    Text="⟲"
+                                    BackgroundColor="#F44336"
+                                    TextColor="White"
+                                    WidthRequest="50"
+                                    HeightRequest="50"
+                                    CornerRadius="25"
+                                    FontSize="18"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Mascot -->
+                <VerticalStackLayout Spacing="10">
+                    <Label 
+                        Text="🐷 Твій герой"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="#333"/>
+                    
+                    <Border 
+                        BackgroundColor="#E8F5E9"
+                        Padding="20"
+                        StrokeShape="RoundRectangle 8"
+                        Stroke="#4CAF50"
+                        HeightRequest="150">
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                            <Label 
+                                Text="🐷"
+                                FontSize="60"
+                                HorizontalOptions="Center"/>
+                            <Label 
+                                Text="Рівень 5"
+                                FontSize="14"
+                                HorizontalOptions="Center"
+                                TextColor="#4CAF50"
+                                FontAttributes="Bold"/>
+                            <ProgressBar 
+                                Progress="0.65"
+                                ProgressColor="#4CAF50"
+                                Margin="0,10,0,0"
+                                WidthRequest="150"/>
+                            <Label 
+                                Text="650 / 1000 XP"
+                                FontSize="12"
+                                HorizontalOptions="Center"
+                                TextColor="#666"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
+</ContentPage>
+
