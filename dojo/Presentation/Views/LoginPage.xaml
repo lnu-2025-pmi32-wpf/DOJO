@@ -17,11 +17,11 @@
                 HorizontalOptions="Center">
 
                 <!-- Logo and Title -->
-                <Image 
-                    Source="dotnet_bot.png"
-                    HeightRequest="120"
-                    Aspect="AspectFit"
-                    Margin="0,0,0,20"/>
+                <Label 
+                    Text="🥋"
+                    FontSize="80"
+                    HorizontalOptions="Center"
+                    Margin="0,0,0,10"/>
 
                 <Label 
                     Text="DOJO"

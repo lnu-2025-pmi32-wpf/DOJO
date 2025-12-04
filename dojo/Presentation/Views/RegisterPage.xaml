@@ -17,10 +17,10 @@
                 HorizontalOptions="Center">
 
                 <!-- Logo and Title -->
-                <Image 
-                    Source="dotnet_bot.png"
-                    HeightRequest="100"
-                    Aspect="AspectFit"
+                <Label 
+                    Text="🥋"
+                    FontSize="80"
+                    HorizontalOptions="Center"
                     Margin="0,0,0,10"/>
 
                 <Label 
