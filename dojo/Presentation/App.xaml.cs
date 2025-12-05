@@ -1,4 +1,4 @@
-﻿﻿using Presentation.Views;
+﻿﻿﻿using Presentation.Views;
 
 namespace Presentation;
 
@@ -11,6 +11,7 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        return new Window(new LoginPage());
+        var loginPage = Handler?.MauiContext?.Services.GetService<LoginPage>();
+        return new Window(loginPage ?? new LoginPage(null!));
     }
 }

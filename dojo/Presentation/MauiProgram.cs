@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using DAL;
 using BLL.Services;
+using BLL.Interfaces;
 using Presentation.Views;
 using Presentation.ViewModels;
 
@@ -22,7 +23,7 @@ namespace Presentation
                 });
 
             // Підключення до бази даних
-            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=";
+            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=postgre2006";
             builder.Services.AddDbContext<DojoDbContext>(options =>
                 options.UseNpgsql(connectionString));
 

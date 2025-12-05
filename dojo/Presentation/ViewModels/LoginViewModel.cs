@@ -1,19 +1,22 @@
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Input;
 using Presentation.Helpers;
+using BLL.Interfaces;
 
 namespace Presentation.ViewModels
 {
     public class LoginViewModel : BaseViewModel
     {
+        private readonly IUserService _userService;
         private string _email = string.Empty;
         private string _password = string.Empty;
         private string _emailError = string.Empty;
         private string _passwordError = string.Empty;
         private bool _isLoading;
 
-        public LoginViewModel()
+        public LoginViewModel(IUserService userService)
         {
+            _userService = userService;
             LoginCommand = new AsyncRelayCommand(OnLogin, CanLogin);
             RegisterCommand = new RelayCommand(OnRegister);
             ForgotPasswordCommand = new RelayCommand(OnForgotPassword);
@@ -85,10 +88,27 @@ namespace Presentation.ViewModels
 
             try
             {
-                // TODO: Implement actual login logic with UserService
-                await Task.Delay(1000); // Simulate API call
+                // Викликаємо LoginAsync
+                var user = await _userService.LoginAsync(Email, Password);
                 
-                // Navigate to dashboard page - replace the window content
+                if (user == null)
+                {
+                    // Невірний email або пароль
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        var window = Application.Current?.Windows[0];
+                        if (window?.Page != null)
+                        {
+                            await window.Page.DisplayAlert(
+                                "Помилка", 
+                                "Невірний email або пароль", 
+                                "OK");
+                        }
+                    });
+                    return;
+                }
+                
+                // Успішний вхід - Navigate to dashboard page
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     var window = Application.Current?.Windows[0];
@@ -122,7 +142,12 @@ namespace Presentation.ViewModels
                 var window = Application.Current?.Windows[0];
                 if (window != null)
                 {
-                    window.Page = new Views.RegisterPage();
+                    var registerPage = Application.Current?.Handler?.MauiContext?.Services
+                        .GetService<Views.RegisterPage>();
+                    if (registerPage != null)
+                    {
+                        window.Page = registerPage;
+                    }
                 }
             });
         }
@@ -170,16 +195,9 @@ namespace Presentation.ViewModels
                 return false;
             }
 
-            if (Password.Length < 8)
+            if (Password.Length < 6)
             {
-                PasswordError = "Пароль має містити мінімум 8 символів";
-                return false;
-            }
-
-            if (!Password.Any(char.IsUpper) || !Password.Any(char.IsLower) || 
-                !Password.Any(char.IsDigit) || !Password.Any(ch => !char.IsLetterOrDigit(ch)))
-            {
-                PasswordError = "Пароль має містити великі та малі літери, цифри та спеціальний символ";
+                PasswordError = "Пароль має містити мінімум 6 символів";
                 return false;
             }
 

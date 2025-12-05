@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Input;
 using Presentation.Helpers;
+using BLL.Interfaces;
 
 namespace Presentation.ViewModels
 {
     public class RegisterViewModel : BaseViewModel
     {
+        private readonly IUserService _userService;
         private string _email = string.Empty;
         private string _password = string.Empty;
         private string _confirmPassword = string.Empty;
@@ -16,8 +18,9 @@ namespace Presentation.ViewModels
         private string _fullNameError = string.Empty;
         private bool _isLoading;
 
-        public RegisterViewModel()
+        public RegisterViewModel(IUserService userService)
         {
+            _userService = userService;
             RegisterCommand = new AsyncRelayCommand(OnRegister, CanRegister);
             BackToLoginCommand = new RelayCommand(OnBackToLogin);
         }
@@ -130,8 +133,25 @@ namespace Presentation.ViewModels
 
             try
             {
-                // TODO: Implement actual registration logic with UserService
-                await Task.Delay(1500); // Simulate API call
+                // Викликаємо RegisterAsync
+                var user = await _userService.RegisterAsync(Email, Password);
+                
+                if (user == null)
+                {
+                    // Користувач з таким email вже існує
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        var window = Application.Current?.Windows[0];
+                        if (window?.Page != null)
+                        {
+                            await window.Page.DisplayAlert(
+                                "Помилка", 
+                                "Користувач з таким email вже зареєстрований", 
+                                "OK");
+                        }
+                    });
+                    return;
+                }
                 
                 // Show success message
                 await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -176,7 +196,12 @@ namespace Presentation.ViewModels
                 var window = Application.Current?.Windows[0];
                 if (window != null)
                 {
-                    window.Page = new Views.LoginPage();
+                    var loginPage = Application.Current?.Handler?.MauiContext?.Services
+                        .GetService<Views.LoginPage>();
+                    if (loginPage != null)
+                    {
+                        window.Page = loginPage;
+                    }
                 }
             });
         }
@@ -207,22 +232,16 @@ namespace Presentation.ViewModels
                 return false;
             }
 
-            if (Password.Length < 8)
+            if (Password.Length < 6)
             {
-                PasswordError = "Пароль має містити мінімум 8 символів";
-                return false;
-            }
-
-            if (!Password.Any(char.IsUpper) || !Password.Any(char.IsLower) || 
-                !Password.Any(char.IsDigit) || !Password.Any(ch => !char.IsLetterOrDigit(ch)))
-            {
-                PasswordError = "Пароль має містити великі та малі літери, цифри та спеціальний символ";
+                PasswordError = "Пароль має містити мінімум 6 символів";
                 return false;
             }
 
             PasswordError = string.Empty;
             return true;
         }
+
 
         private bool ValidateConfirmPassword()
         {
@@ -246,13 +265,13 @@ namespace Presentation.ViewModels
         {
             if (string.IsNullOrWhiteSpace(FullName))
             {
-                FullNameError = "Ім'я обов'язкове";
+                FullNameError = "Username обов'язковий";
                 return false;
             }
 
             if (FullName.Length < 2)
             {
-                FullNameError = "Ім'я має містити мінімум 2 символи";
+                FullNameError = "Username має містити мінімум 2 символи";
                 return false;
             }
 

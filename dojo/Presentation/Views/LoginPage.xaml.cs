@@ -4,10 +4,10 @@ namespace Presentation.Views
 {
     public partial class LoginPage : ContentPage
     {
-        public LoginPage()
+        public LoginPage(LoginViewModel viewModel)
         {
             InitializeComponent();
-            BindingContext = new LoginViewModel();
+            BindingContext = viewModel;
         }
     }
 }
