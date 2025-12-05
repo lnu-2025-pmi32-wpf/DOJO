@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using DAL;
 using BLL.Services;
+using Presentation.Views;
+using Presentation.ViewModels;
 
 
 namespace Presentation
@@ -20,7 +22,7 @@ namespace Presentation
                 });
 
             // Підключення до бази даних
-            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=postgre2006";
+            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=";
             builder.Services.AddDbContext<DojoDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
@@ -29,6 +31,20 @@ namespace Presentation
             builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
             builder.Services.AddScoped<IGoalService, GoalService>();
             builder.Services.AddScoped<IPomodoroService, PomodoroService>();
+
+            // Реєстрація ViewModels
+            builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddTransient<RegisterViewModel>();
+            builder.Services.AddTransient<MainViewModel>();
+            builder.Services.AddTransient<AddPlanViewModel>();
+            builder.Services.AddTransient<StatisticsViewModel>();
+
+            // Реєстрація Views
+            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<RegisterPage>();
+            builder.Services.AddTransient<DashboardPage>();
+            builder.Services.AddTransient<AddPlanPage>();
+            builder.Services.AddTransient<StatisticsPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

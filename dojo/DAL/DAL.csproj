@@ -1,9 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <!-- На Mac використовуємо MacCatalyst, на Windows і Linux - net9.0 -->
+        <TargetFramework Condition="$([MSBuild]::IsOSPlatform('OSX'))">net9.0-maccatalyst</TargetFramework>
+        <TargetFramework Condition="!$([MSBuild]::IsOSPlatform('OSX'))">net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,3 +16,4 @@
     </ItemGroup>
 
 </Project>
+

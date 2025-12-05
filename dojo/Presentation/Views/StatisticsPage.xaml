@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Presentation.ViewModels"
+             x:Class="Presentation.Views.StatisticsPage"
+             x:DataType="viewmodels:StatisticsViewModel"
+             Title="Статистика"
+             BackgroundColor="#F5F5F5">
+
+    <ScrollView>
+        <VerticalStackLayout 
+            Padding="20"
+            Spacing="20"
+            MaximumWidthRequest="1200"
+            HorizontalOptions="Center">
+
+            <Label 
+                Text="📊 Ваша статистика"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="#333333"/>
+
+            <!-- Summary Cards -->
+            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="15">
+                
+                <!-- Completed Tasks Card -->
+                <Border 
+                    Grid.Column="0"
+                    BackgroundColor="White"
+                    Stroke="#4CAF50"
+                    StrokeThickness="2"
+                    Padding="20"
+                    StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="10">
+                        <Label 
+                            Text="✓"
+                            FontSize="32"
+                            TextColor="#4CAF50"
+                            HorizontalOptions="Center"/>
+                        <Label 
+                            Text="{Binding CompletedTasks}"
+                            FontSize="36"
+                            FontAttributes="Bold"
+                            TextColor="#333"
+                            HorizontalOptions="Center"/>
+                        <Label 
+                            Text="Завершено"
+                            FontSize="14"
+                            TextColor="#666"
+                            HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Total Tasks Card -->
+                <Border 
+                    Grid.Column="1"
+                    BackgroundColor="White"
+                    Stroke="#2196F3"
+                    StrokeThickness="2"
+                    Padding="20"
+                    StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="10">
+                        <Label 
+                            Text="📋"
+                            FontSize="32"
+                            HorizontalOptions="Center"/>
+                        <Label 
+                            Text="{Binding TotalTasks}"
+                            FontSize="36"
+                            FontAttributes="Bold"
+                            TextColor="#333"
+                            HorizontalOptions="Center"/>
+                        <Label 
+                            Text="Всього завдань"
+                            FontSize="14"
+                            TextColor="#666"
+                            HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Total Hours Card -->
+                <Border 
+                    Grid.Column="2"
+                    BackgroundColor="White"
+                    Stroke="#FF9800"
+                    StrokeThickness="2"
+                    Padding="20"
+                    StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="10">
+                        <Label 
+                            Text="⏱️"
+                            FontSize="32"
+                            HorizontalOptions="Center"/>
+                        <Label 
+                            Text="{Binding TotalHours, StringFormat='{0:F1}'}"
+                            FontSize="36"
+                            FontAttributes="Bold"
+                            TextColor="#333"
+                            HorizontalOptions="Center"/>
+                        <Label 
+                            Text="Годин роботи"
+                            FontSize="14"
+                            TextColor="#666"
+                            HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Streak Card -->
+                <Border 
+                    Grid.Column="3"
+                    BackgroundColor="White"
+                    Stroke="#F44336"
+                    StrokeThickness="2"
+                    Padding="20"
+                    StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="10">
+                        <Label 
+                            Text="🔥"
+                            FontSize="32"
+                            HorizontalOptions="Center"/>
+                        <Label 
+                            Text="{Binding CurrentStreak}"
+                            FontSize="36"
+                            FontAttributes="Bold"
+                            TextColor="#333"
+                            HorizontalOptions="Center"/>
+                        <Label 
+                            Text="Днів підряд"
+                            FontSize="14"
+                            TextColor="#666"
+                            HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Progress Section -->
+            <Border 
+                BackgroundColor="White"
+                Stroke="#E0E0E0"
+                StrokeThickness="1"
+                Padding="20"
+                StrokeShape="RoundRectangle 12">
+                <VerticalStackLayout Spacing="15">
+                    <Label 
+                        Text="Прогрес виконання"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="#333"/>
+
+                    <!-- Completion Rate -->
+                    <VerticalStackLayout Spacing="8">
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="FillAndExpand">
+                            <Label 
+                                Text="Рівень виконання завдань"
+                                FontSize="16"
+                                TextColor="#666"
+                                HorizontalOptions="StartAndExpand"/>
+                            <Label 
+                                Text="{Binding CompletionRate}"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                TextColor="#4CAF50"/>
+                        </HorizontalStackLayout>
+                        <ProgressBar 
+                            Progress="{Binding CompletionProgress}"
+                            ProgressColor="#4CAF50"
+                            HeightRequest="12"/>
+                    </VerticalStackLayout>
+
+                    <!-- Productivity -->
+                    <VerticalStackLayout Spacing="8">
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="FillAndExpand">
+                            <Label 
+                                Text="Продуктивність"
+                                FontSize="16"
+                                TextColor="#666"
+                                HorizontalOptions="StartAndExpand"/>
+                            <Label 
+                                Text="{Binding ProductivityText}"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                TextColor="#2196F3"/>
+                        </HorizontalStackLayout>
+                        <ProgressBar 
+                            Progress="{Binding ProductivityProgress}"
+                            ProgressColor="#2196F3"
+                            HeightRequest="12"/>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Chart Section -->
+            <Border 
+                BackgroundColor="White"
+                Stroke="#E0E0E0"
+                StrokeThickness="1"
+                Padding="20"
+                StrokeShape="RoundRectangle 12">
+                <VerticalStackLayout Spacing="15">
+                    <Label 
+                        Text="Графік активності"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="#333"/>
+
+                    <Border 
+                        BackgroundColor="#F9F9F9"
+                        Padding="20"
+                        HeightRequest="300"
+                        StrokeShape="RoundRectangle 8"
+                        Stroke="Transparent">
+                        <Label 
+                            Text="📈 Графік буде відображатися тут"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"
+                            TextColor="#999"
+                            FontSize="16"/>
+                    </Border>
+
+                    <Label 
+                        Text="💡 Підказка: Тут буде відображатися ваша активність за останні 7 днів"
+                        FontSize="12"
+                        TextColor="#999"
+                        HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Achievements Section -->
+            <Border 
+                BackgroundColor="White"
+                Stroke="#E0E0E0"
+                StrokeThickness="1"
+                Padding="20"
+                StrokeShape="RoundRectangle 12">
+                <VerticalStackLayout Spacing="15">
+                    <Label 
+                        Text="🏆 Досягнення"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="#333"/>
+
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="15" RowSpacing="15">
+                        
+                        <Border 
+                            Grid.Column="0"
+                            BackgroundColor="#FFF3E0"
+                            Padding="15"
+                            StrokeShape="RoundRectangle 8"
+                            Stroke="#FFB74D">
+                            <VerticalStackLayout Spacing="5">
+                                <Label 
+                                    Text="🌟"
+                                    FontSize="32"
+                                    HorizontalOptions="Center"/>
+                                <Label 
+                                    Text="Перше завдання"
+                                    FontSize="14"
+                                    FontAttributes="Bold"
+                                    TextColor="#FF6F00"
+                                    HorizontalOptions="Center"/>
+                                <Label 
+                                    Text="Виконано"
+                                    FontSize="12"
+                                    TextColor="#666"
+                                    HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border 
+                            Grid.Column="1"
+                            BackgroundColor="#E8F5E9"
+                            Padding="15"
+                            StrokeShape="RoundRectangle 8"
+                            Stroke="#4CAF50">
+                            <VerticalStackLayout Spacing="5">
+                                <Label 
+                                    Text="💪"
+                                    FontSize="32"
+                                    HorizontalOptions="Center"/>
+                                <Label 
+                                    Text="Тиждень продуктивності"
+                                    FontSize="14"
+                                    FontAttributes="Bold"
+                                    TextColor="#2E7D32"
+                                    HorizontalOptions="Center"/>
+                                <Label 
+                                    Text="Виконано"
+                                    FontSize="12"
+                                    TextColor="#666"
+                                    HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border 
+                            Grid.Column="2"
+                            BackgroundColor="#F3E5F5"
+                            Padding="15"
+                            StrokeShape="RoundRectangle 8"
+                            Stroke="#CE93D8">
+                            <VerticalStackLayout Spacing="5">
+                                <Label 
+                                    Text="🎯"
+                                    FontSize="32"
+                                    HorizontalOptions="Center"/>
+                                <Label 
+                                    Text="Майстер планування"
+                                    FontSize="14"
+                                    FontAttributes="Bold"
+                                    TextColor="#7B1FA2"
+                                    HorizontalOptions="Center"/>
+                                <Label 
+                                    Text="Заблоковано"
+                                    FontSize="12"
+                                    TextColor="#999"
+                                    HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
+
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
+

@@ -2,6 +2,7 @@
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:Presentation"
+             xmlns:converters="clr-namespace:Presentation.Converters"
              x:Class="Presentation.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -9,6 +10,14 @@
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Converters -->
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+            <converters:ErrorToBorderColorConverter x:Key="ErrorToBorderColorConverter" />
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <converters:BoolToTextDecorationConverter x:Key="BoolToTextDecorationConverter" />
+            <converters:ViewModeToColorConverter x:Key="ViewModeToColorConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

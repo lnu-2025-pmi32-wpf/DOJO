@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <!-- На Mac використовуємо MacCatalyst, на Windows - Windows -->
-        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">net10.0-maccatalyst</TargetFrameworks>
-        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">net9.0-windows10.0.19041.0</TargetFrameworks>
+        <TargetFramework Condition="$([MSBuild]::IsOSPlatform('OSX'))">net9.0-maccatalyst</TargetFramework>
+        <TargetFramework Condition="$([MSBuild]::IsOSPlatform('Windows'))">net9.0-windows10.0.19041.0</TargetFramework>
 
         <OutputType>Exe</OutputType>
         <RootNamespace>Presentation</RootNamespace>
@@ -11,6 +11,9 @@
         <SingleProject>true</SingleProject>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <!-- Runtime Identifiers для MacCatalyst -->
+        <RuntimeIdentifiers Condition="$([MSBuild]::IsOSPlatform('OSX'))">maccatalyst-arm64;maccatalyst-x64</RuntimeIdentifiers>
 
         <!-- Display name -->
         <ApplicationTitle>DOJO</ApplicationTitle>
@@ -29,6 +32,11 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
     </PropertyGroup>
+    
+    <!-- Вимкнення codesign для Debug конфігурації -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <EnableCodeSigning>false</EnableCodeSigning>
+    </PropertyGroup>
 
     <ItemGroup>
         <!-- App Icon -->
@@ -39,7 +47,6 @@
 
         <!-- Images -->
         <MauiImage Include="Resources\Images\*"/>
-        <MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185"/>
 
         <!-- Custom Fonts -->
         <MauiFont Include="Resources\Fonts\*"/>
@@ -59,5 +66,6 @@
       <ProjectReference Include="..\BLL\BLL.csproj" />
       <ProjectReference Include="..\DAL\DAL.csproj" />
     </ItemGroup>
+
 
 </Project>
