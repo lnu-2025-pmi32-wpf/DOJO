@@ -157,12 +157,23 @@ namespace Presentation.ViewModels
 
             // TODO: Save to database via service
 
-            await Shell.Current.GoToAsync("..");
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await Shell.Current.GoToAsync("..");
+            });
         }
 
         private void OnCancel()
         {
-            Shell.Current.GoToAsync("..");
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                NavigateBack();
+            });
+        }
+
+        private async void NavigateBack()
+        {
+            await Shell.Current.GoToAsync("..");
         }
 
         private async Task OnAttachFile()
@@ -181,7 +192,10 @@ namespace Presentation.ViewModels
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Помилка", $"Не вдалося вибрати файл: {ex.Message}", "OK");
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await Shell.Current.DisplayAlert("Помилка", $"Не вдалося вибрати файл: {ex.Message}", "OK");
+                });
             }
         }
 

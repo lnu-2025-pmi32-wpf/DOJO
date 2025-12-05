@@ -134,28 +134,34 @@ namespace Presentation.ViewModels
                 await Task.Delay(1500); // Simulate API call
                 
                 // Show success message
-                var window = Application.Current?.Windows[0];
-                if (window?.Page != null)
+                await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    await window.Page.DisplayAlert(
-                        "Успіх", 
-                        "Реєстрація пройшла успішно! Тепер ви можете увійти.", 
-                        "OK");
-                }
+                    var window = Application.Current?.Windows[0];
+                    if (window?.Page != null)
+                    {
+                        await window.Page.DisplayAlert(
+                            "Успіх", 
+                            "Реєстрація пройшла успішно! Тепер ви можете увійти.", 
+                            "OK");
+                    }
+                });
                 
                 // Navigate back to login
                 OnBackToLogin();
             }
             catch (Exception ex)
             {
-                var window = Application.Current?.Windows[0];
-                if (window?.Page != null)
+                await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    await window.Page.DisplayAlert(
-                        "Помилка", 
-                        $"Не вдалося зареєструватися: {ex.Message}", 
-                        "OK");
-                }
+                    var window = Application.Current?.Windows[0];
+                    if (window?.Page != null)
+                    {
+                        await window.Page.DisplayAlert(
+                            "Помилка", 
+                            $"Не вдалося зареєструватися: {ex.Message}", 
+                            "OK");
+                    }
+                });
             }
             finally
             {
@@ -165,11 +171,14 @@ namespace Presentation.ViewModels
 
         private void OnBackToLogin()
         {
-            var window = Application.Current?.Windows[0];
-            if (window != null)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                window.Page = new Views.LoginPage();
-            }
+                var window = Application.Current?.Windows[0];
+                if (window != null)
+                {
+                    window.Page = new Views.LoginPage();
+                }
+            });
         }
 
         private bool ValidateEmail()

@@ -22,7 +22,7 @@ namespace Presentation.ViewModels
             NavigateNextCommand = new RelayCommand(OnNavigateNext);
             NavigatePreviousCommand = new RelayCommand(OnNavigatePrevious);
             GoToTodayCommand = new RelayCommand(OnGoToToday);
-            ChangeModeCommand = new RelayCommand<ViewMode>(OnChangeMode);
+            ChangeModeCommand = new RelayCommand<object>(OnChangeModeObject);
             SearchCommand = new RelayCommand(OnSearch);
             EditEventCommand = new RelayCommand<EventModel>(OnEditEvent);
             DeleteEventCommand = new RelayCommand<EventModel>(OnDeleteEvent);
@@ -109,7 +109,10 @@ namespace Presentation.ViewModels
         // Command Handlers
         private async void OnAddPlan()
         {
-            await Shell.Current.GoToAsync(nameof(Views.AddPlanPage));
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await Shell.Current.GoToAsync(nameof(Views.AddPlanPage));
+            });
         }
 
         private void OnNavigateNext()
@@ -137,6 +140,38 @@ namespace Presentation.ViewModels
         private void OnGoToToday()
         {
             SelectedDate = DateTime.Today;
+        }
+
+        private void OnChangeModeObject(object? modeParam)
+        {
+            if (modeParam == null)
+                return;
+
+            ViewMode mode;
+            
+            // Якщо параметр - це рядок, конвертуємо його в енум
+            if (modeParam is string modeString)
+            {
+                if (Enum.TryParse<ViewMode>(modeString, true, out var parsedMode))
+                {
+                    mode = parsedMode;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            // Якщо параметр вже ViewMode
+            else if (modeParam is ViewMode viewMode)
+            {
+                mode = viewMode;
+            }
+            else
+            {
+                return;
+            }
+            
+            OnChangeMode(mode);
         }
 
         private void OnChangeMode(ViewMode mode)
@@ -176,7 +211,10 @@ namespace Presentation.ViewModels
 
         private async void OnNavigateToStatistics()
         {
-            await Shell.Current.GoToAsync(nameof(Views.StatisticsPage));
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await Shell.Current.GoToAsync(nameof(Views.StatisticsPage));
+            });
         }
 
         private void UpdateDateRange()

@@ -89,19 +89,25 @@ namespace Presentation.ViewModels
                 await Task.Delay(1000); // Simulate API call
                 
                 // Navigate to dashboard page - replace the window content
-                var window = Application.Current?.Windows[0];
-                if (window != null)
+                await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    window.Page = new AppShell();
-                }
+                    var window = Application.Current?.Windows[0];
+                    if (window != null)
+                    {
+                        window.Page = new AppShell();
+                    }
+                });
             }
             catch (Exception ex)
             {
-                var window = Application.Current?.Windows[0];
-                if (window?.Page != null)
+                await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    await window.Page.DisplayAlert("Помилка", $"Не вдалося увійти: {ex.Message}", "OK");
-                }
+                    var window = Application.Current?.Windows[0];
+                    if (window?.Page != null)
+                    {
+                        await window.Page.DisplayAlert("Помилка", $"Не вдалося увійти: {ex.Message}", "OK");
+                    }
+                });
             }
             finally
             {
@@ -111,19 +117,30 @@ namespace Presentation.ViewModels
 
         private void OnRegister()
         {
-            var window = Application.Current?.Windows[0];
-            if (window != null)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                window.Page = new Views.RegisterPage();
-            }
+                var window = Application.Current?.Windows[0];
+                if (window != null)
+                {
+                    window.Page = new Views.RegisterPage();
+                }
+            });
         }
 
         private void OnForgotPassword()
         {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                ShowForgotPasswordAlert();
+            });
+        }
+
+        private async void ShowForgotPasswordAlert()
+        {
             var window = Application.Current?.Windows[0];
             if (window?.Page != null)
             {
-                window.Page.DisplayAlert("Відновлення паролю", "Функція відновлення паролю буде додана найближчим часом", "OK");
+                await window.Page.DisplayAlert("Відновлення паролю", "Функція відновлення паролю буде додана найближчим часом", "OK");
             }
         }
 
