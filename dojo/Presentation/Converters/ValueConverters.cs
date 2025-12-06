@@ -87,5 +87,21 @@ namespace Presentation.Converters
             throw new NotImplementedException();
         }
     }
+
+    public class BoolToNotificationColorConverter : IValueConverter
+    {
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            // true = success (green), false = error (red)
+            return value is bool b && b 
+                ? Color.FromArgb("#4CAF50") // зелений для успіху
+                : Color.FromArgb("#F44336"); // червоний для помилки
+        }
+
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
 

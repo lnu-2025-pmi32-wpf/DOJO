@@ -18,6 +18,7 @@
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:BoolToTextDecorationConverter x:Key="BoolToTextDecorationConverter" />
             <converters:ViewModeToColorConverter x:Key="ViewModeToColorConverter" />
+            <converters:BoolToNotificationColorConverter x:Key="BoolToNotificationColorConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

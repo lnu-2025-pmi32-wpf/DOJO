@@ -13,6 +13,8 @@ namespace Presentation.ViewModels
         private string _emailError = string.Empty;
         private string _passwordError = string.Empty;
         private bool _isLoading;
+        private string _notificationMessage = string.Empty;
+        private bool _isNotificationSuccess;
 
         public LoginViewModel(IUserService userService)
         {
@@ -66,6 +68,18 @@ namespace Presentation.ViewModels
             set => SetProperty(ref _isLoading, value);
         }
 
+        public string NotificationMessage
+        {
+            get => _notificationMessage;
+            set => SetProperty(ref _notificationMessage, value);
+        }
+
+        public bool IsNotificationSuccess
+        {
+            get => _isNotificationSuccess;
+            set => SetProperty(ref _isNotificationSuccess, value);
+        }
+
         public ICommand LoginCommand { get; }
         public ICommand RegisterCommand { get; }
         public ICommand ForgotPasswordCommand { get; }
@@ -81,10 +95,19 @@ namespace Presentation.ViewModels
 
         private async Task OnLogin()
         {
+            // Перевіряємо чи всі поля заповнені
+            if (string.IsNullOrWhiteSpace(Email) && string.IsNullOrWhiteSpace(Password))
+            {
+                NotificationMessage = "Будь ласка, заповніть всі поля";
+                IsNotificationSuccess = false;
+                return;
+            }
+
             if (!ValidateEmail() || !ValidatePassword())
                 return;
 
             IsLoading = true;
+            NotificationMessage = string.Empty;
 
             try
             {
@@ -94,21 +117,19 @@ namespace Presentation.ViewModels
                 if (user == null)
                 {
                     // Невірний email або пароль
-                    await MainThread.InvokeOnMainThreadAsync(async () =>
-                    {
-                        var window = Application.Current?.Windows[0];
-                        if (window?.Page != null)
-                        {
-                            await window.Page.DisplayAlert(
-                                "Помилка", 
-                                "Невірний email або пароль", 
-                                "OK");
-                        }
-                    });
+                    NotificationMessage = "Невірний email або пароль";
+                    IsNotificationSuccess = false;
                     return;
                 }
                 
-                // Успішний вхід - Navigate to dashboard page
+                // Успішний вхід
+                NotificationMessage = "Вхід виконано успішно!";
+                IsNotificationSuccess = true;
+
+                // Невелика затримка щоб показати повідомлення
+                await Task.Delay(1000);
+                
+                // Navigate to dashboard page
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     var window = Application.Current?.Windows[0];
@@ -120,14 +141,8 @@ namespace Presentation.ViewModels
             }
             catch (Exception ex)
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    var window = Application.Current?.Windows[0];
-                    if (window?.Page != null)
-                    {
-                        await window.Page.DisplayAlert("Помилка", $"Не вдалося увійти: {ex.Message}", "OK");
-                    }
-                });
+                NotificationMessage = $"Помилка: {ex.Message}";
+                IsNotificationSuccess = false;
             }
             finally
             {

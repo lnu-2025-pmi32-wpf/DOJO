@@ -17,6 +17,8 @@ namespace Presentation.ViewModels
         private string _confirmPasswordError = string.Empty;
         private string _fullNameError = string.Empty;
         private bool _isLoading;
+        private string _notificationMessage = string.Empty;
+        private bool _isNotificationSuccess;
 
         public RegisterViewModel(IUserService userService)
         {
@@ -108,6 +110,18 @@ namespace Presentation.ViewModels
             set => SetProperty(ref _isLoading, value);
         }
 
+        public string NotificationMessage
+        {
+            get => _notificationMessage;
+            set => SetProperty(ref _notificationMessage, value);
+        }
+
+        public bool IsNotificationSuccess
+        {
+            get => _isNotificationSuccess;
+            set => SetProperty(ref _isNotificationSuccess, value);
+        }
+
         public ICommand RegisterCommand { get; }
         public ICommand BackToLoginCommand { get; }
 
@@ -126,10 +140,20 @@ namespace Presentation.ViewModels
 
         private async Task OnRegister()
         {
+            // Перевіряємо чи всі поля заповнені
+            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password) || 
+                string.IsNullOrWhiteSpace(ConfirmPassword) || string.IsNullOrWhiteSpace(FullName))
+            {
+                NotificationMessage = "Будь ласка, заповніть всі поля";
+                IsNotificationSuccess = false;
+                return;
+            }
+
             if (!ValidateEmail() || !ValidatePassword() || !ValidateConfirmPassword() || !ValidateFullName())
                 return;
 
             IsLoading = true;
+            NotificationMessage = string.Empty;
 
             try
             {
@@ -139,49 +163,25 @@ namespace Presentation.ViewModels
                 if (user == null)
                 {
                     // Користувач з таким email вже існує
-                    await MainThread.InvokeOnMainThreadAsync(async () =>
-                    {
-                        var window = Application.Current?.Windows[0];
-                        if (window?.Page != null)
-                        {
-                            await window.Page.DisplayAlert(
-                                "Помилка", 
-                                "Користувач з таким email вже зареєстрований", 
-                                "OK");
-                        }
-                    });
+                    NotificationMessage = "Користувач з таким email вже зареєстрований";
+                    IsNotificationSuccess = false;
                     return;
                 }
                 
-                // Show success message
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    var window = Application.Current?.Windows[0];
-                    if (window?.Page != null)
-                    {
-                        await window.Page.DisplayAlert(
-                            "Успіх", 
-                            "Реєстрація пройшла успішно! Тепер ви можете увійти.", 
-                            "OK");
-                    }
-                });
+                // Успішна реєстрація
+                NotificationMessage = "Реєстрація пройшла успішно! Тепер ви можете увійти.";
+                IsNotificationSuccess = true;
+
+                // Затримка щоб показати повідомлення
+                await Task.Delay(2000);
                 
                 // Navigate back to login
                 OnBackToLogin();
             }
             catch (Exception ex)
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    var window = Application.Current?.Windows[0];
-                    if (window?.Page != null)
-                    {
-                        await window.Page.DisplayAlert(
-                            "Помилка", 
-                            $"Не вдалося зареєструватися: {ex.Message}", 
-                            "OK");
-                    }
-                });
+                NotificationMessage = $"Помилка: {ex.Message}";
+                IsNotificationSuccess = false;
             }
             finally
             {
