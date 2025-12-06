@@ -5,7 +5,7 @@ using BLL.Services;
 using BLL.Interfaces;
 using Presentation.Views;
 using Presentation.ViewModels;
-
+using Presentation.Services;
 
 namespace Presentation
 {
@@ -28,6 +28,7 @@ namespace Presentation
                 options.UseNpgsql(connectionString));
 
             // Реєстрація сервісів
+            builder.Services.AddSingleton<ISessionService, SessionService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
             builder.Services.AddScoped<IGoalService, GoalService>();

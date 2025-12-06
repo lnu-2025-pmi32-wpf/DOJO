@@ -2,12 +2,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Windows.Input;
 using Presentation.Helpers;
 using BLL.Interfaces;
+using Presentation.Views;
 
 namespace Presentation.ViewModels
 {
     public class LoginViewModel : BaseViewModel
     {
         private readonly IUserService _userService;
+        private readonly ISessionService _sessionService;
         private string _email = string.Empty;
         private string _password = string.Empty;
         private string _emailError = string.Empty;
@@ -16,9 +18,10 @@ namespace Presentation.ViewModels
         private string _notificationMessage = string.Empty;
         private bool _isNotificationSuccess;
 
-        public LoginViewModel(IUserService userService)
+        public LoginViewModel(IUserService userService, ISessionService sessionService)
         {
             _userService = userService;
+            _sessionService = sessionService;
             LoginCommand = new AsyncRelayCommand(OnLogin, CanLogin);
             RegisterCommand = new RelayCommand(OnRegister);
             ForgotPasswordCommand = new RelayCommand(OnForgotPassword);
@@ -126,21 +129,14 @@ namespace Presentation.ViewModels
                 NotificationMessage = "Вхід виконано успішно!";
                 IsNotificationSuccess = true;
 
-                // Зберігаємо email користувача
-                Preferences.Set("UserEmail", Email);
+                // Зберігаємо сесію користувача
+                await _sessionService.SaveUserSessionAsync(user.Email, user.Id);
 
                 // Невелика затримка щоб показати повідомлення
-                await Task.Delay(1000);
+                await Task.Delay(500);
                 
-                // Navigate to dashboard page
-                await MainThread.InvokeOnMainThreadAsync(() =>
-                {
-                    var window = Application.Current?.Windows[0];
-                    if (window != null)
-                    {
-                        window.Page = new AppShell();
-                    }
-                });
+                // Navigate to dashboard page - використовуємо відносний маршрут
+                await Shell.Current.GoToAsync($"/{nameof(DashboardPage)}");
             }
             catch (Exception ex)
             {

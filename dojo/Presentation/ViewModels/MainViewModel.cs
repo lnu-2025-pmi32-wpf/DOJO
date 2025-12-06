@@ -2,20 +2,24 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Presentation.Helpers;
 using Presentation.Models;
+using BLL.Interfaces;
 
 namespace Presentation.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
+        private readonly ISessionService? _sessionService;
         private ViewMode _currentViewMode = ViewMode.Week;
         private DateTime _selectedDate = DateTime.Today;
         private string _searchText = string.Empty;
         private EventModel? _selectedEvent;
         private string _userEmail = "user@example.com";
         private string _userInitials = "U";
+        private int _userId;
 
-        public MainViewModel()
+        public MainViewModel(ISessionService? sessionService = null)
         {
+            _sessionService = sessionService;
             Events = new ObservableCollection<EventModel>();
             TodoItems = new ObservableCollection<TodoItemModel>();
             
@@ -30,8 +34,10 @@ namespace Presentation.ViewModels
             DeleteEventCommand = new RelayCommand<EventModel>(OnDeleteEvent);
             ToggleTodoCommand = new RelayCommand<TodoItemModel>(OnToggleTodo);
             NavigateToStatisticsCommand = new RelayCommand(OnNavigateToStatistics);
+            LogoutCommand = new AsyncRelayCommand(OnLogout);
             
             LoadSampleData();
+            LoadUserSessionAsync();
         }
 
         // Properties
@@ -86,6 +92,12 @@ namespace Presentation.ViewModels
             set => SetProperty(ref _userInitials, value);
         }
 
+        public int UserId
+        {
+            get => _userId;
+            set => SetProperty(ref _userId, value);
+        }
+
         private DateTime _weekStartDate;
         public DateTime WeekStartDate
         {
@@ -119,6 +131,7 @@ namespace Presentation.ViewModels
         public ICommand DeleteEventCommand { get; }
         public ICommand ToggleTodoCommand { get; }
         public ICommand NavigateToStatisticsCommand { get; }
+        public ICommand LogoutCommand { get; }
 
         // Command Handlers
         private async void OnAddPlan()
@@ -316,6 +329,33 @@ namespace Presentation.ViewModels
                     }
                 }
             }
+        }
+
+        private async void LoadUserSessionAsync()
+        {
+            if (_sessionService != null)
+            {
+                var session = await _sessionService.GetUserSessionAsync();
+                if (session.HasValue)
+                {
+                    SetUserEmail(session.Value.Email);
+                    UserId = session.Value.UserId;
+                }
+            }
+        }
+
+        private async Task OnLogout()
+        {
+            if (_sessionService != null)
+            {
+                await _sessionService.ClearSessionAsync();
+            }
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                // Очищаємо навігаційний стек і повертаємось на LoginPage
+                await Shell.Current.Navigation.PopToRootAsync();
+            });
         }
     }
 }

@@ -16,4 +16,6 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
         Routing.RegisterRoute(nameof(StatisticsPage), typeof(StatisticsPage));
     }
+
+    // TODO: Увімкнемо автологін після першого успішного логіну
 }

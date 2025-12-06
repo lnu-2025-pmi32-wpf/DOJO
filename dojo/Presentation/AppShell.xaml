@@ -9,8 +9,8 @@
     FlyoutBehavior="Disabled">
 
     <ShellContent
-        Title="Головна"
-        ContentTemplate="{DataTemplate views:DashboardPage}"
-        Route="DashboardPage" />
+        Title="Вхід"
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Route="LoginPage" />
 
 </Shell>

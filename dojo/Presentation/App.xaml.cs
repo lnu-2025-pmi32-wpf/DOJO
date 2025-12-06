@@ -11,7 +11,6 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var loginPage = Handler?.MauiContext?.Services.GetService<LoginPage>();
-        return new Window(loginPage ?? new LoginPage(null!));
+        return new Window(new AppShell());
     }
 }

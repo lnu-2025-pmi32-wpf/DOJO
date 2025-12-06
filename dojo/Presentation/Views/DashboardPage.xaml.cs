@@ -1,21 +1,14 @@
 using Presentation.ViewModels;
+using BLL.Interfaces;
 
 namespace Presentation.Views
 {
     public partial class DashboardPage : ContentPage
     {
-        public DashboardPage()
+        public DashboardPage(ISessionService sessionService)
         {
             InitializeComponent();
-            var viewModel = new MainViewModel();
-            
-            // Отримуємо email користувача з Preferences
-            var userEmail = Preferences.Get("UserEmail", string.Empty);
-            if (!string.IsNullOrEmpty(userEmail))
-            {
-                viewModel.SetUserEmail(userEmail);
-            }
-            
+            var viewModel = new MainViewModel(sessionService);
             BindingContext = viewModel;
         }
 
@@ -32,19 +25,10 @@ namespace Presentation.Views
 
                 if (action == "Вийти")
                 {
-                    // Очищаємо збережений email
-                    Preferences.Remove("UserEmail");
-                    
-                    // Logout logic
-                    var window = Application.Current?.Windows[0];
-                    if (window != null)
+                    // Викликаємо команду logout
+                    if (viewModel.LogoutCommand.CanExecute(null))
                     {
-                        var loginPage = Application.Current?.Handler?.MauiContext?.Services
-                            .GetService<LoginPage>();
-                        if (loginPage != null)
-                        {
-                            window.Page = loginPage;
-                        }
+                        viewModel.LogoutCommand.Execute(null);
                     }
                 }
             }
