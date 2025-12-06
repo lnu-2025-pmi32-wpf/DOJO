@@ -2,9 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using DAL;
 using BLL.Services;
+using BLL.Interfaces;
 using Presentation.Views;
 using Presentation.ViewModels;
-
+using Presentation.Services;
 
 namespace Presentation
 {
@@ -22,11 +23,12 @@ namespace Presentation
                 });
 
             // Підключення до бази даних
-            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=";
+            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=postgre2006";
             builder.Services.AddDbContext<DojoDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
             // Реєстрація сервісів
+            builder.Services.AddSingleton<ISessionService, SessionService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
             builder.Services.AddScoped<IGoalService, GoalService>();

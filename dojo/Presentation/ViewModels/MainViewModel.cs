@@ -2,18 +2,24 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Presentation.Helpers;
 using Presentation.Models;
+using BLL.Interfaces;
 
 namespace Presentation.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
+        private readonly ISessionService? _sessionService;
         private ViewMode _currentViewMode = ViewMode.Week;
         private DateTime _selectedDate = DateTime.Today;
         private string _searchText = string.Empty;
         private EventModel? _selectedEvent;
+        private string _userEmail = "user@example.com";
+        private string _userInitials = "U";
+        private int _userId;
 
-        public MainViewModel()
+        public MainViewModel(ISessionService? sessionService = null)
         {
+            _sessionService = sessionService;
             Events = new ObservableCollection<EventModel>();
             TodoItems = new ObservableCollection<TodoItemModel>();
             
@@ -28,8 +34,10 @@ namespace Presentation.ViewModels
             DeleteEventCommand = new RelayCommand<EventModel>(OnDeleteEvent);
             ToggleTodoCommand = new RelayCommand<TodoItemModel>(OnToggleTodo);
             NavigateToStatisticsCommand = new RelayCommand(OnNavigateToStatistics);
+            LogoutCommand = new AsyncRelayCommand(OnLogout);
             
             LoadSampleData();
+            LoadUserSessionAsync();
         }
 
         // Properties
@@ -72,6 +80,24 @@ namespace Presentation.ViewModels
             set => SetProperty(ref _selectedEvent, value);
         }
 
+        public string UserEmail
+        {
+            get => _userEmail;
+            set => SetProperty(ref _userEmail, value);
+        }
+
+        public string UserInitials
+        {
+            get => _userInitials;
+            set => SetProperty(ref _userInitials, value);
+        }
+
+        public int UserId
+        {
+            get => _userId;
+            set => SetProperty(ref _userId, value);
+        }
+
         private DateTime _weekStartDate;
         public DateTime WeekStartDate
         {
@@ -105,6 +131,7 @@ namespace Presentation.ViewModels
         public ICommand DeleteEventCommand { get; }
         public ICommand ToggleTodoCommand { get; }
         public ICommand NavigateToStatisticsCommand { get; }
+        public ICommand LogoutCommand { get; }
 
         // Command Handlers
         private async void OnAddPlan()
@@ -271,6 +298,64 @@ namespace Presentation.ViewModels
             });
 
             UpdateDateRange();
+        }
+
+        public void SetUserEmail(string email)
+        {
+            UserEmail = email;
+            
+            // Обчислюємо ініціали з email
+            if (!string.IsNullOrEmpty(email))
+            {
+                var emailPart = email.Split('@')[0];
+                if (emailPart.Length > 0)
+                {
+                    // Беремо першу літеру або дві перші якщо є крапка чи підкреслення
+                    if (emailPart.Contains('.') || emailPart.Contains('_'))
+                    {
+                        var parts = emailPart.Split(new[] { '.', '_' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length >= 2)
+                        {
+                            UserInitials = $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[1][0])}";
+                        }
+                        else
+                        {
+                            UserInitials = char.ToUpper(emailPart[0]).ToString();
+                        }
+                    }
+                    else
+                    {
+                        UserInitials = char.ToUpper(emailPart[0]).ToString();
+                    }
+                }
+            }
+        }
+
+        private async void LoadUserSessionAsync()
+        {
+            if (_sessionService != null)
+            {
+                var session = await _sessionService.GetUserSessionAsync();
+                if (session.HasValue)
+                {
+                    SetUserEmail(session.Value.Email);
+                    UserId = session.Value.UserId;
+                }
+            }
+        }
+
+        private async Task OnLogout()
+        {
+            if (_sessionService != null)
+            {
+                await _sessionService.ClearSessionAsync();
+            }
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                // Очищаємо навігаційний стек і повертаємось на LoginPage
+                await Shell.Current.Navigation.PopToRootAsync();
+            });
         }
     }
 }

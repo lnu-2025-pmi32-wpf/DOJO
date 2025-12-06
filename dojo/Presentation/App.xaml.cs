@@ -1,4 +1,4 @@
-﻿﻿using Presentation.Views;
+﻿﻿﻿using Presentation.Views;
 
 namespace Presentation;
 
@@ -11,6 +11,6 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        return new Window(new LoginPage());
+        return new Window(new AppShell());
     }
 }

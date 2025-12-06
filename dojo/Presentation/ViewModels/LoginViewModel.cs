@@ -1,19 +1,27 @@
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Input;
 using Presentation.Helpers;
+using BLL.Interfaces;
+using Presentation.Views;
 
 namespace Presentation.ViewModels
 {
     public class LoginViewModel : BaseViewModel
     {
+        private readonly IUserService _userService;
+        private readonly ISessionService _sessionService;
         private string _email = string.Empty;
         private string _password = string.Empty;
         private string _emailError = string.Empty;
         private string _passwordError = string.Empty;
         private bool _isLoading;
+        private string _notificationMessage = string.Empty;
+        private bool _isNotificationSuccess;
 
-        public LoginViewModel()
+        public LoginViewModel(IUserService userService, ISessionService sessionService)
         {
+            _userService = userService;
+            _sessionService = sessionService;
             LoginCommand = new AsyncRelayCommand(OnLogin, CanLogin);
             RegisterCommand = new RelayCommand(OnRegister);
             ForgotPasswordCommand = new RelayCommand(OnForgotPassword);
@@ -63,6 +71,18 @@ namespace Presentation.ViewModels
             set => SetProperty(ref _isLoading, value);
         }
 
+        public string NotificationMessage
+        {
+            get => _notificationMessage;
+            set => SetProperty(ref _notificationMessage, value);
+        }
+
+        public bool IsNotificationSuccess
+        {
+            get => _isNotificationSuccess;
+            set => SetProperty(ref _isNotificationSuccess, value);
+        }
+
         public ICommand LoginCommand { get; }
         public ICommand RegisterCommand { get; }
         public ICommand ForgotPasswordCommand { get; }
@@ -78,36 +98,50 @@ namespace Presentation.ViewModels
 
         private async Task OnLogin()
         {
+            // Перевіряємо чи всі поля заповнені
+            if (string.IsNullOrWhiteSpace(Email) && string.IsNullOrWhiteSpace(Password))
+            {
+                NotificationMessage = "Будь ласка, заповніть всі поля";
+                IsNotificationSuccess = false;
+                return;
+            }
+
             if (!ValidateEmail() || !ValidatePassword())
                 return;
 
             IsLoading = true;
+            NotificationMessage = string.Empty;
 
             try
             {
-                // TODO: Implement actual login logic with UserService
-                await Task.Delay(1000); // Simulate API call
+                // Викликаємо LoginAsync
+                var user = await _userService.LoginAsync(Email, Password);
                 
-                // Navigate to dashboard page - replace the window content
-                await MainThread.InvokeOnMainThreadAsync(() =>
+                if (user == null)
                 {
-                    var window = Application.Current?.Windows[0];
-                    if (window != null)
-                    {
-                        window.Page = new AppShell();
-                    }
-                });
+                    // Невірний email або пароль
+                    NotificationMessage = "Невірний email або пароль";
+                    IsNotificationSuccess = false;
+                    return;
+                }
+                
+                // Успішний вхід
+                NotificationMessage = "Вхід виконано успішно!";
+                IsNotificationSuccess = true;
+
+                // Зберігаємо сесію користувача
+                await _sessionService.SaveUserSessionAsync(user.Email, user.Id);
+
+                // Невелика затримка щоб показати повідомлення
+                await Task.Delay(500);
+                
+                // Navigate to dashboard page - використовуємо відносний маршрут
+                await Shell.Current.GoToAsync($"/{nameof(DashboardPage)}");
             }
             catch (Exception ex)
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    var window = Application.Current?.Windows[0];
-                    if (window?.Page != null)
-                    {
-                        await window.Page.DisplayAlert("Помилка", $"Не вдалося увійти: {ex.Message}", "OK");
-                    }
-                });
+                NotificationMessage = $"Помилка: {ex.Message}";
+                IsNotificationSuccess = false;
             }
             finally
             {
@@ -122,7 +156,12 @@ namespace Presentation.ViewModels
                 var window = Application.Current?.Windows[0];
                 if (window != null)
                 {
-                    window.Page = new Views.RegisterPage();
+                    var registerPage = Application.Current?.Handler?.MauiContext?.Services
+                        .GetService<Views.RegisterPage>();
+                    if (registerPage != null)
+                    {
+                        window.Page = registerPage;
+                    }
                 }
             });
         }
@@ -170,16 +209,9 @@ namespace Presentation.ViewModels
                 return false;
             }
 
-            if (Password.Length < 8)
+            if (Password.Length < 6)
             {
-                PasswordError = "Пароль має містити мінімум 8 символів";
-                return false;
-            }
-
-            if (!Password.Any(char.IsUpper) || !Password.Any(char.IsLower) || 
-                !Password.Any(char.IsDigit) || !Password.Any(ch => !char.IsLetterOrDigit(ch)))
-            {
-                PasswordError = "Пароль має містити великі та малі літери, цифри та спеціальний символ";
+                PasswordError = "Пароль має містити мінімум 6 символів";
                 return false;
             }
 

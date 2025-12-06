@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Input;
 using Presentation.Helpers;
+using BLL.Interfaces;
 
 namespace Presentation.ViewModels
 {
     public class RegisterViewModel : BaseViewModel
     {
+        private readonly IUserService _userService;
         private string _email = string.Empty;
         private string _password = string.Empty;
         private string _confirmPassword = string.Empty;
@@ -15,9 +17,12 @@ namespace Presentation.ViewModels
         private string _confirmPasswordError = string.Empty;
         private string _fullNameError = string.Empty;
         private bool _isLoading;
+        private string _notificationMessage = string.Empty;
+        private bool _isNotificationSuccess;
 
-        public RegisterViewModel()
+        public RegisterViewModel(IUserService userService)
         {
+            _userService = userService;
             RegisterCommand = new AsyncRelayCommand(OnRegister, CanRegister);
             BackToLoginCommand = new RelayCommand(OnBackToLogin);
         }
@@ -105,6 +110,18 @@ namespace Presentation.ViewModels
             set => SetProperty(ref _isLoading, value);
         }
 
+        public string NotificationMessage
+        {
+            get => _notificationMessage;
+            set => SetProperty(ref _notificationMessage, value);
+        }
+
+        public bool IsNotificationSuccess
+        {
+            get => _isNotificationSuccess;
+            set => SetProperty(ref _isNotificationSuccess, value);
+        }
+
         public ICommand RegisterCommand { get; }
         public ICommand BackToLoginCommand { get; }
 
@@ -123,45 +140,48 @@ namespace Presentation.ViewModels
 
         private async Task OnRegister()
         {
+            // Перевіряємо чи всі поля заповнені
+            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password) || 
+                string.IsNullOrWhiteSpace(ConfirmPassword) || string.IsNullOrWhiteSpace(FullName))
+            {
+                NotificationMessage = "Будь ласка, заповніть всі поля";
+                IsNotificationSuccess = false;
+                return;
+            }
+
             if (!ValidateEmail() || !ValidatePassword() || !ValidateConfirmPassword() || !ValidateFullName())
                 return;
 
             IsLoading = true;
+            NotificationMessage = string.Empty;
 
             try
             {
-                // TODO: Implement actual registration logic with UserService
-                await Task.Delay(1500); // Simulate API call
+                // Викликаємо RegisterAsync
+                var user = await _userService.RegisterAsync(Email, Password);
                 
-                // Show success message
-                await MainThread.InvokeOnMainThreadAsync(async () =>
+                if (user == null)
                 {
-                    var window = Application.Current?.Windows[0];
-                    if (window?.Page != null)
-                    {
-                        await window.Page.DisplayAlert(
-                            "Успіх", 
-                            "Реєстрація пройшла успішно! Тепер ви можете увійти.", 
-                            "OK");
-                    }
-                });
+                    // Користувач з таким email вже існує
+                    NotificationMessage = "Користувач з таким email вже зареєстрований";
+                    IsNotificationSuccess = false;
+                    return;
+                }
+                
+                // Успішна реєстрація
+                NotificationMessage = "Реєстрація пройшла успішно! Тепер ви можете увійти.";
+                IsNotificationSuccess = true;
+
+                // Затримка щоб показати повідомлення
+                await Task.Delay(2000);
                 
                 // Navigate back to login
                 OnBackToLogin();
             }
             catch (Exception ex)
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    var window = Application.Current?.Windows[0];
-                    if (window?.Page != null)
-                    {
-                        await window.Page.DisplayAlert(
-                            "Помилка", 
-                            $"Не вдалося зареєструватися: {ex.Message}", 
-                            "OK");
-                    }
-                });
+                NotificationMessage = $"Помилка: {ex.Message}";
+                IsNotificationSuccess = false;
             }
             finally
             {
@@ -176,7 +196,12 @@ namespace Presentation.ViewModels
                 var window = Application.Current?.Windows[0];
                 if (window != null)
                 {
-                    window.Page = new Views.LoginPage();
+                    var loginPage = Application.Current?.Handler?.MauiContext?.Services
+                        .GetService<Views.LoginPage>();
+                    if (loginPage != null)
+                    {
+                        window.Page = loginPage;
+                    }
                 }
             });
         }
@@ -207,22 +232,16 @@ namespace Presentation.ViewModels
                 return false;
             }
 
-            if (Password.Length < 8)
+            if (Password.Length < 6)
             {
-                PasswordError = "Пароль має містити мінімум 8 символів";
-                return false;
-            }
-
-            if (!Password.Any(char.IsUpper) || !Password.Any(char.IsLower) || 
-                !Password.Any(char.IsDigit) || !Password.Any(ch => !char.IsLetterOrDigit(ch)))
-            {
-                PasswordError = "Пароль має містити великі та малі літери, цифри та спеціальний символ";
+                PasswordError = "Пароль має містити мінімум 6 символів";
                 return false;
             }
 
             PasswordError = string.Empty;
             return true;
         }
+
 
         private bool ValidateConfirmPassword()
         {
@@ -246,13 +265,13 @@ namespace Presentation.ViewModels
         {
             if (string.IsNullOrWhiteSpace(FullName))
             {
-                FullNameError = "Ім'я обов'язкове";
+                FullNameError = "Username обов'язковий";
                 return false;
             }
 
             if (FullName.Length < 2)
             {
-                FullNameError = "Ім'я має містити мінімум 2 символи";
+                FullNameError = "Username має містити мінімум 2 символи";
                 return false;
             }
 
