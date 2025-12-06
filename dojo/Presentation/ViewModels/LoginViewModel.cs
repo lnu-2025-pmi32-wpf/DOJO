@@ -126,6 +126,9 @@ namespace Presentation.ViewModels
                 NotificationMessage = "Вхід виконано успішно!";
                 IsNotificationSuccess = true;
 
+                // Зберігаємо email користувача
+                Preferences.Set("UserEmail", Email);
+
                 // Невелика затримка щоб показати повідомлення
                 await Task.Delay(1000);
                 

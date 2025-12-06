@@ -82,6 +82,34 @@
 
                 <!-- Right - View Mode and Search -->
                 <HorizontalStackLayout Grid.Column="2" Spacing="10">
+                    <!-- Profile Icon -->
+                    <Border 
+                        BackgroundColor="#4CAF50"
+                        StrokeThickness="2"
+                        Stroke="#4CAF50"
+                        HeightRequest="40"
+                        WidthRequest="40"
+                        StrokeShape="RoundRectangle 20"
+                        VerticalOptions="Center">
+                        <Label 
+                            Text="{Binding UserInitials}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="White"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"/>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnProfileTapped"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+
+                    <Label 
+                        Text="{Binding UserEmail}"
+                        FontSize="13"
+                        TextColor="#666"
+                        VerticalOptions="Center"
+                        Margin="0,0,10,0"/>
+
                     <Border 
                         BackgroundColor="#F0F0F0"
                         Padding="2"

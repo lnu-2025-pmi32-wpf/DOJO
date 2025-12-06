@@ -11,6 +11,8 @@ namespace Presentation.ViewModels
         private DateTime _selectedDate = DateTime.Today;
         private string _searchText = string.Empty;
         private EventModel? _selectedEvent;
+        private string _userEmail = "user@example.com";
+        private string _userInitials = "U";
 
         public MainViewModel()
         {
@@ -70,6 +72,18 @@ namespace Presentation.ViewModels
         {
             get => _selectedEvent;
             set => SetProperty(ref _selectedEvent, value);
+        }
+
+        public string UserEmail
+        {
+            get => _userEmail;
+            set => SetProperty(ref _userEmail, value);
+        }
+
+        public string UserInitials
+        {
+            get => _userInitials;
+            set => SetProperty(ref _userInitials, value);
         }
 
         private DateTime _weekStartDate;
@@ -271,6 +285,37 @@ namespace Presentation.ViewModels
             });
 
             UpdateDateRange();
+        }
+
+        public void SetUserEmail(string email)
+        {
+            UserEmail = email;
+            
+            // Обчислюємо ініціали з email
+            if (!string.IsNullOrEmpty(email))
+            {
+                var emailPart = email.Split('@')[0];
+                if (emailPart.Length > 0)
+                {
+                    // Беремо першу літеру або дві перші якщо є крапка чи підкреслення
+                    if (emailPart.Contains('.') || emailPart.Contains('_'))
+                    {
+                        var parts = emailPart.Split(new[] { '.', '_' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length >= 2)
+                        {
+                            UserInitials = $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[1][0])}";
+                        }
+                        else
+                        {
+                            UserInitials = char.ToUpper(emailPart[0]).ToString();
+                        }
+                    }
+                    else
+                    {
+                        UserInitials = char.ToUpper(emailPart[0]).ToString();
+                    }
+                }
+            }
         }
     }
 }
