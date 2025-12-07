@@ -37,7 +37,10 @@ namespace Presentation
             // Реєстрація ViewModels
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<RegisterViewModel>();
-            builder.Services.AddTransient<MainViewModel>();
+            builder.Services.AddTransient<MainViewModel>(sp => 
+                new MainViewModel(
+                    sp.GetService<ISessionService>(),
+                    sp.GetService<IPomodoroService>()));
             builder.Services.AddTransient<AddPlanViewModel>();
             builder.Services.AddTransient<StatisticsViewModel>();
 

@@ -354,7 +354,7 @@
                         Stroke="#FFB74D">
                         <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
                             <Label 
-                                Text="25:00"
+                                Text="{Binding PomodoroTimeText}"
                                 FontSize="32"
                                 FontAttributes="Bold"
                                 HorizontalOptions="Center"
@@ -362,29 +362,32 @@
                             
                             <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
                                 <Button 
-                                    Text="▶"
+                                    Text="{Binding TimerButtonText}"
                                     BackgroundColor="#4CAF50"
                                     TextColor="White"
                                     WidthRequest="50"
                                     HeightRequest="50"
                                     CornerRadius="25"
-                                    FontSize="18"/>
+                                    FontSize="18"
+                                    Command="{Binding StartPomodoroCommand}"/>
                                 <Button 
-                                    Text="⏸"
+                                    Text="■"
                                     BackgroundColor="#FF9800"
                                     TextColor="White"
                                     WidthRequest="50"
                                     HeightRequest="50"
                                     CornerRadius="25"
-                                    FontSize="18"/>
+                                    FontSize="18"
+                                    Command="{Binding PausePomodoroCommand}"/>
                                 <Button 
-                                    Text="⟲"
+                                    Text="↻"
                                     BackgroundColor="#F44336"
                                     TextColor="White"
                                     WidthRequest="50"
                                     HeightRequest="50"
                                     CornerRadius="25"
-                                    FontSize="18"/>
+                                    FontSize="20"
+                                    Command="{Binding ResetPomodoroCommand}"/>
                             </HorizontalStackLayout>
                         </VerticalStackLayout>
                     </Border>

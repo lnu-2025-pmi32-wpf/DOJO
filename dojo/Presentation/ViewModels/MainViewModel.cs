@@ -3,12 +3,14 @@ using System.Windows.Input;
 using Presentation.Helpers;
 using Presentation.Models;
 using BLL.Interfaces;
+using BLL.Services;
 
 namespace Presentation.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
         private readonly ISessionService? _sessionService;
+        private readonly IPomodoroService? _pomodoroService;
         private ViewMode _currentViewMode = ViewMode.Week;
         private DateTime _selectedDate = DateTime.Today;
         private EventModel? _selectedEvent;
@@ -17,9 +19,18 @@ namespace Presentation.ViewModels
         private string _userInitials = "U";
         private int _userId;
 
-        public MainViewModel(ISessionService? sessionService = null)
+        // Pomodoro Timer Properties
+        private System.Timers.Timer? _pomodoroTimer;
+        private TimeSpan _remainingTime = TimeSpan.FromMinutes(25);
+        private bool _isTimerRunning;
+        private bool _isWorkSession = true;
+        private int _completedCycles;
+        private DateTime? _sessionStartTime;
+
+        public MainViewModel(ISessionService? sessionService = null, IPomodoroService? pomodoroService = default)
         {
             _sessionService = sessionService;
+            _pomodoroService = pomodoroService;
             Events = new ObservableCollection<EventModel>();
             TodoItems = new ObservableCollection<TodoItemModel>();
             
@@ -34,6 +45,11 @@ namespace Presentation.ViewModels
             ToggleTodoCommand = new RelayCommand<TodoItemModel>(OnToggleTodo);
             NavigateToStatisticsCommand = new RelayCommand(OnNavigateToStatistics);
             LogoutCommand = new AsyncRelayCommand(OnLogout);
+            
+            // Pomodoro Commands
+            StartPomodoroCommand = new RelayCommand(OnStartPomodoro);
+            PausePomodoroCommand = new RelayCommand(OnPausePomodoro);
+            ResetPomodoroCommand = new RelayCommand(OnResetPomodoro);
             
             LoadSampleData();
             LoadUserSessionAsync();
@@ -97,6 +113,20 @@ namespace Presentation.ViewModels
             set => SetProperty(ref _userId, value);
         }
 
+        // Pomodoro Properties
+        public string PomodoroTimeText
+        {
+            get => $"{_remainingTime.Minutes:D2}:{_remainingTime.Seconds:D2}";
+        }
+
+        public bool IsTimerRunning
+        {
+            get => _isTimerRunning;
+            set => SetProperty(ref _isTimerRunning, value);
+        }
+
+        public string TimerButtonText => IsTimerRunning ? "❚❚" : "▶";
+
         private DateTime _weekStartDate;
         public DateTime WeekStartDate
         {
@@ -130,6 +160,11 @@ namespace Presentation.ViewModels
         public ICommand ToggleTodoCommand { get; }
         public ICommand NavigateToStatisticsCommand { get; }
         public ICommand LogoutCommand { get; }
+        
+        // Pomodoro Commands
+        public ICommand StartPomodoroCommand { get; }
+        public ICommand PausePomodoroCommand { get; }
+        public ICommand ResetPomodoroCommand { get; }
 
         // Command Handlers
         private async void OnAddPlan()
@@ -367,6 +402,139 @@ namespace Presentation.ViewModels
             {
                 // Очищаємо навігаційний стек і повертаємось на LoginPage
                 await Shell.Current.Navigation.PopToRootAsync();
+            });
+        }
+
+        // Pomodoro Timer Methods
+        private void OnStartPomodoro()
+        {
+            if (!IsTimerRunning)
+            {
+                IsTimerRunning = true;
+                
+                if (_sessionStartTime == null)
+                {
+                    _sessionStartTime = DateTime.Now;
+                }
+
+                if (_pomodoroTimer == null)
+                {
+                    _pomodoroTimer = new System.Timers.Timer(1000); // 1 секунда
+                    _pomodoroTimer.Elapsed += OnTimerTick;
+                }
+
+                _pomodoroTimer.Start();
+                OnPropertyChanged(nameof(TimerButtonText));
+            }
+        }
+
+        private void OnPausePomodoro()
+        {
+            if (IsTimerRunning)
+            {
+                IsTimerRunning = false;
+                _pomodoroTimer?.Stop();
+                OnPropertyChanged(nameof(TimerButtonText));
+            }
+        }
+
+        private void OnResetPomodoro()
+        {
+            IsTimerRunning = false;
+            _pomodoroTimer?.Stop();
+            _remainingTime = TimeSpan.FromMinutes(25);
+            _sessionStartTime = null;
+            _completedCycles = 0;
+            _isWorkSession = true;
+            
+            OnPropertyChanged(nameof(PomodoroTimeText));
+            OnPropertyChanged(nameof(TimerButtonText));
+        }
+
+        private async void OnTimerTick(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            _remainingTime = _remainingTime.Subtract(TimeSpan.FromSeconds(1));
+
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                OnPropertyChanged(nameof(PomodoroTimeText));
+            });
+
+            if (_remainingTime.TotalSeconds <= 0)
+            {
+                await OnTimerCompleted();
+            }
+        }
+
+        private async Task OnTimerCompleted()
+        {
+            _pomodoroTimer?.Stop();
+            IsTimerRunning = false;
+
+            if (_isWorkSession)
+            {
+                _completedCycles++;
+
+                // Зберігаємо завершену сесію в БД
+                if (_pomodoroService != null && _sessionStartTime.HasValue)
+                {
+                    var pomodoro = new DAL.Models.Pomodoro
+                    {
+                        UserId = UserId,
+                        StartTime = _sessionStartTime.Value,
+                        EndTime = DateTime.Now,
+                        WorkCycles = 1
+                    };
+
+                    await _pomodoroService.AddPomodoroAsync(pomodoro);
+                }
+
+                // Перемикаємось на перерву
+                if (_completedCycles % 4 == 0)
+                {
+                    _remainingTime = TimeSpan.FromMinutes(15); // Довга перерва
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        await Application.Current.MainPage.DisplayAlert(
+                            "Помодоро завершено! 🎉",
+                            "Час для довгої перерви (15 хвилин)",
+                            "OK");
+                    });
+                }
+                else
+                {
+                    _remainingTime = TimeSpan.FromMinutes(5); // Коротка перерва
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        await Application.Current.MainPage.DisplayAlert(
+                            "Помодоро завершено! ✅",
+                            "Час для короткої перерви (5 хвилин)",
+                            "OK");
+                    });
+                }
+
+                _isWorkSession = false;
+            }
+            else
+            {
+                // Перерва закінчилась, повертаємось до роботи
+                _remainingTime = TimeSpan.FromMinutes(25);
+                _isWorkSession = true;
+                _sessionStartTime = null;
+
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Перерва завершена! 💪",
+                        "Час повертатися до роботи",
+                        "OK");
+                });
+            }
+
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                OnPropertyChanged(nameof(PomodoroTimeText));
+                OnPropertyChanged(nameof(TimerButtonText));
             });
         }
     }
