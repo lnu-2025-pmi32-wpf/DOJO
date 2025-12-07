@@ -155,26 +155,34 @@ namespace Presentation.ViewModels
                     return;
                 }
 
+                var startDateTime = StartDate.Date + StartTime;
                 var endDateTime = EndDate.Date + EndTime;
                 
                 // Конвертуємо в UTC для PostgreSQL
+                var startDateTimeUtc = DateTime.SpecifyKind(startDateTime, DateTimeKind.Utc);
                 var endDateTimeUtc = DateTime.SpecifyKind(endDateTime, DateTimeKind.Utc);
+
+                // Зберігаємо час початку в описі у спеціальному форматі
+                var descriptionWithStartTime = $"START_TIME:{startDateTimeUtc:O}\n{Title}\n{Description}";
 
                 // Створюємо новий Goal для збереження в БД
                 var newGoal = new Goal
                 {
                     UserId = session.Value.UserId,
-                    Description = $"{Title}\n{Description}",
+                    Description = descriptionWithStartTime,
                     Deadline = endDateTimeUtc,
                     Progress = 0
                 };
 
-                System.Diagnostics.Debug.WriteLine($"Зберігаємо план: UserId={newGoal.UserId}, Title={Title}, Deadline={endDateTime}");
+                System.Diagnostics.Debug.WriteLine($"Зберігаємо план: UserId={newGoal.UserId}, Title={Title}, StartTime={startDateTime}, Deadline={endDateTime}");
 
                 // Зберігаємо в БД
                 await _goalService.AddGoalAsync(newGoal);
 
                 System.Diagnostics.Debug.WriteLine("План успішно збережено!");
+
+                // Відправляємо повідомлення про те, що потрібно перезавантажити плани
+                MessagingCenter.Send(this, "GoalAdded");
 
                 // Показуємо повідомлення про успіх
                 await Shell.Current.DisplayAlert(

@@ -4,6 +4,7 @@ using Presentation.Helpers;
 using Presentation.Models;
 using BLL.Interfaces;
 using BLL.Services;
+using Microsoft.Maui.Controls;
 
 namespace Presentation.ViewModels
 {
@@ -27,6 +28,7 @@ namespace Presentation.ViewModels
         private bool _isWorkSession = true;
         private int _completedCycles;
         private DateTime? _sessionStartTime;
+        private bool _isLoadingGoals = false;
 
         public MainViewModel(ISessionService? sessionService = null, IPomodoroService? pomodoroService = default, IGoalService? goalService = null)
         {
@@ -58,15 +60,76 @@ namespace Presentation.ViewModels
         NextMonthCommand = new RelayCommand(OnNextMonth);
         SelectDayCommand = new RelayCommand<CalendarDayModel>(OnSelectDay);
         
-        LoadSampleData();
-        LoadUserSessionAsync();
-        LoadGoalsFromDatabase();
+        // Генеруємо порожній календар
+        GenerateCalendarDays();
+    }
+    
+    // Публічний метод для ініціалізації даних (викликається з DashboardPage)
+    public void Initialize()
+    {
+        System.Diagnostics.Debug.WriteLine("MainViewModel: Initialize викликано");
         
-        // Генеруємо календар на головному потоці після завантаження
-        MainThread.BeginInvokeOnMainThread(() =>
+        // Підписуємось на повідомлення про додавання нового плану
+        MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalAdded", (sender) =>
         {
-            GenerateCalendarDays();
+            System.Diagnostics.Debug.WriteLine("MainViewModel: Отримано повідомлення про додавання плану");
+            _ = LoadGoalsFromDatabaseAsync();
         });
+        
+        // Запускаємо завантаження даних в фоновому режимі
+        System.Diagnostics.Debug.WriteLine("MainViewModel: Запускаємо фонове завантаження...");
+        _ = InitializeAsync();
+    }
+
+    private async Task InitializeAsync()
+    {
+        try
+        {
+            System.Diagnostics.Debug.WriteLine("MainViewModel: Початок завантаження сесії...");
+            
+            if (_sessionService == null)
+            {
+                System.Diagnostics.Debug.WriteLine("InitializeAsync: SessionService не доступний");
+                return;
+            }
+
+            (string Email, int UserId, string? Username)? session;
+            try
+            {
+                session = await _sessionService.GetUserSessionAsync().ConfigureAwait(false);
+            }
+            catch (Exception sessionEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"InitializeAsync: Помилка отримання сесії - {sessionEx.Message}");
+                return;
+            }
+            
+            if (session.HasValue)
+            {
+                System.Diagnostics.Debug.WriteLine($"InitializeAsync: Сесія отримана - UserId={session.Value.UserId}");
+                
+                var sessionValue = session.Value;
+                
+                // Оновлюємо UI в головному потоці
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    SetUserInfo(sessionValue.Email, sessionValue.Username ?? sessionValue.Email);
+                    UserId = sessionValue.UserId;
+                    System.Diagnostics.Debug.WriteLine($"InitializeAsync: Користувач завантажено - {sessionValue.Username}");
+                });
+                
+                // Завантажуємо плани (цей метод сам оброблюе UI потік)
+                await LoadGoalsFromDatabaseAsync().ConfigureAwait(false);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("InitializeAsync: Сесія не знайдена");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"MainViewModel: Помилка Initialize - {ex.Message}");
+        }
     }
 
         // Properties
@@ -422,18 +485,6 @@ namespace Presentation.ViewModels
             }
         }
 
-        private async void LoadUserSessionAsync()
-        {
-            if (_sessionService != null)
-            {
-                var session = await _sessionService.GetUserSessionAsync();
-                if (session.HasValue)
-                {
-                    SetUserInfo(session.Value.Email, session.Value.Username);
-                    UserId = session.Value.UserId;
-                }
-            }
-        }
 
         private async Task OnLogout()
         {
@@ -545,24 +596,18 @@ namespace Presentation.ViewModels
                 if (_completedCycles % 4 == 0)
                 {
                     _remainingTime = TimeSpan.FromMinutes(15); // Довга перерва
-                    await MainThread.InvokeOnMainThreadAsync(async () =>
-                    {
-                        await Application.Current.MainPage.DisplayAlert(
-                            "Помодоро завершено! 🎉",
-                            "Час для довгої перерви (15 хвилин)",
-                            "OK");
-                    });
+                    await Shell.Current.DisplayAlert(
+                        "Помодоро завершено! 🎉",
+                        "Час для довгої перерви (15 хвилин)",
+                        "OK");
                 }
                 else
                 {
                     _remainingTime = TimeSpan.FromMinutes(5); // Коротка перерва
-                    await MainThread.InvokeOnMainThreadAsync(async () =>
-                    {
-                        await Application.Current.MainPage.DisplayAlert(
-                            "Помодоро завершено! ✅",
-                            "Час для короткої перерви (5 хвилин)",
-                            "OK");
-                    });
+                    await Shell.Current.DisplayAlert(
+                        "Помодоро завершено! ✅",
+                        "Час для короткої перерви (5 хвилин)",
+                        "OK");
                 }
 
                 _isWorkSession = false;
@@ -574,13 +619,10 @@ namespace Presentation.ViewModels
                 _isWorkSession = true;
                 _sessionStartTime = null;
 
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    await Application.Current.MainPage.DisplayAlert(
-                        "Перерва завершена! 💪",
-                        "Час повертатися до роботи",
-                        "OK");
-                });
+                await Shell.Current.DisplayAlert(
+                    "Перерва завершена! 💪",
+                    "Час повертатися до роботи",
+                    "OK");
             }
 
             await MainThread.InvokeOnMainThreadAsync(() =>
@@ -714,63 +756,140 @@ namespace Presentation.ViewModels
             OnPropertyChanged(nameof(CalendarDays));
         }
         
-        private async void LoadGoalsFromDatabase()
+        private async Task LoadGoalsFromDatabaseAsync()
         {
-            if (_goalService == null || _sessionService == null)
+            // Якщо вже йде завантаження - не запускаємо нове
+            if (_isLoadingGoals)
+            {
+                System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Завантаження вже виконується, пропускаємо...");
                 return;
+            }
+
+            if (_goalService == null)
+            {
+                System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Goal сервіс не доступний");
+                return;
+            }
+
+            if (UserId == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: UserId не встановлено");
+                return;
+            }
+
+            _isLoadingGoals = true;
 
             try
             {
-                var session = await _sessionService.GetUserSessionAsync();
-                if (!session.HasValue)
-                    return;
-
-                var goals = await _goalService.GetGoalsByUserIdAsync(session.Value.UserId);
-
-                await MainThread.InvokeOnMainThreadAsync(() =>
+                System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Завантаження планів для користувача {UserId}...");
+                
+                // Завантажуємо плани з БД (це асинхронна операція)
+                IEnumerable<DAL.Models.Goal> goals;
+                try
                 {
-                    // Очищаємо тестові дані
-                    Events.Clear();
+                    goals = await _goalService.GetGoalsByUserIdAsync(UserId).ConfigureAwait(false);
+                }
+                catch (Exception dbEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Помилка БД - {dbEx.Message}");
+                    return;
+                }
+                
+                var goalsList = goals.ToList();
+                System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Знайдено {goalsList.Count} планів");
 
-                    // Додаємо реальні дані з БД
-                    foreach (var goal in goals)
+                // Підготовлюємо дані для UI
+                var eventModels = new List<EventModel>();
+                
+                foreach (var goal in goalsList)
+                {
+                    if (goal.Deadline.HasValue)
                     {
-                        if (goal.Deadline.HasValue)
+                        DateTime startDateTime = goal.CreatedAt;
+                        string title = goal.Description;
+                        string description = string.Empty;
+
+                        // Парсимо опис для отримання часу початку та тексту
+                        if (goal.Description.StartsWith("START_TIME:"))
                         {
-                            // Розбираємо опис на назву та детальний опис
-                            var descriptionParts = goal.Description.Split('\n', 2);
-                            var title = descriptionParts.Length > 0 ? descriptionParts[0] : goal.Description;
-                            var description = descriptionParts.Length > 1 ? descriptionParts[1] : string.Empty;
-
-                            var eventModel = new EventModel
+                            var lines = goal.Description.Split('\n');
+                            if (lines.Length > 0 && DateTime.TryParse(lines[0].Replace("START_TIME:", ""), out var parsedStartTime))
                             {
-                                Id = goal.Id,
-                                Title = title,
-                                Description = description,
-                                StartDateTime = goal.CreatedAt,
-                                EndDateTime = goal.Deadline.Value,
-                                Priority = EventPriority.Normal,
-                                Color = Colors.Blue
-                            };
-
-                            Events.Add(eventModel);
+                                startDateTime = parsedStartTime;
+                            }
+                            
+                            if (lines.Length > 1)
+                            {
+                                title = lines[1];
+                            }
+                            
+                            if (lines.Length > 2)
+                            {
+                                description = string.Join("\n", lines.Skip(2));
+                            }
                         }
+                        else
+                        {
+                            // Старий формат - розбираємо опис на назву та детальний опис
+                            var descriptionParts = goal.Description.Split('\n', 2);
+                            title = descriptionParts.Length > 0 ? descriptionParts[0] : goal.Description;
+                            description = descriptionParts.Length > 1 ? descriptionParts[1] : string.Empty;
+                        }
+
+                        eventModels.Add(new EventModel
+                        {
+                            Id = goal.Id,
+                            Title = title,
+                            Description = description,
+                            StartDateTime = startDateTime,
+                            EndDateTime = goal.Deadline.Value,
+                            Priority = EventPriority.Normal,
+                            Color = Colors.Blue
+                        });
                     }
-                    
-                    // Регенеруємо календар після завантаження подій
-                    GenerateCalendarDays();
+                }
+                
+                // Оновлюємо UI в головному потоці
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    try
+                    {
+                        Events.Clear();
+                        foreach (var eventModel in eventModels)
+                        {
+                            Events.Add(eventModel);
+                            System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Додано план '{eventModel.Title}'");
+                        }
+                        
+                        // Регенеруємо календар після завантаження подій
+                        System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Регенерація календаря...");
+                        GenerateCalendarDays();
+                        System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Завершено успішно");
+                    }
+                    catch (Exception uiEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Помилка UI - {uiEx.Message}");
+                    }
                 });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Помилка завантаження цілей: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: ПОМИЛКА - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Stack trace - {ex.StackTrace}");
+            }
+            finally
+            {
+                _isLoadingGoals = false;
+                System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Флаг завантаження знято");
             }
         }
         
         // Публічний метод для перезавантаження цілей (викликається після додавання нового плану)
-        public void ReloadGoals()
+        public async Task ReloadGoals()
         {
-            LoadGoalsFromDatabase();
+            System.Diagnostics.Debug.WriteLine("ReloadGoals: Починаємо перезавантаження...");
+            await Task.Delay(300);
+            await LoadGoalsFromDatabaseAsync();
         }
     }
 }
