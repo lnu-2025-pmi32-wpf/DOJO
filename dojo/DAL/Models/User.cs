@@ -15,6 +15,10 @@ namespace DAL.Models
         [MaxLength(255)]
         public string Email { get; set; } = string.Empty;
         
+        [Column("username")]
+        [MaxLength(100)]
+        public string? Username { get; set; }
+        
         [Required]
         [Column("password")]
         [MaxLength(255)]
