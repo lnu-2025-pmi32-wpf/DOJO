@@ -1,4 +1,5 @@
 using Presentation.ViewModels;
+using Presentation.Models;
 using BLL.Interfaces;
 
 namespace Presentation.Views
@@ -33,6 +34,18 @@ namespace Presentation.Views
                 }
             }
         }
+
+        private void OnCalendarDaySelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var viewModel = BindingContext as MainViewModel;
+            if (viewModel != null && e.CurrentSelection.Count > 0)
+            {
+                var selectedDay = e.CurrentSelection[0] as CalendarDayModel;
+                if (selectedDay != null && selectedDay.IsCurrentMonth)
+                {
+                    viewModel.SelectedDate = selectedDay.Date;
+                }
+            }
+        }
     }
 }
-

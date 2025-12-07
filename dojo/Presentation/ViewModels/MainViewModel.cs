@@ -51,8 +51,18 @@ namespace Presentation.ViewModels
             PausePomodoroCommand = new RelayCommand(OnPausePomodoro);
             ResetPomodoroCommand = new RelayCommand(OnResetPomodoro);
             
+            // Calendar Commands
+            PreviousMonthCommand = new RelayCommand(OnPreviousMonth);
+            NextMonthCommand = new RelayCommand(OnNextMonth);
+            
             LoadSampleData();
             LoadUserSessionAsync();
+            
+            // Генеруємо календар на головному потоці після завантаження
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                GenerateCalendarDays();
+            });
         }
 
         // Properties
@@ -165,6 +175,35 @@ namespace Presentation.ViewModels
         public ICommand StartPomodoroCommand { get; }
         public ICommand PausePomodoroCommand { get; }
         public ICommand ResetPomodoroCommand { get; }
+        
+        // Calendar Properties and Commands
+        private DateTime _calendarCurrentMonth = DateTime.Today;
+        private CalendarDayModel? _selectedCalendarDay;
+        
+        public ObservableCollection<CalendarDayModel> CalendarDays { get; } = new();
+        
+        public DateTime CalendarCurrentMonth
+        {
+            get => _calendarCurrentMonth;
+            set
+            {
+                if (SetProperty(ref _calendarCurrentMonth, value))
+                {
+                    GenerateCalendarDays();
+                }
+            }
+        }
+        
+        public CalendarDayModel? SelectedCalendarDay
+        {
+            get => _selectedCalendarDay;
+            set => SetProperty(ref _selectedCalendarDay, value);
+        }
+        
+        public string CurrentMonthYear => CalendarCurrentMonth.ToString("MMMM yyyy");
+        
+        public ICommand PreviousMonthCommand { get; }
+        public ICommand NextMonthCommand { get; }
 
         // Command Handlers
         private async void OnAddPlan()
@@ -544,6 +583,93 @@ namespace Presentation.ViewModels
                 OnPropertyChanged(nameof(PomodoroTimeText));
                 OnPropertyChanged(nameof(TimerButtonText));
             });
+        }
+        
+        // Calendar Methods
+        private void GenerateCalendarDays()
+        {
+            CalendarDays.Clear();
+            
+            var firstDayOfMonth = new DateTime(CalendarCurrentMonth.Year, CalendarCurrentMonth.Month, 1);
+            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+            
+            // Понеділок = 1, Неділя = 0 (в C# DayOfWeek)
+            int firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+            if (firstDayOfWeek == 0) firstDayOfWeek = 7; // Неділя стає 7
+            
+            // Додаємо дні з попереднього місяця
+            var previousMonth = firstDayOfMonth.AddMonths(-1);
+            var daysInPreviousMonth = DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month);
+            
+            for (int i = firstDayOfWeek - 1; i > 0; i--)
+            {
+                var day = daysInPreviousMonth - i + 1;
+                var date = new DateTime(previousMonth.Year, previousMonth.Month, day);
+                CalendarDays.Add(new CalendarDayModel
+                {
+                    Day = day,
+                    Date = date,
+                    IsCurrentMonth = false,
+                    IsToday = false,
+                    IsSelected = false
+                });
+            }
+            
+            // Додаємо дні поточного місяця
+            for (int day = 1; day <= lastDayOfMonth.Day; day++)
+            {
+                var date = new DateTime(CalendarCurrentMonth.Year, CalendarCurrentMonth.Month, day);
+                CalendarDays.Add(new CalendarDayModel
+                {
+                    Day = day,
+                    Date = date,
+                    IsCurrentMonth = true,
+                    IsToday = date.Date == DateTime.Today,
+                    IsSelected = date.Date == SelectedDate.Date
+                });
+            }
+            
+            // Додаємо дні з наступного місяця, щоб заповнити сітку
+            var totalDays = CalendarDays.Count;
+            var remainingDays = (7 - (totalDays % 7)) % 7;
+            if (remainingDays > 0 || totalDays < 35)
+            {
+                var nextMonth = firstDayOfMonth.AddMonths(1);
+                var daysToAdd = remainingDays > 0 ? remainingDays : 7;
+                
+                // Додаємо ще один тиждень якщо менше 35 днів
+                if (totalDays + daysToAdd < 35)
+                {
+                    daysToAdd += 7;
+                }
+                
+                for (int day = 1; day <= daysToAdd; day++)
+                {
+                    var date = new DateTime(nextMonth.Year, nextMonth.Month, day);
+                    CalendarDays.Add(new CalendarDayModel
+                    {
+                        Day = day,
+                        Date = date,
+                        IsCurrentMonth = false,
+                        IsToday = false,
+                        IsSelected = false
+                    });
+                }
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"Calendar generated: {CalendarDays.Count} days");
+            OnPropertyChanged(nameof(CurrentMonthYear));
+            OnPropertyChanged(nameof(CalendarDays));
+        }
+        
+        private void OnPreviousMonth()
+        {
+            CalendarCurrentMonth = CalendarCurrentMonth.AddMonths(-1);
+        }
+        
+        private void OnNextMonth()
+        {
+            CalendarCurrentMonth = CalendarCurrentMonth.AddMonths(1);
         }
     }
 }
