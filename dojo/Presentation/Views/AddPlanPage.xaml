@@ -213,9 +213,7 @@
                         <Button 
                             Text="📎 Прикріпити файл"
                             Command="{Binding AttachFileCommand}"
-                            BackgroundColor="#2196F3"
-                            TextColor="White"
-                            CornerRadius="5"
+                            Style="{StaticResource SecondaryButtonStyle}"
                             Padding="12,8"
                             HorizontalOptions="Start"/>
                         
@@ -235,11 +233,7 @@
                     Grid.Column="0"
                     Text="Скасувати"
                     Command="{Binding CancelCommand}"
-                    BackgroundColor="Transparent"
-                    TextColor="#666"
-                    BorderColor="#DDD"
-                    BorderWidth="1"
-                    CornerRadius="8"
+                    Style="{StaticResource OutlineButtonStyle}"
                     FontSize="16"
                     Padding="0,12"/>
                 
@@ -247,11 +241,8 @@
                     Grid.Column="1"
                     Text="Зберегти"
                     Command="{Binding SaveCommand}"
-                    BackgroundColor="#4CAF50"
-                    TextColor="White"
-                    CornerRadius="8"
+                    Style="{StaticResource PrimaryButtonStyle}"
                     FontSize="16"
-                    FontAttributes="Bold"
                     Padding="0,12"/>
             </Grid>
 

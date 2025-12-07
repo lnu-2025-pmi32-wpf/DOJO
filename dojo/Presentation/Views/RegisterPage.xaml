@@ -175,12 +175,7 @@
                 <Button 
                     Text="Зареєструватися"
                     Command="{Binding RegisterCommand}"
-                    BackgroundColor="#4CAF50"
-                    TextColor="White"
-                    FontSize="15"
-                    FontAttributes="Bold"
-                    HeightRequest="45"
-                    CornerRadius="8"
+                    Style="{StaticResource PrimaryButtonStyle}"
                     Margin="0,8,0,0"/>
 
                 <!-- Loading Indicator -->
@@ -201,9 +196,7 @@
                         TextColor="#666666"/>
                     <Label 
                         Text="Увійти"
-                        FontSize="13"
-                        TextColor="#4CAF50"
-                        FontAttributes="Bold">
+                        Style="{StaticResource LinkButtonStyle}">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding BackToLoginCommand}"/>
                         </Label.GestureRecognizers>

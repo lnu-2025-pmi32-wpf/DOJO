@@ -206,3 +206,9 @@ VALUES (5, '2025-10-26 20:00:00', '2025-10-26 20:50:00', 2);
 
 INSERT INTO pomodoros (user_id, start_time) 
 VALUES (4, '2025-10-29 14:00:00');
+
+-- Крок 1: Додати колонку без NOT NULL
+ALTER TABLE users ADD COLUMN username VARCHAR(255);
+
+-- Крок 2: Додати унікальний constraint
+ALTER TABLE users ADD CONSTRAINT users_username_unique UNIQUE (username);
