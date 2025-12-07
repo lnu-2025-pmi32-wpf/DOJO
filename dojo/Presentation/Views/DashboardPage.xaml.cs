@@ -18,10 +18,10 @@ namespace Presentation.Views
             if (viewModel != null)
             {
                 var action = await DisplayActionSheet(
-                    "Профіль користувача", 
+                    $"👤 {viewModel.UserName}", 
                     "Скасувати", 
                     "Вийти", 
-                    $"Email: {viewModel.UserEmail}");
+                    $"📧 {viewModel.UserEmail}");
 
                 if (action == "Вийти")
                 {

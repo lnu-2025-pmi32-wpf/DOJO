@@ -11,9 +11,9 @@ namespace Presentation.ViewModels
         private readonly ISessionService? _sessionService;
         private ViewMode _currentViewMode = ViewMode.Week;
         private DateTime _selectedDate = DateTime.Today;
-        private string _searchText = string.Empty;
         private EventModel? _selectedEvent;
         private string _userEmail = "user@example.com";
+        private string _userName = "Користувач";
         private string _userInitials = "U";
         private int _userId;
 
@@ -29,7 +29,6 @@ namespace Presentation.ViewModels
             NavigatePreviousCommand = new RelayCommand(OnNavigatePrevious);
             GoToTodayCommand = new RelayCommand(OnGoToToday);
             ChangeModeCommand = new RelayCommand<object>(OnChangeModeObject);
-            SearchCommand = new RelayCommand(OnSearch);
             EditEventCommand = new RelayCommand<EventModel>(OnEditEvent);
             DeleteEventCommand = new RelayCommand<EventModel>(OnDeleteEvent);
             ToggleTodoCommand = new RelayCommand<TodoItemModel>(OnToggleTodo);
@@ -68,12 +67,6 @@ namespace Presentation.ViewModels
             }
         }
 
-        public string SearchText
-        {
-            get => _searchText;
-            set => SetProperty(ref _searchText, value);
-        }
-
         public EventModel? SelectedEvent
         {
             get => _selectedEvent;
@@ -84,6 +77,12 @@ namespace Presentation.ViewModels
         {
             get => _userEmail;
             set => SetProperty(ref _userEmail, value);
+        }
+
+        public string UserName
+        {
+            get => _userName;
+            set => SetProperty(ref _userName, value);
         }
 
         public string UserInitials
@@ -126,7 +125,6 @@ namespace Presentation.ViewModels
         public ICommand NavigatePreviousCommand { get; }
         public ICommand GoToTodayCommand { get; }
         public ICommand ChangeModeCommand { get; }
-        public ICommand SearchCommand { get; }
         public ICommand EditEventCommand { get; }
         public ICommand DeleteEventCommand { get; }
         public ICommand ToggleTodoCommand { get; }
@@ -206,10 +204,6 @@ namespace Presentation.ViewModels
             CurrentViewMode = mode;
         }
 
-        private void OnSearch()
-        {
-            // Implement search logic
-        }
 
         private void OnEditEvent(EventModel? eventModel)
         {
@@ -300,14 +294,32 @@ namespace Presentation.ViewModels
             UpdateDateRange();
         }
 
-        public void SetUserEmail(string email)
+        public void SetUserInfo(string email, string? username = null)
         {
             UserEmail = email;
             
-            // Обчислюємо ініціали з email
-            if (!string.IsNullOrEmpty(email))
+            // Використовуємо username якщо він є, інакше беремо частину email
+            if (!string.IsNullOrEmpty(username))
             {
+                UserName = username;
+                
+                // Обчислюємо ініціали з username
+                var parts = username.Split(new[] { ' ', '.', '_' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 2)
+                {
+                    UserInitials = $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[1][0])}";
+                }
+                else if (parts.Length == 1 && parts[0].Length > 0)
+                {
+                    UserInitials = char.ToUpper(parts[0][0]).ToString();
+                }
+            }
+            else
+            {
+                // Якщо username немає, використовуємо email
                 var emailPart = email.Split('@')[0];
+                UserName = emailPart;
+                
                 if (emailPart.Length > 0)
                 {
                     // Беремо першу літеру або дві перші якщо є крапка чи підкреслення
@@ -338,7 +350,7 @@ namespace Presentation.ViewModels
                 var session = await _sessionService.GetUserSessionAsync();
                 if (session.HasValue)
                 {
-                    SetUserEmail(session.Value.Email);
+                    SetUserInfo(session.Value.Email, session.Value.Username);
                     UserId = session.Value.UserId;
                 }
             }

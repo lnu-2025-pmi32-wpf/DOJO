@@ -16,7 +16,7 @@ namespace BLL.Services
             _context = context;
         }
 
-        public async Task<User?> RegisterAsync(string email, string password)
+        public async Task<User?> RegisterAsync(string email, string password, string? username = null)
         {
             // Перевіряємо, чи користувач з таким email вже існує
             var existingUser = await _context.Users
@@ -34,6 +34,7 @@ namespace BLL.Services
             var newUser = new User
             {
                 Email = email,
+                Username = username,
                 Password = passwordHash,
                 ExpPoints = 0,
                 Level = 1,

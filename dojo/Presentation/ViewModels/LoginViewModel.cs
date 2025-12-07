@@ -130,7 +130,7 @@ namespace Presentation.ViewModels
                 IsNotificationSuccess = true;
 
                 // Зберігаємо сесію користувача
-                await _sessionService.SaveUserSessionAsync(user.Email, user.Id);
+                await _sessionService.SaveUserSessionAsync(user.Email, user.Id, user.Username);
 
                 // Невелика затримка щоб показати повідомлення
                 await Task.Delay(500);

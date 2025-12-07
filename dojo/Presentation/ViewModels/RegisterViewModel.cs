@@ -157,8 +157,8 @@ namespace Presentation.ViewModels
 
             try
             {
-                // Викликаємо RegisterAsync
-                var user = await _userService.RegisterAsync(Email, Password);
+                // Викликаємо RegisterAsync з username
+                var user = await _userService.RegisterAsync(Email, Password, FullName);
                 
                 if (user == null)
                 {
