@@ -40,8 +40,12 @@ namespace Presentation
             builder.Services.AddTransient<MainViewModel>(sp => 
                 new MainViewModel(
                     sp.GetService<ISessionService>(),
-                    sp.GetService<IPomodoroService>()));
-            builder.Services.AddTransient<AddPlanViewModel>();
+                    sp.GetService<IPomodoroService>(),
+                    sp.GetService<IGoalService>()));
+            builder.Services.AddTransient<AddPlanViewModel>(sp =>
+                new AddPlanViewModel(
+                    sp.GetRequiredService<IGoalService>(),
+                    sp.GetRequiredService<ISessionService>()));
             builder.Services.AddTransient<StatisticsViewModel>();
 
             // Реєстрація Views

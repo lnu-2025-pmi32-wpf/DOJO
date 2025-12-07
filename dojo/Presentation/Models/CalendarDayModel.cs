@@ -10,6 +10,7 @@ namespace Presentation.Models
         public bool IsToday { get; set; }
         public bool IsSelected { get; set; }
         public bool HasEvents { get; set; }
+        public int EventCount { get; set; }
 
         public string TextColor =>
             IsToday ? "White" :
@@ -28,6 +29,9 @@ namespace Presentation.Models
         public FontAttributes FontAttributes =>
             IsToday ? FontAttributes.Bold :
             FontAttributes.None;
+            
+        public bool ShowEventDot => HasEvents && EventCount > 0;
+        public string EventDotColor => "#2196F3";
     }
 }
 

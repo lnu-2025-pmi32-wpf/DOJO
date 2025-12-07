@@ -11,6 +11,7 @@ namespace Presentation.ViewModels
     {
         private readonly ISessionService? _sessionService;
         private readonly IPomodoroService? _pomodoroService;
+        private readonly IGoalService? _goalService;
         private ViewMode _currentViewMode = ViewMode.Week;
         private DateTime _selectedDate = DateTime.Today;
         private EventModel? _selectedEvent;
@@ -27,10 +28,11 @@ namespace Presentation.ViewModels
         private int _completedCycles;
         private DateTime? _sessionStartTime;
 
-        public MainViewModel(ISessionService? sessionService = null, IPomodoroService? pomodoroService = default)
+        public MainViewModel(ISessionService? sessionService = null, IPomodoroService? pomodoroService = default, IGoalService? goalService = null)
         {
             _sessionService = sessionService;
             _pomodoroService = pomodoroService;
+            _goalService = goalService;
             Events = new ObservableCollection<EventModel>();
             TodoItems = new ObservableCollection<TodoItemModel>();
             
@@ -51,19 +53,21 @@ namespace Presentation.ViewModels
             PausePomodoroCommand = new RelayCommand(OnPausePomodoro);
             ResetPomodoroCommand = new RelayCommand(OnResetPomodoro);
             
-            // Calendar Commands
-            PreviousMonthCommand = new RelayCommand(OnPreviousMonth);
-            NextMonthCommand = new RelayCommand(OnNextMonth);
-            
-            LoadSampleData();
-            LoadUserSessionAsync();
-            
-            // Генеруємо календар на головному потоці після завантаження
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                GenerateCalendarDays();
-            });
-        }
+        // Calendar Commands
+        PreviousMonthCommand = new RelayCommand(OnPreviousMonth);
+        NextMonthCommand = new RelayCommand(OnNextMonth);
+        SelectDayCommand = new RelayCommand<CalendarDayModel>(OnSelectDay);
+        
+        LoadSampleData();
+        LoadUserSessionAsync();
+        LoadGoalsFromDatabase();
+        
+        // Генеруємо календар на головному потоці після завантаження
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            GenerateCalendarDays();
+        });
+    }
 
         // Properties
         public ObservableCollection<EventModel> Events { get; }
@@ -204,6 +208,7 @@ namespace Presentation.ViewModels
         
         public ICommand PreviousMonthCommand { get; }
         public ICommand NextMonthCommand { get; }
+        public ICommand SelectDayCommand { get; }
 
         // Command Handlers
         private async void OnAddPlan()
@@ -605,13 +610,17 @@ namespace Presentation.ViewModels
             {
                 var day = daysInPreviousMonth - i + 1;
                 var date = new DateTime(previousMonth.Year, previousMonth.Month, day);
+                var eventCount = GetEventCountForDate(date);
+                
                 CalendarDays.Add(new CalendarDayModel
                 {
                     Day = day,
                     Date = date,
                     IsCurrentMonth = false,
                     IsToday = false,
-                    IsSelected = false
+                    IsSelected = false,
+                    HasEvents = eventCount > 0,
+                    EventCount = eventCount
                 });
             }
             
@@ -619,13 +628,17 @@ namespace Presentation.ViewModels
             for (int day = 1; day <= lastDayOfMonth.Day; day++)
             {
                 var date = new DateTime(CalendarCurrentMonth.Year, CalendarCurrentMonth.Month, day);
+                var eventCount = GetEventCountForDate(date);
+                
                 CalendarDays.Add(new CalendarDayModel
                 {
                     Day = day,
                     Date = date,
                     IsCurrentMonth = true,
                     IsToday = date.Date == DateTime.Today,
-                    IsSelected = date.Date == SelectedDate.Date
+                    IsSelected = date.Date == SelectedDate.Date,
+                    HasEvents = eventCount > 0,
+                    EventCount = eventCount
                 });
             }
             
@@ -646,13 +659,17 @@ namespace Presentation.ViewModels
                 for (int day = 1; day <= daysToAdd; day++)
                 {
                     var date = new DateTime(nextMonth.Year, nextMonth.Month, day);
+                    var eventCount = GetEventCountForDate(date);
+                    
                     CalendarDays.Add(new CalendarDayModel
                     {
                         Day = day,
                         Date = date,
                         IsCurrentMonth = false,
                         IsToday = false,
-                        IsSelected = false
+                        IsSelected = false,
+                        HasEvents = eventCount > 0,
+                        EventCount = eventCount
                     });
                 }
             }
@@ -660,6 +677,13 @@ namespace Presentation.ViewModels
             System.Diagnostics.Debug.WriteLine($"Calendar generated: {CalendarDays.Count} days");
             OnPropertyChanged(nameof(CurrentMonthYear));
             OnPropertyChanged(nameof(CalendarDays));
+        }
+        
+        private int GetEventCountForDate(DateTime date)
+        {
+            return Events.Count(e => 
+                e.StartDateTime.Date <= date.Date && 
+                e.EndDateTime.Date >= date.Date);
         }
         
         private void OnPreviousMonth()
@@ -670,6 +694,83 @@ namespace Presentation.ViewModels
         private void OnNextMonth()
         {
             CalendarCurrentMonth = CalendarCurrentMonth.AddMonths(1);
+        }
+        
+        private void OnSelectDay(CalendarDayModel? selectedDay)
+        {
+            if (selectedDay == null) return;
+
+            // Знімаємо виділення з усіх днів
+            foreach (var day in CalendarDays)
+            {
+                day.IsSelected = false;
+            }
+
+            // Виділяємо вибраний день
+            selectedDay.IsSelected = true;
+            SelectedDate = selectedDay.Date;
+
+            // Оновлюємо календар
+            OnPropertyChanged(nameof(CalendarDays));
+        }
+        
+        private async void LoadGoalsFromDatabase()
+        {
+            if (_goalService == null || _sessionService == null)
+                return;
+
+            try
+            {
+                var session = await _sessionService.GetUserSessionAsync();
+                if (!session.HasValue)
+                    return;
+
+                var goals = await _goalService.GetGoalsByUserIdAsync(session.Value.UserId);
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    // Очищаємо тестові дані
+                    Events.Clear();
+
+                    // Додаємо реальні дані з БД
+                    foreach (var goal in goals)
+                    {
+                        if (goal.Deadline.HasValue)
+                        {
+                            // Розбираємо опис на назву та детальний опис
+                            var descriptionParts = goal.Description.Split('\n', 2);
+                            var title = descriptionParts.Length > 0 ? descriptionParts[0] : goal.Description;
+                            var description = descriptionParts.Length > 1 ? descriptionParts[1] : string.Empty;
+
+                            var eventModel = new EventModel
+                            {
+                                Id = goal.Id,
+                                Title = title,
+                                Description = description,
+                                StartDateTime = goal.CreatedAt,
+                                EndDateTime = goal.Deadline.Value,
+                                Priority = EventPriority.Normal,
+                                Color = Colors.Blue
+                            };
+
+                            Events.Add(eventModel);
+                        }
+                    }
+                    
+                    // Регенеруємо календар після завантаження подій
+                    GenerateCalendarDays();
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Помилка завантаження цілей: {ex.Message}");
+            }
+        }
+        
+        // Публічний метод для перезавантаження цілей (викликається після додавання нового плану)
+        public void ReloadGoals()
+        {
+            LoadGoalsFromDatabase();
         }
     }
 }

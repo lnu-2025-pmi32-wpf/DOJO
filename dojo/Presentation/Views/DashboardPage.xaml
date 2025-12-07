@@ -363,13 +363,24 @@
                                             StrokeThickness="1"
                                             HorizontalOptions="Fill"
                                             VerticalOptions="Fill">
-                                            <Label 
-                                                Text="{Binding Day}"
-                                                FontSize="12"
-                                                TextColor="{Binding TextColor}"
-                                                HorizontalOptions="Center"
-                                                VerticalOptions="Center"
-                                                FontAttributes="{Binding FontAttributes}"/>
+                                            <Grid>
+                                                <Label 
+                                                    Text="{Binding Day}"
+                                                    FontSize="12"
+                                                    TextColor="{Binding TextColor}"
+                                                    HorizontalOptions="Center"
+                                                    VerticalOptions="Center"
+                                                    FontAttributes="{Binding FontAttributes}"/>
+                                                <!-- Event Indicator Dot -->
+                                                <Ellipse 
+                                                    Fill="{Binding EventDotColor}"
+                                                    WidthRequest="4"
+                                                    HeightRequest="4"
+                                                    HorizontalOptions="Center"
+                                                    VerticalOptions="End"
+                                                    Margin="0,0,0,3"
+                                                    IsVisible="{Binding ShowEventDot}"/>
+                                            </Grid>
                                         </Border>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>

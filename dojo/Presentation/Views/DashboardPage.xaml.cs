@@ -13,6 +13,15 @@ namespace Presentation.Views
             BindingContext = viewModel;
         }
 
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            
+            // Перезавантажуємо дані при поверненні на сторінку
+            var viewModel = BindingContext as MainViewModel;
+            viewModel?.ReloadGoals();
+        }
+
         private async void OnProfileTapped(object sender, EventArgs e)
         {
             var viewModel = BindingContext as MainViewModel;
