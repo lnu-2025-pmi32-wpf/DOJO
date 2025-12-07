@@ -408,8 +408,16 @@ namespace Presentation.ViewModels
         // Pomodoro Timer Methods
         private void OnStartPomodoro()
         {
-            if (!IsTimerRunning)
+            if (IsTimerRunning)
             {
+                // Якщо таймер працює - ставимо на паузу
+                IsTimerRunning = false;
+                _pomodoroTimer?.Stop();
+                OnPropertyChanged(nameof(TimerButtonText));
+            }
+            else
+            {
+                // Якщо таймер не працює - запускаємо
                 IsTimerRunning = true;
                 
                 if (_sessionStartTime == null)
