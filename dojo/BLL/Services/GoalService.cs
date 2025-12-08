@@ -1,19 +1,10 @@
 using DAL;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using BLL.Interfaces;
 
 namespace BLL.Services
 {
-    public interface IGoalService
-    {
-        Task<IEnumerable<Goal>> GetAllGoalsAsync();
-        Task<IEnumerable<Goal>> GetGoalsByUserIdAsync(int userId);
-        Task<Goal?> GetGoalByIdAsync(int id);
-        Task AddGoalAsync(Goal goal);
-        Task UpdateGoalAsync(Goal goal);
-        Task DeleteGoalAsync(int id);
-    }
-
     public class GoalService : IGoalService
     {
         private readonly DojoDbContext _context;
@@ -66,4 +57,3 @@ namespace BLL.Services
         }
     }
 }
-

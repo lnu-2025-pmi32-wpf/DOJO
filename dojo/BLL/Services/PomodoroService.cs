@@ -1,19 +1,10 @@
 using DAL;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using BLL.Interfaces;
 
 namespace BLL.Services
 {
-    public interface IPomodoroService
-    {
-        Task<IEnumerable<Pomodoro>> GetAllPomodorosAsync();
-        Task<IEnumerable<Pomodoro>> GetPomodorosByTaskIdAsync(int taskId);
-        Task<Pomodoro?> GetPomodoroByIdAsync(int id);
-        Task AddPomodoroAsync(Pomodoro pomodoro);
-        Task UpdatePomodoroAsync(Pomodoro pomodoro);
-        Task DeletePomodoroAsync(int id);
-    }
-
     public class PomodoroService : IPomodoroService
     {
         private readonly DojoDbContext _context;
@@ -32,6 +23,13 @@ namespace BLL.Services
         {
             return await _context.Pomodoros
                 .Where(p => p.TaskId == taskId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Pomodoro>> GetPomodoroByUserIdAsync(int userId)
+        {
+            return await _context.Pomodoros
+                .Where(p => p.UserId == userId)
                 .ToListAsync();
         }
 
@@ -63,4 +61,3 @@ namespace BLL.Services
         }
     }
 }
-

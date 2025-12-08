@@ -1,19 +1,10 @@
 using DAL;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using BLL.Interfaces;
 
 namespace BLL.Services
 {
-    public interface IToDoTaskService
-    {
-        Task<IEnumerable<ToDoTask>> GetAllTasksAsync();
-        Task<IEnumerable<ToDoTask>> GetTasksByUserIdAsync(int userId);
-        Task<ToDoTask?> GetTaskByIdAsync(int id);
-        Task AddTaskAsync(ToDoTask task);
-        Task UpdateTaskAsync(ToDoTask task);
-        Task DeleteTaskAsync(int id);
-    }
-
     public class ToDoTaskService : IToDoTaskService
     {
         private readonly DojoDbContext _context;
@@ -64,4 +55,3 @@ namespace BLL.Services
         }
     }
 }
-

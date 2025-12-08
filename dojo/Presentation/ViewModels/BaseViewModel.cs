@@ -23,4 +23,3 @@ namespace Presentation.ViewModels
         }
     }
 }
-

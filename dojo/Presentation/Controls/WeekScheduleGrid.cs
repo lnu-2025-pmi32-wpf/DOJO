@@ -94,7 +94,7 @@ namespace Presentation.Controls
                 var dayDate = WeekStartDate.AddDays(day);
                 var headerBorder = new Border
                 {
-                    BackgroundColor = Color.FromArgb("#4CAF50"),
+                    BackgroundColor = Color.FromArgb("#FF69B4"),
                     Stroke = Color.FromArgb("#E0E0E0"),
                     StrokeThickness = 1,
                     Padding = new Thickness(10, 5)
@@ -110,7 +110,7 @@ namespace Presentation.Controls
                 headerStack.Children.Add(new Label
                 {
                     Text = _daysOfWeek[day],
-                    FontSize = 14,
+                    FontSize = 12, // більший розмір
                     FontAttributes = FontAttributes.Bold,
                     TextColor = Colors.White,
                     HorizontalOptions = LayoutOptions.Center
@@ -296,4 +296,3 @@ namespace Presentation.Controls
         }
     }
 }
-

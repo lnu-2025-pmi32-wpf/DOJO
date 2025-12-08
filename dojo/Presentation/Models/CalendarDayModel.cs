@@ -18,12 +18,12 @@ namespace Presentation.Models
             "Black";
 
         public string BackgroundColor =>
-            IsToday ? "#4CAF50" :
-            IsSelected ? "#E8F5E9" :
+            IsToday ? "#FF69B4" :
+            IsSelected ? "#FFE4EC" :
             "Transparent";
 
         public string BorderColor =>
-            IsSelected ? "#4CAF50" :
+            IsSelected ? "#FF69B4" :
             "Transparent";
 
         public FontAttributes FontAttributes =>
@@ -31,7 +31,6 @@ namespace Presentation.Models
             FontAttributes.None;
             
         public bool ShowEventDot => HasEvents && EventCount > 0;
-        public string EventDotColor => "#2196F3";
+        public string EventDotColor => "#FF1493";
     }
 }
-
