@@ -1,11 +1,17 @@
 using System.Windows.Input;
 using Presentation.Helpers;
 using Presentation.Models;
+using BLL.Services;
+using BLL.Interfaces;
+using DAL.Models;
 
 namespace Presentation.ViewModels
 {
     public class AddPlanViewModel : BaseViewModel
     {
+        private readonly IGoalService _goalService;
+        private readonly ISessionService _sessionService;
+        
         private string _title = string.Empty;
         private string _description = string.Empty;
         private DateTime _startDate = DateTime.Today;
@@ -18,8 +24,11 @@ namespace Presentation.ViewModels
         private string _titleError = string.Empty;
         private string _dateError = string.Empty;
 
-        public AddPlanViewModel()
+        public AddPlanViewModel(IGoalService goalService, ISessionService sessionService)
         {
+            _goalService = goalService;
+            _sessionService = sessionService;
+            
             SaveCommand = new AsyncRelayCommand(OnSave, CanSave);
             CancelCommand = new RelayCommand(OnCancel);
             AttachFileCommand = new AsyncRelayCommand(OnAttachFile);
@@ -136,31 +145,63 @@ namespace Presentation.ViewModels
             if (!ValidateTitle() || !ValidateDates())
                 return;
 
-            var startDateTime = StartDate.Date + StartTime;
-            var endDateTime = EndDate.Date + EndTime;
-
-            var newEvent = new EventModel
+            try
             {
-                Title = Title,
-                Description = Description,
-                StartDateTime = startDateTime,
-                EndDateTime = endDateTime,
-                Priority = Priority,
-                Color = Priority switch
+                // Отримуємо поточну сесію користувача
+                var session = await _sessionService.GetUserSessionAsync();
+                if (!session.HasValue)
                 {
-                    EventPriority.High => Colors.Red,
-                    EventPriority.Normal => Colors.Blue,
-                    EventPriority.Low => Colors.Green,
-                    _ => Colors.Blue
+                    await Shell.Current.DisplayAlert("Помилка", "Не вдалося визначити користувача", "OK");
+                    return;
                 }
-            };
 
-            // TODO: Save to database via service
+                var startDateTime = StartDate.Date + StartTime;
+                var endDateTime = EndDate.Date + EndTime;
+                
+                // Конвертуємо в UTC для PostgreSQL
+                var startDateTimeUtc = DateTime.SpecifyKind(startDateTime, DateTimeKind.Utc);
+                var endDateTimeUtc = DateTime.SpecifyKind(endDateTime, DateTimeKind.Utc);
 
-            await MainThread.InvokeOnMainThreadAsync(async () =>
-            {
+                // Зберігаємо час початку в описі у спеціальному форматі
+                var descriptionWithStartTime = $"START_TIME:{startDateTimeUtc:O}\n{Title}\n{Description}";
+
+                // Створюємо новий Goal для збереження в БД
+                var newGoal = new Goal
+                {
+                    UserId = session.Value.UserId,
+                    Description = descriptionWithStartTime,
+                    Deadline = endDateTimeUtc,
+                    Progress = 0
+                };
+
+                System.Diagnostics.Debug.WriteLine($"Зберігаємо план: UserId={newGoal.UserId}, Title={Title}, StartTime={startDateTime}, Deadline={endDateTime}");
+
+                // Зберігаємо в БД
+                await _goalService.AddGoalAsync(newGoal);
+
+                System.Diagnostics.Debug.WriteLine("План успішно збережено!");
+
+                // Відправляємо повідомлення про те, що потрібно перезавантажити плани
+                MessagingCenter.Send(this, "GoalAdded");
+
+                // Показуємо повідомлення про успіх
+                await Shell.Current.DisplayAlert(
+                    "✅ Успіх", 
+                    $"План '{Title}' успішно створено!", 
+                    "OK");
+
                 await Shell.Current.GoToAsync("..");
-            });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Помилка збереження: {ex}");
+                
+                var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                await Shell.Current.DisplayAlert(
+                    "Помилка", 
+                    $"Не вдалося зберегти план:\n{errorMessage}", 
+                    "OK");
+            }
         }
 
         private void OnCancel()

@@ -4,10 +4,10 @@ namespace Presentation.Views
 {
     public partial class AddPlanPage : ContentPage
     {
-        public AddPlanPage()
+        public AddPlanPage(AddPlanViewModel viewModel)
         {
             InitializeComponent();
-            BindingContext = new AddPlanViewModel();
+            BindingContext = viewModel;
         }
     }
 }

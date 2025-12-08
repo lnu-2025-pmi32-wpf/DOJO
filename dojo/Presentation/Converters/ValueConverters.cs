@@ -44,7 +44,7 @@ namespace Presentation.Converters
 
     public class BoolToColorConverter : IValueConverter
     {
-        public Color TrueColor { get; set; } = Colors.Green;
+        public Color TrueColor { get; set; } = Color.FromArgb("#FF69B4");
         public Color FalseColor { get; set; } = Colors.Gray;
 
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -77,7 +77,7 @@ namespace Presentation.Converters
         {
             if (value?.ToString() == parameter?.ToString())
             {
-                return Color.FromArgb("#4CAF50");
+                return Color.FromArgb("#FF69B4");
             }
             return Colors.Transparent;
         }
@@ -94,7 +94,7 @@ namespace Presentation.Converters
         {
             // true = success (green), false = error (red)
             return value is bool b && b 
-                ? Color.FromArgb("#4CAF50") // зелений для успіху
+                ? Color.FromArgb("#FF69B4") // рожевий для успіху
                 : Color.FromArgb("#F44336"); // червоний для помилки
         }
 
@@ -104,4 +104,3 @@ namespace Presentation.Converters
         }
     }
 }
-

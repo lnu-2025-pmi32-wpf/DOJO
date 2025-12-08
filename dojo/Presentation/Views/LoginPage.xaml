@@ -123,7 +123,7 @@
                 <ActivityIndicator 
                     IsRunning="{Binding IsLoading}"
                     IsVisible="{Binding IsLoading}"
-                    Color="#4CAF50"
+                    Color="{StaticResource DarkPink}"
                     HeightRequest="30"/>
 
                 <!-- Register Link -->
@@ -160,4 +160,3 @@
     </Grid>
 
 </ContentPage>
-

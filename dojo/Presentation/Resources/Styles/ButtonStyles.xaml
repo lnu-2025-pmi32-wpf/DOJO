@@ -3,9 +3,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- Primary Green Button Style -->
+    <!-- Primary HotPink Button Style -->
     <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-        <Setter Property="BackgroundColor" Value="#4CAF50" />
+        <Setter Property="BackgroundColor" Value="{StaticResource HotPink}" />
         <Setter Property="TextColor" Value="White" />
         <Setter Property="FontSize" Value="15" />
         <Setter Property="FontAttributes" Value="Bold" />
@@ -20,19 +20,19 @@
                 <VisualStateGroup x:Name="CommonStates">
                     <VisualState x:Name="Normal">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#4CAF50" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource HotPink}" />
                             <Setter Property="Scale" Value="1.0" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#45a049" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource DeepPink}" />
                             <Setter Property="Scale" Value="1.02" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Pressed">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#3d8b40" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource Raspberry}" />
                             <Setter Property="Scale" Value="0.98" />
                         </VisualState.Setters>
                     </VisualState>
@@ -49,7 +49,7 @@
 
     <!-- Secondary Blue Button Style -->
     <Style x:Key="SecondaryButtonStyle" TargetType="Button">
-        <Setter Property="BackgroundColor" Value="#2196F3" />
+        <Setter Property="BackgroundColor" Value="{StaticResource MediumPink}" />
         <Setter Property="TextColor" Value="White" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="FontAttributes" Value="Bold" />
@@ -63,19 +63,19 @@
                 <VisualStateGroup x:Name="CommonStates">
                     <VisualState x:Name="Normal">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#2196F3" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource MediumPink}" />
                             <Setter Property="Scale" Value="1.0" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#1976D2" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource DarkPink}" />
                             <Setter Property="Scale" Value="1.02" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Pressed">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#0D47A1" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource SoftPink}" />
                             <Setter Property="Scale" Value="0.98" />
                         </VisualState.Setters>
                     </VisualState>
@@ -87,11 +87,11 @@
     <!-- Outline Button Style -->
     <Style x:Key="OutlineButtonStyle" TargetType="Button">
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="#333" />
+        <Setter Property="TextColor" Value="{StaticResource DarkPink}" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="CornerRadius" Value="5" />
         <Setter Property="Padding" Value="12,8" />
-        <Setter Property="BorderColor" Value="#DDD" />
+        <Setter Property="BorderColor" Value="{StaticResource MediumPink}" />
         <Setter Property="BorderWidth" Value="1" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
@@ -99,21 +99,21 @@
                     <VisualState x:Name="Normal">
                         <VisualState.Setters>
                             <Setter Property="BackgroundColor" Value="Transparent" />
-                            <Setter Property="BorderColor" Value="#DDD" />
+                            <Setter Property="BorderColor" Value="{StaticResource MediumPink}" />
                             <Setter Property="Scale" Value="1.0" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#F5F5F5" />
-                            <Setter Property="BorderColor" Value="#4CAF50" />
-                            <Setter Property="TextColor" Value="#4CAF50" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource SoftPink}" />
+                            <Setter Property="BorderColor" Value="{StaticResource DarkPink}" />
+                            <Setter Property="TextColor" Value="{StaticResource DarkPink}" />
                             <Setter Property="Scale" Value="1.02" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Pressed">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#E8E8E8" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource MediumPink}" />
                             <Setter Property="Scale" Value="0.98" />
                         </VisualState.Setters>
                     </VisualState>
@@ -143,7 +143,7 @@
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
                             <Setter Property="BackgroundColor" Value="#E8E8E8" />
-                            <Setter Property="TextColor" Value="#4CAF50" />
+                            <Setter Property="TextColor" Value="{StaticResource HotPink}" />
                             <Setter Property="Scale" Value="1.1" />
                         </VisualState.Setters>
                     </VisualState>
@@ -210,8 +210,8 @@
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#E8F5E9" />
-                            <Setter Property="TextColor" Value="#4CAF50" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource HotPink}" />
+                            <Setter Property="TextColor" Value="{StaticResource HotPink}" />
                             <Setter Property="Scale" Value="1.03" />
                         </VisualState.Setters>
                     </VisualState>
@@ -228,7 +228,7 @@
     <!-- Add Button Style (+ Додати план, + Додати завдання) -->
     <Style x:Key="AddButtonStyle" TargetType="Button">
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="#4CAF50" />
+        <Setter Property="TextColor" Value="{StaticResource DarkPink}" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="Padding" Value="0" />
@@ -238,13 +238,13 @@
                 <VisualStateGroup x:Name="CommonStates">
                     <VisualState x:Name="Normal">
                         <VisualState.Setters>
-                            <Setter Property="TextColor" Value="#4CAF50" />
+                            <Setter Property="TextColor" Value="{StaticResource DarkPink}" />
                             <Setter Property="Scale" Value="1.0" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="TextColor" Value="#45a049" />
+                            <Setter Property="TextColor" Value="{StaticResource MediumPink}" />
                             <Setter Property="Scale" Value="1.05" />
                             <Setter Property="Opacity" Value="0.8" />
                         </VisualState.Setters>
@@ -261,7 +261,7 @@
 
     <!-- Link/Text Button Style (для "Зареєструватися", "Забули пароль?" тощо) -->
     <Style x:Key="LinkButtonStyle" TargetType="Label">
-        <Setter Property="TextColor" Value="#4CAF50" />
+        <Setter Property="TextColor" Value="{StaticResource HotPink}" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="VisualStateManager.VisualStateGroups">
@@ -269,14 +269,14 @@
                 <VisualStateGroup x:Name="CommonStates">
                     <VisualState x:Name="Normal">
                         <VisualState.Setters>
-                            <Setter Property="TextColor" Value="#4CAF50" />
+                            <Setter Property="TextColor" Value="{StaticResource HotPink}" />
                             <Setter Property="Scale" Value="1.0" />
                             <Setter Property="Opacity" Value="1.0" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="TextColor" Value="#45a049" />
+                            <Setter Property="TextColor" Value="{StaticResource DeepPink}" />
                             <Setter Property="TextDecorations" Value="Underline" />
                             <Setter Property="Scale" Value="1.02" />
                         </VisualState.Setters>
@@ -332,9 +332,9 @@
 
     <!-- Profile Border Button Style -->
     <Style x:Key="ProfileBorderStyle" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="#4CAF50" />
+        <Setter Property="BackgroundColor" Value="{StaticResource MediumPink}" />
         <Setter Property="StrokeThickness" Value="2" />
-        <Setter Property="Stroke" Value="#4CAF50" />
+        <Setter Property="Stroke" Value="{StaticResource DarkPink}" />
         <Setter Property="HeightRequest" Value="40" />
         <Setter Property="WidthRequest" Value="40" />
         <Setter Property="StrokeShape" Value="RoundRectangle 20" />
@@ -343,15 +343,15 @@
                 <VisualStateGroup x:Name="CommonStates">
                     <VisualState x:Name="Normal">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#4CAF50" />
-                            <Setter Property="Stroke" Value="#4CAF50" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource MediumPink}" />
+                            <Setter Property="Stroke" Value="{StaticResource DarkPink}" />
                             <Setter Property="Scale" Value="1.0" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="#45a049" />
-                            <Setter Property="Stroke" Value="#45a049" />
+                            <Setter Property="BackgroundColor" Value="{StaticResource DarkPink}" />
+                            <Setter Property="Stroke" Value="{StaticResource DarkPink}" />
                             <Setter Property="Scale" Value="1.1" />
                         </VisualState.Setters>
                     </VisualState>

@@ -23,7 +23,11 @@ namespace Presentation
                 });
 
             // Підключення до бази даних
+<<<<<<< HEAD
             string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=postgre2006";
+=======
+            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=14122005Ad";
+>>>>>>> ab64bacce2f7b7594026457460e4ff9f97eb6423
             builder.Services.AddDbContext<DojoDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
@@ -40,8 +44,12 @@ namespace Presentation
             builder.Services.AddTransient<MainViewModel>(sp => 
                 new MainViewModel(
                     sp.GetService<ISessionService>(),
-                    sp.GetService<IPomodoroService>()));
-            builder.Services.AddTransient<AddPlanViewModel>();
+                    sp.GetService<IPomodoroService>(),
+                    sp.GetService<IGoalService>()));
+            builder.Services.AddTransient<AddPlanViewModel>(sp =>
+                new AddPlanViewModel(
+                    sp.GetRequiredService<IGoalService>(),
+                    sp.GetRequiredService<ISessionService>()));
             builder.Services.AddTransient<StatisticsViewModel>();
 
             // Реєстрація Views
