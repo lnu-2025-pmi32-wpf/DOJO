@@ -164,6 +164,19 @@
                             WeekStartDate="{Binding WeekStartDate}"/>
                     </Border>
 
+                    <!-- Month View Grid -->
+                    <Border 
+                        BackgroundColor="White"
+                        Stroke="#E0E0E0"
+                        StrokeThickness="1"
+                        Padding="10"
+                        StrokeShape="RoundRectangle 8"
+                        IsVisible="{Binding CurrentViewMode, Converter={StaticResource ViewModeToVisibilityConverter}, ConverterParameter=Month}">
+                        <controls:MonthViewGrid 
+                            Events="{Binding Events}"
+                            SelectedDate="{Binding SelectedDate}"/>
+                    </Border>
+
                     <!-- Bottom Cards Row -->
                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="15">
                         
