@@ -52,6 +52,7 @@ namespace Presentation.Views
                         _viewModel.LogoutCommand.Execute(null);
                     }
                 }
+                // Якщо користувач вибрав email - нічого не робимо, просто показуємо інформацію
             }
         }
 

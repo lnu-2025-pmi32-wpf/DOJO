@@ -2,12 +2,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Windows.Input;
 using Presentation.Helpers;
 using BLL.Interfaces;
+using Presentation.Views;
 
 namespace Presentation.ViewModels
 {
     public class RegisterViewModel : BaseViewModel
     {
         private readonly IUserService _userService;
+        private readonly ISessionService _sessionService;
         private string _email = string.Empty;
         private string _password = string.Empty;
         private string _confirmPassword = string.Empty;
@@ -20,9 +22,10 @@ namespace Presentation.ViewModels
         private string _notificationMessage = string.Empty;
         private bool _isNotificationSuccess;
 
-        public RegisterViewModel(IUserService userService)
+        public RegisterViewModel(IUserService userService, ISessionService sessionService)
         {
             _userService = userService;
+            _sessionService = sessionService;
             RegisterCommand = new AsyncRelayCommand(OnRegister, CanRegister);
             BackToLoginCommand = new RelayCommand(OnBackToLogin);
         }
@@ -169,19 +172,34 @@ namespace Presentation.ViewModels
                 }
                 
                 // Успішна реєстрація
-                NotificationMessage = "Реєстрація пройшла успішно! Тепер ви можете увійти.";
+                NotificationMessage = "Реєстрація пройшла успішно! Вхід в систему...";
                 IsNotificationSuccess = true;
 
+                // Зберігаємо сесію користувача
+                await _sessionService.SaveUserSessionAsync(user.Email, user.Id, user.Username);
+
                 // Затримка щоб показати повідомлення
-                await Task.Delay(2000);
+                await Task.Delay(500);
                 
-                // Navigate back to login
-                OnBackToLogin();
+                // Встановлюємо IsLoading = false перед навігацією
+                IsLoading = false;
+                
+                // Перехід на Dashboard - простий підхід як в LoginPage
+                var window = Application.Current?.Windows[0];
+                if (window != null)
+                {
+                    window.Page = new AppShell();
+                    // Даємо час Shell ініціалізуватися
+                    await Task.Delay(100);
+                    await Shell.Current.GoToAsync($"///{nameof(DashboardPage)}");
+                }
+                return; // Виходимо щоб не виконувати finally IsLoading = false
             }
             catch (Exception ex)
             {
                 NotificationMessage = $"Помилка: {ex.Message}";
                 IsNotificationSuccess = false;
+                System.Diagnostics.Debug.WriteLine($"RegisterViewModel Error: {ex.Message}\n{ex.StackTrace}");
             }
             finally
             {

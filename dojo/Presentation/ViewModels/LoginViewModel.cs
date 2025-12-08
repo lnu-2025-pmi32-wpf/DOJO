@@ -135,13 +135,18 @@ namespace Presentation.ViewModels
                 // Невелика затримка щоб показати повідомлення
                 await Task.Delay(500);
                 
-                // Navigate to dashboard page - використовуємо відносний маршрут
+                // Встановлюємо IsLoading = false перед навігацією
+                IsLoading = false;
+                
+                // Navigate to dashboard page
                 await Shell.Current.GoToAsync($"/{nameof(DashboardPage)}");
+                return; // Виходимо щоб не виконувати finally IsLoading = false
             }
             catch (Exception ex)
             {
                 NotificationMessage = $"Помилка: {ex.Message}";
                 IsNotificationSuccess = false;
+                System.Diagnostics.Debug.WriteLine($"LoginViewModel Error: {ex.Message}\n{ex.StackTrace}");
             }
             finally
             {
