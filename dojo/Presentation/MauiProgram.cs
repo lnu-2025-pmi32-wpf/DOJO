@@ -23,7 +23,7 @@ namespace Presentation
                 });
 
             // Підключення до бази даних
-            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=24062006";
+            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=";
             builder.Services.AddDbContext<DojoDbContext>(options =>
                 options.UseNpgsql(connectionString));
 

@@ -26,7 +26,7 @@ namespace BLL.Services
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Pomodoro>> GetPomodoroByUserIdAsync(int userId)
+        public async Task<IEnumerable<Pomodoro>> GetPomodorosByUserIdAsync(int userId)
         {
             return await _context.Pomodoros
                 .Where(p => p.UserId == userId)
