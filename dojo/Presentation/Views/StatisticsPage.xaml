@@ -27,7 +27,7 @@
                 <Border 
                     Grid.Column="0"
                     BackgroundColor="White"
-                    Stroke="#4CAF50"
+                    Stroke="{StaticResource HotPink}"
                     StrokeThickness="2"
                     Padding="20"
                     StrokeShape="RoundRectangle 12">
@@ -35,7 +35,7 @@
                         <Label 
                             Text="✓"
                             FontSize="32"
-                            TextColor="#4CAF50"
+                            TextColor="{StaticResource HotPink}"
                             HorizontalOptions="Center"/>
                         <Label 
                             Text="{Binding CompletedTasks}"
@@ -55,7 +55,7 @@
                 <Border 
                     Grid.Column="1"
                     BackgroundColor="White"
-                    Stroke="#2196F3"
+                    Stroke="{StaticResource DeepPink}"
                     StrokeThickness="2"
                     Padding="20"
                     StrokeShape="RoundRectangle 12">
@@ -159,11 +159,11 @@
                                 Text="{Binding CompletionRate}"
                                 FontSize="16"
                                 FontAttributes="Bold"
-                                TextColor="#4CAF50"/>
+                                TextColor="{StaticResource DarkPink}"/>
                         </HorizontalStackLayout>
                         <ProgressBar 
                             Progress="{Binding CompletionProgress}"
-                            ProgressColor="#4CAF50"
+                            ProgressColor="{StaticResource DeepPink}"
                             HeightRequest="12"/>
                     </VerticalStackLayout>
 
@@ -179,11 +179,11 @@
                                 Text="{Binding ProductivityText}"
                                 FontSize="16"
                                 FontAttributes="Bold"
-                                TextColor="#2196F3"/>
+                                TextColor="{StaticResource DeepPink}"/>
                         </HorizontalStackLayout>
                         <ProgressBar 
                             Progress="{Binding ProductivityProgress}"
-                            ProgressColor="#2196F3"
+                            ProgressColor="{StaticResource DeepPink}"
                             HeightRequest="12"/>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
@@ -246,7 +246,7 @@
                             BackgroundColor="#FFF3E0"
                             Padding="15"
                             StrokeShape="RoundRectangle 8"
-                            Stroke="#FFB74D">
+                            Stroke="{StaticResource HotPink}">
                             <VerticalStackLayout Spacing="5">
                                 <Label 
                                     Text="🌟"
@@ -256,7 +256,7 @@
                                     Text="Перше завдання"
                                     FontSize="14"
                                     FontAttributes="Bold"
-                                    TextColor="#FF6F00"
+                                    TextColor="{StaticResource Raspberry}"
                                     HorizontalOptions="Center"/>
                                 <Label 
                                     Text="Виконано"
@@ -268,10 +268,10 @@
 
                         <Border 
                             Grid.Column="1"
-                            BackgroundColor="#E8F5E9"
+                            BackgroundColor="{StaticResource SoftPink}"
                             Padding="15"
                             StrokeShape="RoundRectangle 8"
-                            Stroke="#4CAF50">
+                            Stroke="{StaticResource HotPink}">
                             <VerticalStackLayout Spacing="5">
                                 <Label 
                                     Text="💪"
@@ -324,4 +324,3 @@
     </ScrollView>
 
 </ContentPage>
-

@@ -182,7 +182,7 @@
                 <ActivityIndicator 
                     IsRunning="{Binding IsLoading}"
                     IsVisible="{Binding IsLoading}"
-                    Color="#4CAF50"
+                    Color="{StaticResource DarkPink}"
                     HeightRequest="30"/>
 
                 <!-- Back to Login Link -->
@@ -208,4 +208,3 @@
     </Grid>
 
 </ContentPage>
-
