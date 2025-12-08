@@ -101,19 +101,22 @@
                                 Command="{Binding ChangeModeCommand}"
                                 CommandParameter="Day"
                                 Style="{StaticResource ViewModeButtonStyle}"
-                                BackgroundColor="{Binding CurrentViewMode, Converter={StaticResource ViewModeToColorConverter}, ConverterParameter=Day}"/>
+                                BackgroundColor="{Binding CurrentViewMode, Converter={StaticResource ViewModeToColorConverter}, ConverterParameter=Day}"
+                                TextColor="{Binding CurrentViewMode, Converter={StaticResource ViewModeToTextColorConverter}, ConverterParameter=Day}"/>
                             <Button 
                                 Text="Тиждень"
                                 Command="{Binding ChangeModeCommand}"
                                 CommandParameter="Week"
                                 Style="{StaticResource ViewModeButtonStyle}"
-                                BackgroundColor="{StaticResource HotPink}"
-                                TextColor="White"/>
+                                BackgroundColor="{Binding CurrentViewMode, Converter={StaticResource ViewModeToColorConverter}, ConverterParameter=Week}"
+                                TextColor="{Binding CurrentViewMode, Converter={StaticResource ViewModeToTextColorConverter}, ConverterParameter=Week}"/>
                             <Button 
                                 Text="Місяць"
                                 Command="{Binding ChangeModeCommand}"
                                 CommandParameter="Month"
-                                Style="{StaticResource ViewModeButtonStyle}"/>
+                                Style="{StaticResource ViewModeButtonStyle}"
+                                BackgroundColor="{Binding CurrentViewMode, Converter={StaticResource ViewModeToColorConverter}, ConverterParameter=Month}"
+                                TextColor="{Binding CurrentViewMode, Converter={StaticResource ViewModeToTextColorConverter}, ConverterParameter=Month}"/>
                         </HorizontalStackLayout>
                     </Border>
                     

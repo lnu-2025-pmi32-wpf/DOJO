@@ -210,8 +210,7 @@
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="BackgroundColor" Value="{StaticResource HotPink}" />
-                            <Setter Property="TextColor" Value="{StaticResource HotPink}" />
+                            <Setter Property="Opacity" Value="0.8" />
                             <Setter Property="Scale" Value="1.03" />
                         </VisualState.Setters>
                     </VisualState>

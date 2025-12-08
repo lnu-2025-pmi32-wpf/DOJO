@@ -88,6 +88,23 @@ namespace Presentation.Converters
         }
     }
 
+    public class ViewModeToTextColorConverter : IValueConverter
+    {
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value?.ToString() == parameter?.ToString())
+            {
+                return Colors.White;
+            }
+            return Color.FromArgb("#333333");
+        }
+
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class BoolToNotificationColorConverter : IValueConverter
     {
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
