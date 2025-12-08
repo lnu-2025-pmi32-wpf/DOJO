@@ -134,6 +134,22 @@
             <ScrollView>
                 <VerticalStackLayout Spacing="15">
                     
+                    <!-- Day Schedule Grid -->
+                    <Border 
+                        BackgroundColor="White"
+                        Stroke="#E0E0E0"
+                        StrokeThickness="1"
+                        Padding="0"
+                        StrokeShape="RoundRectangle 8"
+                        HeightRequest="1440"
+                        IsVisible="{Binding CurrentViewMode, Converter={StaticResource ViewModeToVisibilityConverter}, ConverterParameter=Day}">
+                        <ScrollView>
+                            <controls:DayScheduleGrid 
+                                Events="{Binding Events}"
+                                SelectedDate="{Binding SelectedDate}"/>
+                        </ScrollView>
+                    </Border>
+                    
                     <!-- Week Schedule Grid -->
                     <Border 
                         BackgroundColor="White"
@@ -141,7 +157,8 @@
                         StrokeThickness="1"
                         Padding="0"
                         StrokeShape="RoundRectangle 8"
-                        HeightRequest="600">
+                        HeightRequest="600"
+                        IsVisible="{Binding CurrentViewMode, Converter={StaticResource ViewModeToVisibilityConverter}, ConverterParameter=Week}">
                         <controls:WeekScheduleGrid 
                             Events="{Binding Events}"
                             WeekStartDate="{Binding WeekStartDate}"/>
