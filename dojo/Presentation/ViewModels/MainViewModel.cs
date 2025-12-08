@@ -416,7 +416,6 @@ namespace Presentation.ViewModels
                 Color = Colors.Blue
             });
 
-            // Sample todos
             TodoItems.Add(new TodoItemModel
             {
                 Id = 1,
@@ -439,13 +438,11 @@ namespace Presentation.ViewModels
         public void SetUserInfo(string email, string? username = null)
         {
             UserEmail = email;
-            
-            // Використовуємо username якщо він є, інакше беремо частину email
+
             if (!string.IsNullOrEmpty(username))
             {
                 UserName = username;
                 
-                // Обчислюємо ініціали з username
                 var parts = username.Split(new[] { ' ', '.', '_' }, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length >= 2)
                 {
@@ -458,7 +455,6 @@ namespace Presentation.ViewModels
             }
             else
             {
-                // Якщо username немає, використовуємо email
                 var emailPart = email.Split('@')[0];
                 UserName = emailPart;
                 

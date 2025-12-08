@@ -15,6 +15,10 @@ namespace Presentation.Views
             _viewModel = viewModel;
             BindingContext = _viewModel;
             
+            // Підписуємося на події контролів
+            WeekSchedule.DayTapped += OnDayTappedInCalendar;
+            MonthView.DayTapped += OnDayTappedInCalendar;
+            
             System.Diagnostics.Debug.WriteLine("DashboardPage: Створено");
         }
 
@@ -65,6 +69,15 @@ namespace Presentation.Views
                 {
                     _viewModel.SelectedDate = selectedDay.Date;
                 }
+            }
+        }
+
+        private void OnDayTappedInCalendar(object? sender, DateTime selectedDate)
+        {
+            if (_viewModel != null)
+            {
+                _viewModel.SelectedDate = selectedDate;
+                _viewModel.CurrentViewMode = ViewMode.Day;
             }
         }
     }

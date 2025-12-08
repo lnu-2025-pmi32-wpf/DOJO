@@ -16,6 +16,8 @@ namespace Presentation.Controls
         public static readonly BindableProperty EventsProperty =
             BindableProperty.Create(nameof(Events), typeof(ObservableCollection<EventModel>), typeof(MonthViewGrid), null, propertyChanged: OnEventsChanged);
 
+        public event EventHandler<DateTime>? DayTapped;
+
         public DateTime SelectedDate
         {
             get => (DateTime)GetValue(SelectedDateProperty);
@@ -214,6 +216,7 @@ namespace Presentation.Controls
             tapGesture.Tapped += (s, e) =>
             {
                 SelectedDate = date;
+                DayTapped?.Invoke(this, date);
             };
             border.GestureRecognizers.Add(tapGesture);
 

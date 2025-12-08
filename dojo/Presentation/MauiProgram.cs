@@ -22,20 +22,16 @@ namespace Presentation
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            // Підключення до бази даних
-
             string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=14122005Ad";
             builder.Services.AddDbContext<DojoDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
-            // Реєстрація сервісів
             builder.Services.AddSingleton<ISessionService, SessionService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
             builder.Services.AddScoped<IGoalService, GoalService>();
             builder.Services.AddScoped<IPomodoroService, PomodoroService>();
 
-            // Реєстрація ViewModels
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<RegisterViewModel>();
             builder.Services.AddTransient<MainViewModel>(sp => 
@@ -49,7 +45,6 @@ namespace Presentation
                     sp.GetRequiredService<ISessionService>()));
             builder.Services.AddTransient<StatisticsViewModel>();
 
-            // Реєстрація Views
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<DashboardPage>();

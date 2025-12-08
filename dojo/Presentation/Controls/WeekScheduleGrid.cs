@@ -11,6 +11,8 @@ namespace Presentation.Controls
         private readonly int _endHour = 24;
         private readonly int _hourHeight = 60;
 
+        public event EventHandler<DateTime>? DayTapped;
+
         public static readonly BindableProperty EventsProperty =
             BindableProperty.Create(nameof(Events), typeof(ObservableCollection<EventModel>), typeof(WeekScheduleGrid), 
                 new ObservableCollection<EventModel>(), propertyChanged: OnEventsChanged);
@@ -126,6 +128,12 @@ namespace Presentation.Controls
                 });
 
                 headerBorder.Content = headerStack;
+
+                // Add tap gesture to day header
+                var headerTapGesture = new TapGestureRecognizer();
+                int capturedDay = day;
+                headerTapGesture.Tapped += (s, e) => DayTapped?.Invoke(this, WeekStartDate.AddDays(capturedDay));
+                headerBorder.GestureRecognizers.Add(headerTapGesture);
 
                 Grid.SetRow(headerBorder, 0);
                 Grid.SetColumn(headerBorder, day + 1);
@@ -260,7 +268,7 @@ namespace Presentation.Controls
         private void OnCellTapped(int day, int hour)
         {
             var selectedDate = WeekStartDate.AddDays(day).AddHours(hour);
-            // Trigger event or command to add new event
+            DayTapped?.Invoke(this, selectedDate.Date);
         }
 
         private static void OnEventsChanged(BindableObject bindable, object oldValue, object newValue)
