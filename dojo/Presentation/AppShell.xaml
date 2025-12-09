@@ -9,8 +9,8 @@
     FlyoutBehavior="Disabled">
 
     <ShellContent
+        x:Name="DashboardContent"
         Title="Dashboard"
-        ContentTemplate="{DataTemplate views:DashboardPage}"
         Route="DashboardPage" />
 
 </Shell>

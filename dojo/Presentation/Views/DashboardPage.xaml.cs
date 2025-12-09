@@ -40,45 +40,8 @@ namespace Presentation.Views
                     System.Diagnostics.Debug.WriteLine("DashboardPage: MonthView підписано");
                 }
                 
-                // Підписуємося на повідомлення про оновлення планів
-                MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalAdded", (sender) =>
-                {
-                    System.Diagnostics.Debug.WriteLine("DashboardPage: Отримано GoalAdded, оновлюємо дані");
-                    try
-                    {
-                        _viewModel?.RefreshData();
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"DashboardPage: Помилка при RefreshData після GoalAdded - {ex.Message}");
-                    }
-                });
-                
-                MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalUpdated", (sender) =>
-                {
-                    System.Diagnostics.Debug.WriteLine("DashboardPage: Отримано GoalUpdated, оновлюємо дані");
-                    try
-                    {
-                        _viewModel?.RefreshData();
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"DashboardPage: Помилка при RefreshData після GoalUpdated - {ex.Message}");
-                    }
-                });
-                
-                MessagingCenter.Subscribe<ViewPlanViewModel>(this, "GoalDeleted", (sender) =>
-                {
-                    System.Diagnostics.Debug.WriteLine("DashboardPage: Отримано GoalDeleted, оновлюємо дані");
-                    try
-                    {
-                        _viewModel?.RefreshData();
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"DashboardPage: Помилка при RefreshData після GoalDeleted - {ex.Message}");
-                    }
-                });
+                // MessagingCenter підписки перенесено в MainViewModel.Initialize()
+                // щоб уникнути дублювання підписок
                 
                 System.Diagnostics.Debug.WriteLine("DashboardPage: Конструктор завершено успішно");
             }
@@ -187,11 +150,7 @@ namespace Presentation.Views
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            
-            // Відписуємося від повідомлень
-            MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalAdded");
-            MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalUpdated");
-            MessagingCenter.Unsubscribe<ViewPlanViewModel>(this, "GoalDeleted");
+            // MessagingCenter підписки керуються в MainViewModel
         }
     }
 }

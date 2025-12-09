@@ -29,6 +29,7 @@ namespace Presentation.ViewModels
         private int _completedCycles;
         private DateTime? _sessionStartTime;
         private bool _isLoadingGoals = false;
+        private bool _isMessagingSubscribed = false;
 
         public MainViewModel(ISessionService? sessionService = null, IPomodoroService? pomodoroService = null, IServiceProvider? serviceProvider = null)
         {
@@ -63,6 +64,17 @@ namespace Presentation.ViewModels
     public void Initialize()
     {
         System.Diagnostics.Debug.WriteLine("MainViewModel: Initialize викликано");
+        
+        // Відписуємося від старих підписок якщо вони є
+        if (_isMessagingSubscribed)
+        {
+            System.Diagnostics.Debug.WriteLine("MainViewModel: Відписуємося від старих підписок");
+            MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalAdded");
+            MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalUpdated");
+            MessagingCenter.Unsubscribe<ViewPlanViewModel>(this, "GoalDeleted");
+        }
+        
+        _isMessagingSubscribed = true;
         
         MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalAdded", (sender) =>
         {
