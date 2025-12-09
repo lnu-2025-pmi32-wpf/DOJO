@@ -43,6 +43,10 @@ namespace DAL
                 eb.Property(g => g.EndTime)
                   .HasColumnName("end_time")
                   .HasColumnType("timestamp without time zone");
+                  
+                eb.Property(g => g.Priority)
+                  .HasColumnName("priority")
+                  .HasDefaultValue(1);
                 
                 eb.Property(g => g.CreatedAt)
                   .HasColumnName("created_at")
@@ -99,6 +103,18 @@ namespace DAL
             {
                 eb.Property(a => a.FilePath).HasColumnName("file_path");
                 eb.Property(a => a.FileName).HasColumnName("file_name");
+                eb.Property(a => a.TaskId).HasColumnName("task_id");
+                eb.Property(a => a.GoalId).HasColumnName("goal_id");
+                
+                eb.HasOne(a => a.Task)
+                  .WithMany()
+                  .HasForeignKey(a => a.TaskId)
+                  .OnDelete(DeleteBehavior.Cascade);
+                  
+                eb.HasOne(a => a.Goal)
+                  .WithMany()
+                  .HasForeignKey(a => a.GoalId)
+                  .OnDelete(DeleteBehavior.Cascade);
             });
             
             foreach (var entity in modelBuilder.Model.GetEntityTypes())

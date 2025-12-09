@@ -37,8 +37,25 @@ namespace Presentation.Controls
         {
             if (bindable is DayScheduleGrid grid)
             {
+                // Відписуємося від старої колекції
+                if (oldValue is ObservableCollection<EventModel> oldCollection)
+                {
+                    oldCollection.CollectionChanged -= grid.OnEventsCollectionChanged;
+                }
+
+                // Підписуємося на нову колекцію
+                if (newValue is ObservableCollection<EventModel> newCollection)
+                {
+                    newCollection.CollectionChanged += grid.OnEventsCollectionChanged;
+                }
+
                 grid.RenderEvents();
             }
+        }
+
+        private void OnEventsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            RenderEvents();
         }
 
         private static void OnSelectedDateChanged(BindableObject bindable, object oldValue, object newValue)

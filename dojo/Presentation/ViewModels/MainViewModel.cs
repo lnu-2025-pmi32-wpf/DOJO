@@ -5,6 +5,7 @@ using Presentation.Models;
 using BLL.Interfaces;
 using BLL.Services;
 using Microsoft.Maui.Controls;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Presentation.ViewModels
 {
@@ -12,7 +13,7 @@ namespace Presentation.ViewModels
     {
         private readonly ISessionService? _sessionService;
         private readonly IPomodoroService? _pomodoroService;
-        private readonly IGoalService? _goalService;
+        private readonly IServiceProvider? _serviceProvider;
         private ViewMode _currentViewMode = ViewMode.Week;
         private DateTime _selectedDate = DateTime.Today;
         private EventModel? _selectedEvent;
@@ -29,11 +30,11 @@ namespace Presentation.ViewModels
         private DateTime? _sessionStartTime;
         private bool _isLoadingGoals = false;
 
-        public MainViewModel(ISessionService? sessionService = null, IPomodoroService? pomodoroService = default, IGoalService? goalService = null)
+        public MainViewModel(ISessionService? sessionService = null, IPomodoroService? pomodoroService = null, IServiceProvider? serviceProvider = null)
         {
             _sessionService = sessionService;
             _pomodoroService = pomodoroService;
-            _goalService = goalService;
+            _serviceProvider = serviceProvider;
             Events = new ObservableCollection<EventModel>();
             TodoItems = new ObservableCollection<TodoItemModel>();
             AddPlanCommand = new RelayCommand(OnAddPlan);
@@ -75,41 +76,44 @@ namespace Presentation.ViewModels
             _ = LoadGoalsFromDatabaseAsync();
         });
         
+        MessagingCenter.Subscribe<ViewPlanViewModel>(this, "GoalDeleted", (sender) =>
+        {
+            System.Diagnostics.Debug.WriteLine("MainViewModel: Отримано повідомлення про видалення плану");
+            _ = LoadGoalsFromDatabaseAsync();
+        });
+        
         System.Diagnostics.Debug.WriteLine("MainViewModel: Запускаємо фонове завантаження...");
         _ = InitializeAsync();
     }
 
-    public void RefreshData()
+    public async void RefreshData()
     {
         System.Diagnostics.Debug.WriteLine("MainViewModel: RefreshData викликано");
         
-        // Запускаємо в окремому потоці щоб не блокувати UI
-        Task.Run(async () =>
+        try
         {
-            try
+            await LoadGoalsFromDatabaseAsync();
+            
+            // Примусово оновлюємо відображення календаря в UI потоці
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                await LoadGoalsFromDatabaseAsync();
-                
-                // Примусово оновлюємо відображення календаря в UI потоці
-                await MainThread.InvokeOnMainThreadAsync(() =>
+                try
                 {
-                    try
-                    {
-                        System.Diagnostics.Debug.WriteLine($"MainViewModel: RefreshData завершено. Events.Count = {Events.Count}");
-                        OnPropertyChanged(nameof(Events));
-                        GenerateCalendarDays();
-                    }
-                    catch (Exception uiEx)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"MainViewModel: Помилка UI оновлення - {uiEx.Message}");
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"MainViewModel: Помилка RefreshData - {ex.Message}");
-            }
-        });
+                    System.Diagnostics.Debug.WriteLine($"MainViewModel: RefreshData завершено. Events.Count = {Events.Count}");
+                    OnPropertyChanged(nameof(Events));
+                    GenerateCalendarDays();
+                }
+                catch (Exception uiEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"MainViewModel: Помилка UI оновлення - {uiEx.Message}");
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"MainViewModel: Помилка RefreshData - {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"MainViewModel: Stack - {ex.StackTrace}");
+        }
     }
 
     private async Task InitializeAsync()
@@ -762,9 +766,9 @@ namespace Presentation.ViewModels
                 return;
             }
 
-            if (_goalService == null)
+            if (_serviceProvider == null)
             {
-                System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Goal сервіс не доступний");
+                System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: ServiceProvider не доступний");
                 return;
             }
 
@@ -780,10 +784,14 @@ namespace Presentation.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Завантаження планів для користувача {UserId}...");
                 
+                // Створюємо новий scope для кожного запиту
+                using var scope = _serviceProvider.CreateScope();
+                var goalService = scope.ServiceProvider.GetRequiredService<IGoalService>();
+                
                 IEnumerable<DAL.Models.Goal> goals;
                 try
                 {
-                    goals = await _goalService.GetGoalsByUserIdAsync(UserId).ConfigureAwait(false);
+                    goals = await goalService.GetGoalsByUserIdAsync(UserId).ConfigureAwait(false);
                 }
                 catch (Exception dbEx)
                 {
@@ -812,7 +820,7 @@ namespace Presentation.ViewModels
                             Description = description,
                             StartDateTime = goal.StartTime.Value,
                             EndDateTime = goal.EndTime.Value,
-                            Priority = EventPriority.Normal,
+                            Priority = (EventPriority)goal.Priority,
                             Color = Colors.Blue,
                             IsCompleted = goal.Progress >= 100
                         });
@@ -831,6 +839,10 @@ namespace Presentation.ViewModels
                         }
                        
                         System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Регенерація календаря...");
+                        
+                        // Примусово оновлюємо прив'язку Events
+                        OnPropertyChanged(nameof(Events));
+                        
                         GenerateCalendarDays();
                         System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Завершено успішно");
                     }

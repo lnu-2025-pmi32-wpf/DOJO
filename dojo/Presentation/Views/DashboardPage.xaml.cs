@@ -67,6 +67,19 @@ namespace Presentation.Views
                     }
                 });
                 
+                MessagingCenter.Subscribe<ViewPlanViewModel>(this, "GoalDeleted", (sender) =>
+                {
+                    System.Diagnostics.Debug.WriteLine("DashboardPage: Отримано GoalDeleted, оновлюємо дані");
+                    try
+                    {
+                        _viewModel?.RefreshData();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"DashboardPage: Помилка при RefreshData після GoalDeleted - {ex.Message}");
+                    }
+                });
+                
                 System.Diagnostics.Debug.WriteLine("DashboardPage: Конструктор завершено успішно");
             }
             catch (Exception ex)
@@ -153,8 +166,15 @@ namespace Presentation.Views
         {
             if (eventModel == null) return;
 
-            // Створюємо ViewPlanViewModel та завантажуємо дані події
-            var viewPlanViewModel = new ViewPlanViewModel();
+            // Отримуємо ViewPlanViewModel з DI контейнера для правильної ін'єкції залежностей
+            var viewPlanViewModel = Application.Current?.Handler?.MauiContext?.Services.GetService<ViewPlanViewModel>();
+            
+            if (viewPlanViewModel == null)
+            {
+                await DisplayAlert("Помилка", "Не вдалося відкрити деталі плану", "OK");
+                return;
+            }
+            
             viewPlanViewModel.LoadEvent(eventModel);
 
             // Створюємо сторінку та передаємо ViewModel
@@ -171,6 +191,7 @@ namespace Presentation.Views
             // Відписуємося від повідомлень
             MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalAdded");
             MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalUpdated");
+            MessagingCenter.Unsubscribe<ViewPlanViewModel>(this, "GoalDeleted");
         }
     }
 }

@@ -15,6 +15,9 @@ namespace DAL.Models
         public DateTime? EndTime { get; set; }
         
         public float Progress { get; set; }
+        
+        // 0 = Low, 1 = Normal, 2 = High
+        public int Priority { get; set; } = 1;
 
         [Column(TypeName = "timestamp without time zone")]
         public DateTime CreatedAt { get; set; } 

@@ -95,14 +95,15 @@
                         Stroke="#DDD"
                         StrokeThickness="1"
                         Padding="8"
-                        StrokeShape="RoundRectangle 8">
+                        StrokeShape="RoundRectangle 8"
+                        HeightRequest="50">
                         <DatePicker 
                             x:Name="StartDatePicker"
                             Date="{Binding StartDate}"
                             Format="dd.MM.yyyy"
-                            FontSize="16"
                             TextColor="#333333"
                             BackgroundColor="Transparent"
+                            HorizontalOptions="Fill"
                             MinimumDate="2020-01-01"
                             MaximumDate="2030-12-31"/>
                     </Border>
@@ -120,14 +121,24 @@
                         Stroke="#DDD"
                         StrokeThickness="1"
                         Padding="8"
-                        StrokeShape="RoundRectangle 8">
-                        <TimePicker 
-                            x:Name="StartTimePicker"
-                            Time="{Binding StartTime}"
-                            Format="HH:mm"
-                            FontSize="16"
-                            TextColor="#333333"
-                            BackgroundColor="Transparent"/>
+                        StrokeShape="RoundRectangle 8"
+                        HeightRequest="50">
+                        <Grid>
+                            <Label 
+                                Text="{Binding StartTimeText}"
+                                FontSize="16"
+                                TextColor="#333333"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Start"
+                                Padding="4,0,0,0"/>
+                            <TimePicker 
+                                x:Name="StartTimePicker"
+                                Time="{Binding StartTime}"
+                                Format="HH:mm"
+                                Opacity="0.01"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Fill"/>
+                        </Grid>
                     </Border>
                 </VerticalStackLayout>
             </Grid>
@@ -136,7 +147,7 @@
             <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
                 <VerticalStackLayout Grid.Column="0" Spacing="5">
                     <Label 
-                        Text="Дата завершення *"
+                        Text="Дата завершення"
                         FontSize="14"
                         FontAttributes="Bold"
                         TextColor="#333333"/>
@@ -146,14 +157,15 @@
                         Stroke="#DDD"
                         StrokeThickness="1"
                         Padding="8"
-                        StrokeShape="RoundRectangle 8">
+                        StrokeShape="RoundRectangle 8"
+                        HeightRequest="50">
                         <DatePicker 
                             x:Name="EndDatePicker"
                             Date="{Binding EndDate}"
                             Format="dd.MM.yyyy"
-                            FontSize="16"
                             TextColor="#333333"
                             BackgroundColor="Transparent"
+                            HorizontalOptions="Fill"
                             MinimumDate="2020-01-01"
                             MaximumDate="2030-12-31"/>
                     </Border>
@@ -171,14 +183,24 @@
                         Stroke="#DDD"
                         StrokeThickness="1"
                         Padding="8"
-                        StrokeShape="RoundRectangle 8">
-                        <TimePicker 
-                            x:Name="EndTimePicker"
-                            Time="{Binding EndTime}"
-                            Format="HH:mm"
-                            FontSize="16"
-                            TextColor="#333333"
-                            BackgroundColor="Transparent"/>
+                        StrokeShape="RoundRectangle 8"
+                        HeightRequest="50">
+                        <Grid>
+                            <Label 
+                                Text="{Binding EndTimeText}"
+                                FontSize="16"
+                                TextColor="#333333"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Start"
+                                Padding="4,0,0,0"/>
+                            <TimePicker 
+                                x:Name="EndTimePicker"
+                                Time="{Binding EndTime}"
+                                Format="HH:mm"
+                                Opacity="0.01"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Fill"/>
+                        </Grid>
                     </Border>
                 </VerticalStackLayout>
             </Grid>
@@ -205,7 +227,7 @@
                     Padding="12"
                     StrokeShape="RoundRectangle 8">
                     <Picker 
-                        SelectedIndex="{Binding Priority}"
+                        SelectedIndex="{Binding PriorityIndex}"
                         FontSize="16"
                         TextColor="#333333">
                         <Picker.ItemsSource>
@@ -219,8 +241,8 @@
                 </Border>
             </VerticalStackLayout>
 
-            <!-- Attachment -->
-            <VerticalStackLayout Spacing="5">
+            <!-- Attachment - приховано до реалізації -->
+            <VerticalStackLayout Spacing="5" IsVisible="False">
                 <Label 
                     Text="Вкладення"
                     FontSize="14"

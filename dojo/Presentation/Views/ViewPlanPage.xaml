@@ -242,13 +242,13 @@
             </VerticalStackLayout>
 
             <!-- Action Buttons -->
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,20,0,0">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" Margin="0,20,0,0">
                 <Button 
                     Grid.Column="0"
                     Text="Редагувати"
                     BackgroundColor="#FF69B4"
                     TextColor="White"
-                    FontSize="16"
+                    FontSize="14"
                     FontAttributes="Bold"
                     CornerRadius="8"
                     HeightRequest="50"
@@ -256,10 +256,21 @@
                 
                 <Button 
                     Grid.Column="1"
+                    Text="Видалити"
+                    BackgroundColor="#E74C3C"
+                    TextColor="White"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Command="{Binding DeleteCommand}"/>
+                
+                <Button 
+                    Grid.Column="2"
                     Text="Закрити"
                     BackgroundColor="#CCCCCC"
                     TextColor="White"
-                    FontSize="16"
+                    FontSize="14"
                     FontAttributes="Bold"
                     CornerRadius="8"
                     HeightRequest="50"

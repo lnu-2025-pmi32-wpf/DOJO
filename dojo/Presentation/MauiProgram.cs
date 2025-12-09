@@ -25,33 +25,34 @@ namespace Presentation
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=postgre2006";
+            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=14122005Ad";
             builder.Services.AddDbContext<DojoDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
             builder.Services.AddSingleton<ISessionService, SessionService>();
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
-            builder.Services.AddScoped<IGoalService, GoalService>();
-            builder.Services.AddScoped<IPomodoroService, PomodoroService>();
+            builder.Services.AddTransient<IUserService, UserService>();
+            builder.Services.AddTransient<IToDoTaskService, ToDoTaskService>();
+            builder.Services.AddTransient<IGoalService, GoalService>();
+            builder.Services.AddTransient<IPomodoroService, PomodoroService>();
 
-            builder.Services.AddTransient<LoginViewModel>();
-            builder.Services.AddTransient<RegisterViewModel>();
-            builder.Services.AddTransient<MainViewModel>(sp => 
+            builder.Services.AddSingleton<MainViewModel>(sp => 
                 new MainViewModel(
                     sp.GetService<ISessionService>(),
                     sp.GetService<IPomodoroService>(),
-                    sp.GetService<IGoalService>()));
+                    sp));
+            builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddTransient<RegisterViewModel>();
             builder.Services.AddTransient<AddPlanViewModel>(sp =>
                 new AddPlanViewModel(
                     sp.GetRequiredService<IGoalService>(),
                     sp.GetRequiredService<ISessionService>()));
-            builder.Services.AddTransient<ViewPlanViewModel>();
+            builder.Services.AddTransient<ViewPlanViewModel>(sp =>
+                new ViewPlanViewModel(sp.GetRequiredService<IGoalService>()));
             builder.Services.AddTransient<StatisticsViewModel>();
 
+            builder.Services.AddSingleton<DashboardPage>();
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<RegisterPage>();
-            builder.Services.AddTransient<DashboardPage>();
             builder.Services.AddTransient<AddPlanPage>();
             builder.Services.AddTransient<ViewPlanPage>();
             builder.Services.AddTransient<StatisticsPage>();

@@ -5,11 +5,14 @@ using System.Windows.Input;
 using Presentation.Helpers;
 using Presentation.Models;
 using Presentation.Views;
+using BLL.Interfaces;
+using Microsoft.Maui.Controls;
 
 namespace Presentation.ViewModels
 {
     public class ViewPlanViewModel : INotifyPropertyChanged
     {
+        private readonly IGoalService? _goalService;
         private int _eventId;
         private string _title = string.Empty;
         private string _description = string.Empty;
@@ -124,11 +127,14 @@ namespace Presentation.ViewModels
 
         public ICommand EditCommand { get; }
         public ICommand CloseCommand { get; }
+        public ICommand DeleteCommand { get; }
 
-        public ViewPlanViewModel()
+        public ViewPlanViewModel(IGoalService? goalService = null)
         {
+            _goalService = goalService;
             EditCommand = new RelayCommand(OnEdit);
             CloseCommand = new RelayCommand(OnClose);
+            DeleteCommand = new RelayCommand(OnDelete);
         }
 
         public void LoadEvent(EventModel eventModel)
@@ -149,40 +155,92 @@ namespace Presentation.ViewModels
 
         private async void OnEdit()
         {
-            // Передаємо параметри через Shell navigation
-            var navigationParameter = new Dictionary<string, object>
+            try
             {
-                { "EventId", EventId },
-                { "Title", Title },
-                { "Description", Description },
-                { "StartDate", StartDate },
-                { "StartTime", StartTime },
-                { "EndDate", EndDate },
-                { "EndTime", EndTime },
-                { "Priority", (int)Priority },
-                { "IsCompleted", IsCompleted },
-                { "IsEditMode", true }
-            };
-
-            // Закриваємо поточну сторінку та відкриваємо редагування
-            await Shell.Current.Navigation.PopAsync();
-            
-            // Отримуємо AddPlanPage з DI контейнера
-            var addPlanPage = Application.Current?.Handler?.MauiContext?.Services.GetService<AddPlanPage>();
-            
-            if (addPlanPage != null && addPlanPage.BindingContext is AddPlanViewModel addPlanViewModel)
-            {
-                // Завантажуємо дані для редагування
-                addPlanViewModel.LoadEventForEdit(EventId, Title, Description, 
-                    StartDate, StartTime, EndDate, EndTime, Priority, IsCompleted);
+                System.Diagnostics.Debug.WriteLine($"OnEdit: Починаємо редагування плану Id={EventId}");
                 
-                await Shell.Current.Navigation.PushAsync(addPlanPage);
+                // Отримуємо AddPlanPage з DI контейнера
+                var addPlanPage = Application.Current?.Handler?.MauiContext?.Services.GetService<AddPlanPage>();
+                
+                if (addPlanPage != null && addPlanPage.BindingContext is AddPlanViewModel addPlanViewModel)
+                {
+                    System.Diagnostics.Debug.WriteLine($"OnEdit: AddPlanPage отримано, завантажуємо дані");
+                    
+                    // Завантажуємо дані для редагування
+                    addPlanViewModel.LoadEventForEdit(EventId, Title, Description, 
+                        StartDate, StartTime, EndDate, EndTime, Priority, IsCompleted);
+                    
+                    System.Diagnostics.Debug.WriteLine($"OnEdit: Дані завантажено, навігація...");
+                    
+                    // Закриваємо поточну сторінку ViewPlanPage
+                    await Shell.Current.Navigation.PopAsync();
+                    
+                    // Відкриваємо AddPlanPage в режимі редагування
+                    await Shell.Current.Navigation.PushAsync(addPlanPage);
+                    
+                    System.Diagnostics.Debug.WriteLine($"OnEdit: Навігація завершена");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"OnEdit: AddPlanPage або BindingContext є null");
+                    await Shell.Current.DisplayAlert("Помилка", "Не вдалося відкрити редактор плану", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"OnEdit: Помилка - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"OnEdit: Stack trace - {ex.StackTrace}");
+                await Shell.Current.DisplayAlert("Помилка", $"Помилка редагування: {ex.Message}", "OK");
             }
         }
 
         private async void OnClose()
         {
             await Shell.Current.GoToAsync("..");
+        }
+
+        private async void OnDelete()
+        {
+            bool confirm = await Shell.Current.DisplayAlert(
+                "Видалення плану",
+                $"Ви впевнені, що хочете видалити план '{Title}'?",
+                "Видалити",
+                "Скасувати");
+
+            if (!confirm) return;
+
+            try
+            {
+                if (_goalService != null)
+                {
+                    await _goalService.DeleteGoalAsync(EventId);
+                    
+                    // Відправляємо повідомлення про видалення
+                    MessagingCenter.Send(this, "GoalDeleted");
+                    
+                    await Shell.Current.DisplayAlert(
+                        "✅ Успіх",
+                        "План успішно видалено!",
+                        "OK");
+                    
+                    await Shell.Current.Navigation.PopAsync();
+                }
+                else
+                {
+                    await Shell.Current.DisplayAlert(
+                        "❌ Помилка",
+                        "Не вдалося видалити план. Сервіс недоступний.",
+                        "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ViewPlanViewModel: Помилка видалення - {ex.Message}");
+                await Shell.Current.DisplayAlert(
+                    "❌ Помилка",
+                    $"Не вдалося видалити план: {ex.Message}",
+                    "OK");
+            }
         }
 
         protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

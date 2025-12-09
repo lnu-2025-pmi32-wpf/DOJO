@@ -48,8 +48,25 @@ namespace Presentation.Controls
         {
             if (bindable is MonthViewGrid grid)
             {
+                // Відписуємося від старої колекції
+                if (oldValue is ObservableCollection<EventModel> oldCollection)
+                {
+                    oldCollection.CollectionChanged -= grid.OnEventsCollectionChanged;
+                }
+
+                // Підписуємося на нову колекцію
+                if (newValue is ObservableCollection<EventModel> newCollection)
+                {
+                    newCollection.CollectionChanged += grid.OnEventsCollectionChanged;
+                }
+
                 grid.BuildMonthView();
             }
+        }
+
+        private void OnEventsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            BuildMonthView();
         }
 
         private void BuildMonthView()
@@ -132,7 +149,7 @@ namespace Presentation.Controls
             {
                 Stroke = Color.FromArgb("#E0E0E0"),
                 StrokeThickness = 0.5,
-                BackgroundColor = isToday ? Color.FromArgb("#FFF0F5") : Colors.White,
+                BackgroundColor = isSelected ? Color.FromArgb("#FFE4EC") : (isToday ? Color.FromArgb("#FFF0F5") : Colors.White),
                 Padding = new Thickness(8),
                 MinimumHeightRequest = 100
             };

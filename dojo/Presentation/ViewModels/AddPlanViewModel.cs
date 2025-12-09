@@ -143,6 +143,22 @@ namespace Presentation.ViewModels
             get => _priority;
             set => SetProperty(ref _priority, value);
         }
+        
+        // Для біндингу з Picker.SelectedIndex
+        public int PriorityIndex
+        {
+            get => (int)_priority;
+            set
+            {
+                var newPriority = (EventPriority)value;
+                if (_priority != newPriority)
+                {
+                    _priority = newPriority;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(Priority));
+                }
+            }
+        }
 
         public string AttachmentPath
         {
@@ -180,6 +196,9 @@ namespace Presentation.ViewModels
 
             try
             {
+                // Зберігаємо заголовок для повідомлення (до очистки форми)
+                var savedTitle = Title;
+                
                 // Отримуємо поточну сесію користувача
                 var session = await _sessionService.GetUserSessionAsync();
                 if (!session.HasValue)
@@ -205,32 +224,35 @@ namespace Presentation.ViewModels
                         existingGoal.StartTime = startDateTime;
                         existingGoal.EndTime = endDateTime;
                         existingGoal.Progress = _isCompleted ? 100 : existingGoal.Progress;
-                        existingGoal.UpdatedAt = DateTime.Now;
+                        existingGoal.Priority = PriorityIndex;
+                        existingGoal.UpdatedAt = DateTime.UtcNow;
 
-                        System.Diagnostics.Debug.WriteLine($"Оновлюємо план: Id={existingGoal.Id}, Title={Title}, StartTime={startDateTime}, EndTime={endDateTime}");
+                        System.Diagnostics.Debug.WriteLine($"Оновлюємо план: Id={existingGoal.Id}, Title={savedTitle}, StartTime={startDateTime}, EndTime={endDateTime}");
 
                         await _goalService.UpdateGoalAsync(existingGoal);
 
-                        System.Diagnostics.Debug.WriteLine("План успішно оновлено!");
+                        System.Diagnostics.Debug.WriteLine("План успішно оновлено в БД!");
 
                         // Очищуємо форму
                         ClearForm();
-                        
-                        // Відправляємо повідомлення про оновлення
-                        MessagingCenter.Send(this, "GoalUpdated");
 
-                        // Показуємо повідомлення та закриваємо сторінку
+                        // Виконуємо все в UI потоці
                         await MainThread.InvokeOnMainThreadAsync(async () =>
                         {
+                            // Відправляємо повідомлення про оновлення
+                            System.Diagnostics.Debug.WriteLine("Відправляємо GoalUpdated...");
+                            MessagingCenter.Send(this, "GoalUpdated");
+                            System.Diagnostics.Debug.WriteLine("GoalUpdated відправлено!");
+                            
                             await Shell.Current.DisplayAlert(
                                 "✅ Успіх", 
-                                $"План '{Title}' успішно оновлено!", 
+                                $"План '{savedTitle}' успішно оновлено!", 
                                 "OK");
                             
                             await Shell.Current.Navigation.PopAsync();
                         });
                         
-                        return; // Виходимо з методу
+                        return;
                     }
                 }
                 else
@@ -242,40 +264,37 @@ namespace Presentation.ViewModels
                         Description = fullDescription,
                         StartTime = startDateTime,
                         EndTime = endDateTime,
-                        Progress = 0
+                        Progress = 0,
+                        Priority = PriorityIndex
                     };
 
-                    System.Diagnostics.Debug.WriteLine($"Зберігаємо план: UserId={newGoal.UserId}, Title={Title}, StartTime={startDateTime}, EndTime={endDateTime}");
+                    System.Diagnostics.Debug.WriteLine($"Зберігаємо план: UserId={newGoal.UserId}, Title={savedTitle}, StartTime={startDateTime}, EndTime={endDateTime}");
 
                     await _goalService.AddGoalAsync(newGoal);
 
-                    System.Diagnostics.Debug.WriteLine("План успішно збережено!");
+                    System.Diagnostics.Debug.WriteLine("План успішно збережено в БД!");
 
                     // Очищуємо форму
                     ClearForm();
-                    
-                    // Відправляємо повідомлення про те, що потрібно перезавантажити плани
-                    MessagingCenter.Send(this, "GoalAdded");
 
-                    // Показуємо повідомлення та закриваємо сторінку
+                    // Виконуємо все в UI потоці
                     await MainThread.InvokeOnMainThreadAsync(async () =>
                     {
+                        // Відправляємо повідомлення про додавання
+                        System.Diagnostics.Debug.WriteLine("Відправляємо GoalAdded...");
+                        MessagingCenter.Send(this, "GoalAdded");
+                        System.Diagnostics.Debug.WriteLine("GoalAdded відправлено!");
+                        
                         await Shell.Current.DisplayAlert(
                             "✅ Успіх", 
-                            $"План '{Title}' успішно створено!", 
+                            $"План '{savedTitle}' успішно створено!", 
                             "OK");
                         
                         await Shell.Current.Navigation.PopAsync();
                     });
                     
-                    return; // Виходимо з методу
+                    return;
                 }
-
-                // Якщо це редагування, закриваємо сторінку після оновлення
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    await Shell.Current.Navigation.PopAsync();
-                });
             }
             catch (Exception ex)
             {

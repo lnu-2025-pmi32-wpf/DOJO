@@ -212,3 +212,10 @@ ALTER TABLE users ADD COLUMN username VARCHAR(255);
 
 -- Крок 2: Додати унікальний constraint
 ALTER TABLE users ADD CONSTRAINT users_username_unique UNIQUE (username);
+
+-- Додати priority до goals (0 = Low, 1 = Normal, 2 = High)
+ALTER TABLE goals ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 1;
+
+-- Додати goal_id до attachments та зробити task_id nullable
+ALTER TABLE attachments ADD COLUMN IF NOT EXISTS goal_id INTEGER REFERENCES goals(id) ON DELETE CASCADE;
+ALTER TABLE attachments ALTER COLUMN task_id DROP NOT NULL;
