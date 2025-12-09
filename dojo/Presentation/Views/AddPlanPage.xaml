@@ -94,19 +94,26 @@
                         BackgroundColor="White"
                         Stroke="#DDD"
                         StrokeThickness="1"
-                        Padding="8"
+                        Padding="12"
                         StrokeShape="RoundRectangle 8"
                         HeightRequest="50">
-                        <DatePicker 
-                            x:Name="StartDatePicker"
-                            Date="{Binding StartDate}"
-                            Format="dd.MM.yyyy"
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStartDateTapped"/>
+                        </Border.GestureRecognizers>
+                        <Label 
+                            Text="{Binding StartDateText}"
+                            FontSize="16"
                             TextColor="#333333"
-                            BackgroundColor="Transparent"
-                            HorizontalOptions="Fill"
-                            MinimumDate="2020-01-01"
-                            MaximumDate="2030-12-31"/>
+                            VerticalOptions="Center"
+                            HorizontalOptions="Start"/>
                     </Border>
+                    <DatePicker 
+                        x:Name="StartDatePicker"
+                        Date="{Binding StartDate}"
+                        Format="dd.MM.yyyy"
+                        IsVisible="False"
+                        MinimumDate="2020-01-01"
+                        MaximumDate="2030-12-31"/>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Grid.Column="1" Spacing="5">
@@ -120,26 +127,24 @@
                         BackgroundColor="White"
                         Stroke="#DDD"
                         StrokeThickness="1"
-                        Padding="8"
+                        Padding="12"
                         StrokeShape="RoundRectangle 8"
                         HeightRequest="50">
-                        <Grid>
-                            <Label 
-                                Text="{Binding StartTimeText}"
-                                FontSize="16"
-                                TextColor="#333333"
-                                VerticalOptions="Center"
-                                HorizontalOptions="Start"
-                                Padding="4,0,0,0"/>
-                            <TimePicker 
-                                x:Name="StartTimePicker"
-                                Time="{Binding StartTime}"
-                                Format="HH:mm"
-                                Opacity="0.01"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Fill"/>
-                        </Grid>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStartTimeTapped"/>
+                        </Border.GestureRecognizers>
+                        <Label 
+                            Text="{Binding StartTimeText}"
+                            FontSize="16"
+                            TextColor="#333333"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Start"/>
                     </Border>
+                    <TimePicker 
+                        x:Name="StartTimePicker"
+                        Time="{Binding StartTime}"
+                        Format="HH:mm"
+                        IsVisible="False"/>
                 </VerticalStackLayout>
             </Grid>
 
@@ -156,19 +161,26 @@
                         BackgroundColor="White"
                         Stroke="#DDD"
                         StrokeThickness="1"
-                        Padding="8"
+                        Padding="12"
                         StrokeShape="RoundRectangle 8"
                         HeightRequest="50">
-                        <DatePicker 
-                            x:Name="EndDatePicker"
-                            Date="{Binding EndDate}"
-                            Format="dd.MM.yyyy"
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnEndDateTapped"/>
+                        </Border.GestureRecognizers>
+                        <Label 
+                            Text="{Binding EndDateText}"
+                            FontSize="16"
                             TextColor="#333333"
-                            BackgroundColor="Transparent"
-                            HorizontalOptions="Fill"
-                            MinimumDate="2020-01-01"
-                            MaximumDate="2030-12-31"/>
+                            VerticalOptions="Center"
+                            HorizontalOptions="Start"/>
                     </Border>
+                    <DatePicker 
+                        x:Name="EndDatePicker"
+                        Date="{Binding EndDate}"
+                        Format="dd.MM.yyyy"
+                        IsVisible="False"
+                        MinimumDate="2020-01-01"
+                        MaximumDate="2030-12-31"/>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Grid.Column="1" Spacing="5">
@@ -182,26 +194,24 @@
                         BackgroundColor="White"
                         Stroke="#DDD"
                         StrokeThickness="1"
-                        Padding="8"
+                        Padding="12"
                         StrokeShape="RoundRectangle 8"
                         HeightRequest="50">
-                        <Grid>
-                            <Label 
-                                Text="{Binding EndTimeText}"
-                                FontSize="16"
-                                TextColor="#333333"
-                                VerticalOptions="Center"
-                                HorizontalOptions="Start"
-                                Padding="4,0,0,0"/>
-                            <TimePicker 
-                                x:Name="EndTimePicker"
-                                Time="{Binding EndTime}"
-                                Format="HH:mm"
-                                Opacity="0.01"
-                                HorizontalOptions="Fill"
-                                VerticalOptions="Fill"/>
-                        </Grid>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnEndTimeTapped"/>
+                        </Border.GestureRecognizers>
+                        <Label 
+                            Text="{Binding EndTimeText}"
+                            FontSize="16"
+                            TextColor="#333333"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Start"/>
                     </Border>
+                    <TimePicker 
+                        x:Name="EndTimePicker"
+                        Time="{Binding EndTime}"
+                        Format="HH:mm"
+                        IsVisible="False"/>
                 </VerticalStackLayout>
             </Grid>
 
