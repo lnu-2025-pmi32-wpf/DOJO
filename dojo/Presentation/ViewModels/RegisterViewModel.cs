@@ -184,15 +184,15 @@ namespace Presentation.ViewModels
                 // Встановлюємо IsLoading = false перед навігацією
                 IsLoading = false;
                 
-                // Перехід на Dashboard - простий підхід як в LoginPage
-                var window = Application.Current?.Windows[0];
-                if (window != null)
+                // Перехід на Dashboard - просто замінюємо сторінку на AppShell
+                await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    window.Page = new AppShell();
-                    // Даємо час Shell ініціалізуватися
-                    await Task.Delay(100);
-                    await Shell.Current.GoToAsync($"///{nameof(DashboardPage)}");
-                }
+                    var appShell = Application.Current?.Handler?.MauiContext?.Services.GetService<AppShell>();
+                    if (appShell != null && Application.Current?.Windows.Count > 0)
+                    {
+                        Application.Current.Windows[0].Page = appShell;
+                    }
+                });
                 return; // Виходимо щоб не виконувати finally IsLoading = false
             }
             catch (Exception ex)
@@ -209,17 +209,12 @@ namespace Presentation.ViewModels
 
         private void OnBackToLogin()
         {
-            MainThread.BeginInvokeOnMainThread(() =>
+            MainThread.BeginInvokeOnMainThread(async () =>
             {
-                var window = Application.Current?.Windows[0];
-                if (window != null)
+                if (Application.Current?.Windows.Count > 0 && 
+                    Application.Current.Windows[0].Page is NavigationPage navPage)
                 {
-                    var loginPage = Application.Current?.Handler?.MauiContext?.Services
-                        .GetService<Views.LoginPage>();
-                    if (loginPage != null)
-                    {
-                        window.Page = loginPage;
-                    }
+                    await navPage.PopAsync();
                 }
             });
         }

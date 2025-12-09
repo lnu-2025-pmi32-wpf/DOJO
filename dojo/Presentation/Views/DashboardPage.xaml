@@ -28,12 +28,12 @@
                         Padding="15,8"/>
                     
                     <Button 
-                        Text="📋 TODO"
+                        Text="TODO"
                         Style="{StaticResource OutlineButtonStyle}"
                         Padding="12,8"/>
                     
                     <Button 
-                        Text="📊 Статистика"
+                        Text="Статистика"
                         Command="{Binding NavigateToStatisticsCommand}"
                         Style="{StaticResource OutlineButtonStyle}"
                         Padding="12,8"/>
@@ -193,7 +193,7 @@
                             StrokeShape="RoundRectangle 8">
                             <VerticalStackLayout Spacing="10">
                                 <Label 
-                                    Text="📋 ПЛАН"
+                                    Text="ПЛАН"
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="#333"/>
@@ -225,7 +225,7 @@
                             StrokeShape="RoundRectangle 8">
                             <VerticalStackLayout Spacing="10">
                                 <Label 
-                                    Text="✓ TO DO"
+                                    Text="TO DO"
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="#333"/>
@@ -269,7 +269,7 @@
                             StrokeShape="RoundRectangle 8">
                             <VerticalStackLayout Spacing="10">
                                 <Label 
-                                    Text="📊 СТАТИСТИКА"
+                                    Text="СТАТИСТИКА"
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="#333"/>
@@ -428,7 +428,7 @@
                 <!-- Pomodoro Timer -->
                 <VerticalStackLayout Spacing="10">
                     <Label 
-                        Text="⏱️ Помодоро"
+                        Text="Помодоро"
                         FontSize="16"
                         FontAttributes="Bold"
                         TextColor="#333"/>
@@ -465,7 +465,7 @@
                 <!-- Mascot -->
                 <VerticalStackLayout Spacing="10">
                     <Label 
-                        Text="🐷 Твій герой"
+                        Text="Твій герой"
                         FontSize="16"
                         FontAttributes="Bold"
                         TextColor="#333"/>
@@ -477,10 +477,12 @@
                         Stroke="{StaticResource HotPink}"
                         HeightRequest="150">
                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                            <!-- Тут можна замінити на Image з Figma: <Image Source="pig.png" .../> -->
                             <Label 
-                                Text="🐷"
-                                FontSize="60"
-                                HorizontalOptions="Center"/>
+                                Text="(^_^)"
+                                FontSize="40"
+                                HorizontalOptions="Center"
+                                TextColor="{StaticResource HotPink}"/>
                             <Label 
                                 Text="Рівень 5"
                                 FontSize="14"

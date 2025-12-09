@@ -138,8 +138,15 @@ namespace Presentation.ViewModels
                 // Встановлюємо IsLoading = false перед навігацією
                 IsLoading = false;
                 
-                // Navigate to dashboard page
-                await Shell.Current.GoToAsync($"/{nameof(DashboardPage)}");
+                // Navigate to dashboard page - просто замінюємо сторінку на AppShell
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    var appShell = Application.Current?.Handler?.MauiContext?.Services.GetService<AppShell>();
+                    if (appShell != null && Application.Current?.Windows.Count > 0)
+                    {
+                        Application.Current.Windows[0].Page = appShell;
+                    }
+                });
                 return; // Виходимо щоб не виконувати finally IsLoading = false
             }
             catch (Exception ex)
@@ -156,17 +163,14 @@ namespace Presentation.ViewModels
 
         private void OnRegister()
         {
-            MainThread.BeginInvokeOnMainThread(() =>
+            MainThread.BeginInvokeOnMainThread(async () =>
             {
-                var window = Application.Current?.Windows[0];
-                if (window != null)
+                var registerPage = Application.Current?.Handler?.MauiContext?.Services
+                    .GetService<Views.RegisterPage>();
+                if (registerPage != null && Application.Current?.Windows.Count > 0 && 
+                    Application.Current.Windows[0].Page is NavigationPage navPage)
                 {
-                    var registerPage = Application.Current?.Handler?.MauiContext?.Services
-                        .GetService<Views.RegisterPage>();
-                    if (registerPage != null)
-                    {
-                        window.Page = registerPage;
-                    }
+                    await navPage.PushAsync(registerPage);
                 }
             });
         }

@@ -82,17 +82,33 @@ namespace Presentation.ViewModels
     public void RefreshData()
     {
         System.Diagnostics.Debug.WriteLine("MainViewModel: RefreshData викликано");
+        
+        // Запускаємо в окремому потоці щоб не блокувати UI
         Task.Run(async () =>
         {
-            await LoadGoalsFromDatabaseAsync();
-            
-            // Примусово оновлюємо відображення календаря
-            MainThread.BeginInvokeOnMainThread(() =>
+            try
             {
-                System.Diagnostics.Debug.WriteLine($"MainViewModel: RefreshData завершено. Events.Count = {Events.Count}");
-                OnPropertyChanged(nameof(Events));
-                OnPropertyChanged(nameof(CalendarDays));
-            });
+                await LoadGoalsFromDatabaseAsync();
+                
+                // Примусово оновлюємо відображення календаря в UI потоці
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    try
+                    {
+                        System.Diagnostics.Debug.WriteLine($"MainViewModel: RefreshData завершено. Events.Count = {Events.Count}");
+                        OnPropertyChanged(nameof(Events));
+                        GenerateCalendarDays();
+                    }
+                    catch (Exception uiEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"MainViewModel: Помилка UI оновлення - {uiEx.Message}");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"MainViewModel: Помилка RefreshData - {ex.Message}");
+            }
         });
     }
 
@@ -125,14 +141,16 @@ namespace Presentation.ViewModels
                 
                 var sessionValue = session.Value;
                 
-                MainThread.BeginInvokeOnMainThread(() =>
+                await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     SetUserInfo(sessionValue.Email, sessionValue.Username ?? sessionValue.Email);
                     UserId = sessionValue.UserId;
                     System.Diagnostics.Debug.WriteLine($"InitializeAsync: Користувач завантажено - {sessionValue.Username}");
                 });
                 
+                System.Diagnostics.Debug.WriteLine("InitializeAsync: Завантаження цілей з БД...");
                 await LoadGoalsFromDatabaseAsync().ConfigureAwait(false);
+                System.Diagnostics.Debug.WriteLine("InitializeAsync: Завершено");
             }
             else
             {
@@ -141,7 +159,8 @@ namespace Presentation.ViewModels
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"MainViewModel: Помилка Initialize - {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"❌ MainViewModel: Помилка Initialize - {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack: {ex.StackTrace}");
         }
     }
 
@@ -779,46 +798,23 @@ namespace Presentation.ViewModels
                 
                 foreach (var goal in goalsList)
                 {
-                    if (goal.Deadline.HasValue)
+                    if (goal.StartTime.HasValue && goal.EndTime.HasValue)
                     {
-                        DateTime startDateTime = goal.CreatedAt;
-                        string title = goal.Description;
-                        string description = string.Empty;
-
-                        if (goal.Description.StartsWith("START_TIME:"))
-                        {
-                            var lines = goal.Description.Split('\n');
-                            if (lines.Length > 0 && DateTime.TryParse(lines[0].Replace("START_TIME:", ""), out var parsedStartTime))
-                            {
-                                startDateTime = parsedStartTime;
-                            }
-                            
-                            if (lines.Length > 1)
-                            {
-                                title = lines[1];
-                            }
-                            
-                            if (lines.Length > 2)
-                            {
-                                description = string.Join("\n", lines.Skip(2));
-                            }
-                        }
-                        else
-                        {
-                            var descriptionParts = goal.Description.Split('\n', 2);
-                            title = descriptionParts.Length > 0 ? descriptionParts[0] : goal.Description;
-                            description = descriptionParts.Length > 1 ? descriptionParts[1] : string.Empty;
-                        }
+                        // Розбиваємо опис на заголовок та деталі
+                        var lines = goal.Description.Split('\n', 2);
+                        string title = lines.Length > 0 ? lines[0] : goal.Description;
+                        string description = lines.Length > 1 ? lines[1] : string.Empty;
 
                         eventModels.Add(new EventModel
                         {
                             Id = goal.Id,
                             Title = title,
                             Description = description,
-                            StartDateTime = startDateTime,
-                            EndDateTime = goal.Deadline.Value,
+                            StartDateTime = goal.StartTime.Value,
+                            EndDateTime = goal.EndTime.Value,
                             Priority = EventPriority.Normal,
-                            Color = Colors.Blue
+                            Color = Colors.Blue,
+                            IsCompleted = goal.Progress >= 100
                         });
                     }
                 }
@@ -831,7 +827,7 @@ namespace Presentation.ViewModels
                         foreach (var eventModel in eventModels)
                         {
                             Events.Add(eventModel);
-                            System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Додано план '{eventModel.Title}'");
+                            System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Додано план '{eventModel.Title}' (Start: {eventModel.StartDateTime}, End: {eventModel.EndDateTime})");
                         }
                        
                         System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Регенерація календаря...");
@@ -841,6 +837,7 @@ namespace Presentation.ViewModels
                     catch (Exception uiEx)
                     {
                         System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Помилка UI - {uiEx.Message}");
+                        System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Stack trace - {uiEx.StackTrace}");
                     }
                 });
             }

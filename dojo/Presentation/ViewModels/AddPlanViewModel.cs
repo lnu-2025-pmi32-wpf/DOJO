@@ -190,13 +190,9 @@ namespace Presentation.ViewModels
 
                 var startDateTime = StartDate.Date + StartTime;
                 var endDateTime = EndDate.Date + EndTime;
-                
-                // Конвертуємо в UTC для PostgreSQL
-                var startDateTimeUtc = DateTime.SpecifyKind(startDateTime, DateTimeKind.Utc);
-                var endDateTimeUtc = DateTime.SpecifyKind(endDateTime, DateTimeKind.Utc);
 
-                // Зберігаємо час початку в описі у спеціальному форматі
-                var descriptionWithStartTime = $"START_TIME:{startDateTimeUtc:O}\n{Title}\n{Description}";
+                // Зберігаємо заголовок та опис окремо
+                var fullDescription = string.IsNullOrEmpty(Description) ? Title : $"{Title}\n{Description}";
 
                 if (IsEditMode && _eventId.HasValue)
                 {
@@ -205,36 +201,36 @@ namespace Presentation.ViewModels
                     
                     if (existingGoal != null)
                     {
-                        existingGoal.Description = descriptionWithStartTime;
-                        existingGoal.Deadline = endDateTimeUtc;
+                        existingGoal.Description = fullDescription;
+                        existingGoal.StartTime = startDateTime;
+                        existingGoal.EndTime = endDateTime;
                         existingGoal.Progress = _isCompleted ? 100 : existingGoal.Progress;
-                        
-                        // Переконуємося, що всі DateTime мають Kind = UTC
-                        if (existingGoal.CreatedAt.Kind == DateTimeKind.Unspecified)
-                        {
-                            existingGoal.CreatedAt = DateTime.SpecifyKind(existingGoal.CreatedAt, DateTimeKind.Utc);
-                        }
-                        if (existingGoal.UpdatedAt.Kind == DateTimeKind.Unspecified)
-                        {
-                            existingGoal.UpdatedAt = DateTime.SpecifyKind(existingGoal.UpdatedAt, DateTimeKind.Utc);
-                        }
+                        existingGoal.UpdatedAt = DateTime.Now;
 
-                        System.Diagnostics.Debug.WriteLine($"Оновлюємо план: Id={existingGoal.Id}, Title={Title}, StartTime={startDateTime}, Deadline={endDateTime}");
+                        System.Diagnostics.Debug.WriteLine($"Оновлюємо план: Id={existingGoal.Id}, Title={Title}, StartTime={startDateTime}, EndTime={endDateTime}");
 
                         await _goalService.UpdateGoalAsync(existingGoal);
 
                         System.Diagnostics.Debug.WriteLine("План успішно оновлено!");
 
+                        // Очищуємо форму
+                        ClearForm();
+                        
                         // Відправляємо повідомлення про оновлення
                         MessagingCenter.Send(this, "GoalUpdated");
 
-                        await Shell.Current.DisplayAlert(
-                            "✅ Успіх", 
-                            $"План '{Title}' успішно оновлено!", 
-                            "OK");
+                        // Показуємо повідомлення та закриваємо сторінку
+                        await MainThread.InvokeOnMainThreadAsync(async () =>
+                        {
+                            await Shell.Current.DisplayAlert(
+                                "✅ Успіх", 
+                                $"План '{Title}' успішно оновлено!", 
+                                "OK");
+                            
+                            await Shell.Current.Navigation.PopAsync();
+                        });
                         
-                        // Очищуємо форму
-                        ClearForm();
+                        return; // Виходимо з методу
                     }
                 }
                 else
@@ -243,40 +239,57 @@ namespace Presentation.ViewModels
                     var newGoal = new Goal
                     {
                         UserId = session.Value.UserId,
-                        Description = descriptionWithStartTime,
-                        Deadline = endDateTimeUtc,
+                        Description = fullDescription,
+                        StartTime = startDateTime,
+                        EndTime = endDateTime,
                         Progress = 0
                     };
 
-                    System.Diagnostics.Debug.WriteLine($"Зберігаємо план: UserId={newGoal.UserId}, Title={Title}, StartTime={startDateTime}, Deadline={endDateTime}");
+                    System.Diagnostics.Debug.WriteLine($"Зберігаємо план: UserId={newGoal.UserId}, Title={Title}, StartTime={startDateTime}, EndTime={endDateTime}");
 
                     await _goalService.AddGoalAsync(newGoal);
 
                     System.Diagnostics.Debug.WriteLine("План успішно збережено!");
 
+                    // Очищуємо форму
+                    ClearForm();
+                    
                     // Відправляємо повідомлення про те, що потрібно перезавантажити плани
                     MessagingCenter.Send(this, "GoalAdded");
 
-                    await Shell.Current.DisplayAlert(
-                        "✅ Успіх", 
-                        $"План '{Title}' успішно створено!", 
-                        "OK");
+                    // Показуємо повідомлення та закриваємо сторінку
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        await Shell.Current.DisplayAlert(
+                            "✅ Успіх", 
+                            $"План '{Title}' успішно створено!", 
+                            "OK");
+                        
+                        await Shell.Current.Navigation.PopAsync();
+                    });
                     
-                    // Очищуємо форму
-                    ClearForm();
+                    return; // Виходимо з методу
                 }
 
-                await Shell.Current.Navigation.PopAsync();
+                // Якщо це редагування, закриваємо сторінку після оновлення
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await Shell.Current.Navigation.PopAsync();
+                });
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Помилка збереження: {ex}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 
                 var errorMessage = ex.InnerException?.Message ?? ex.Message;
-                await Shell.Current.DisplayAlert(
-                    "Помилка", 
-                    $"Не вдалося зберегти план:\n{errorMessage}", 
-                    "OK");
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await Shell.Current.DisplayAlert(
+                        "Помилка", 
+                        $"Не вдалося зберегти план:\n{errorMessage}", 
+                        "OK");
+                });
             }
         }
 

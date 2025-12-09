@@ -33,10 +33,10 @@ namespace DAL.Models
         [Column("current_streak")]
         public int CurrentStreak { get; set; }
         
-        [Column("last_completion_date")]
+        [Column("last_completion_date", TypeName = "timestamp without time zone")]
         public DateTime? LastCompletionDate { get; set; }
         
-        [Column("created_at")]
+        [Column("created_at", TypeName = "timestamp without time zone")]
         public DateTime CreatedAt { get; set; }
 
         public ICollection<Goal>? Goals { get; set; }

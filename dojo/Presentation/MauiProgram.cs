@@ -13,6 +13,9 @@ namespace Presentation
     {
         public static MauiApp CreateMauiApp()
         {
+            // Важливо! Дозволяємо Npgsql працювати з DateTime без timezone
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
@@ -22,7 +25,7 @@ namespace Presentation
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=14122005Ad";
+            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=postgre2006";
             builder.Services.AddDbContext<DojoDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
@@ -52,12 +55,15 @@ namespace Presentation
             builder.Services.AddTransient<AddPlanPage>();
             builder.Services.AddTransient<ViewPlanPage>();
             builder.Services.AddTransient<StatisticsPage>();
+            builder.Services.AddTransient<AppShell>();
 
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
+            var app = builder.Build();
+            
+            return app;
         }
     }
 }

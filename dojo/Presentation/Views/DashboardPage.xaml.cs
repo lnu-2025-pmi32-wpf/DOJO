@@ -11,52 +11,98 @@ namespace Presentation.Views
 
         public DashboardPage(MainViewModel viewModel)
         {
-            InitializeComponent();
-            _viewModel = viewModel;
-            BindingContext = _viewModel;
-            
-            // Підписуємося на події контролів
-            DaySchedule.EventTapped += OnEventTapped;
-            WeekSchedule.DayTapped += OnDayTappedInCalendar;
-            WeekSchedule.EventTapped += OnEventTapped;
-            MonthView.DayTapped += OnDayTappedInCalendar;
-            MonthView.EventTapped += OnEventTapped;
-            
-            // Підписуємося на повідомлення про оновлення планів
-            MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalAdded", (sender) =>
+            try
             {
-                System.Diagnostics.Debug.WriteLine("DashboardPage: Отримано GoalAdded, оновлюємо дані");
-                _viewModel?.RefreshData();
-            });
-            
-            MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalUpdated", (sender) =>
+                System.Diagnostics.Debug.WriteLine("DashboardPage: Початок конструктора");
+                InitializeComponent();
+                System.Diagnostics.Debug.WriteLine("DashboardPage: InitializeComponent завершено");
+                
+                _viewModel = viewModel;
+                BindingContext = _viewModel;
+                System.Diagnostics.Debug.WriteLine("DashboardPage: BindingContext встановлено");
+                
+                // Підписуємося на події контролів
+                if (DaySchedule != null)
+                {
+                    DaySchedule.EventTapped += OnEventTapped;
+                    System.Diagnostics.Debug.WriteLine("DashboardPage: DaySchedule підписано");
+                }
+                if (WeekSchedule != null)
+                {
+                    WeekSchedule.DayTapped += OnDayTappedInCalendar;
+                    WeekSchedule.EventTapped += OnEventTapped;
+                    System.Diagnostics.Debug.WriteLine("DashboardPage: WeekSchedule підписано");
+                }
+                if (MonthView != null)
+                {
+                    MonthView.DayTapped += OnDayTappedInCalendar;
+                    MonthView.EventTapped += OnEventTapped;
+                    System.Diagnostics.Debug.WriteLine("DashboardPage: MonthView підписано");
+                }
+                
+                // Підписуємося на повідомлення про оновлення планів
+                MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalAdded", (sender) =>
+                {
+                    System.Diagnostics.Debug.WriteLine("DashboardPage: Отримано GoalAdded, оновлюємо дані");
+                    try
+                    {
+                        _viewModel?.RefreshData();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"DashboardPage: Помилка при RefreshData після GoalAdded - {ex.Message}");
+                    }
+                });
+                
+                MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalUpdated", (sender) =>
+                {
+                    System.Diagnostics.Debug.WriteLine("DashboardPage: Отримано GoalUpdated, оновлюємо дані");
+                    try
+                    {
+                        _viewModel?.RefreshData();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"DashboardPage: Помилка при RefreshData після GoalUpdated - {ex.Message}");
+                    }
+                });
+                
+                System.Diagnostics.Debug.WriteLine("DashboardPage: Конструктор завершено успішно");
+            }
+            catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("DashboardPage: Отримано GoalUpdated, оновлюємо дані");
-                _viewModel?.RefreshData();
-            });
-            
-            System.Diagnostics.Debug.WriteLine("DashboardPage: Створено");
+                System.Diagnostics.Debug.WriteLine($"❌ DashboardPage: КРИТИЧНА ПОМИЛКА в конструкторі - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack: {ex.StackTrace}");
+                throw;
+            }
         }
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
             
-            System.Diagnostics.Debug.WriteLine($"DashboardPage: OnAppearing викликано (IsInitialized: {_isInitialized})");
-            
-            // Ініціалізуємо тільки один раз при першому відображенні
-            if (!_isInitialized && _viewModel != null)
+            try
             {
-                _isInitialized = true;
-                System.Diagnostics.Debug.WriteLine("DashboardPage: Запускаємо ініціалізацію...");
-                _viewModel.Initialize();
-                System.Diagnostics.Debug.WriteLine("DashboardPage: Ініціалізацію запущено");
+                System.Diagnostics.Debug.WriteLine($"DashboardPage: OnAppearing викликано (IsInitialized: {_isInitialized})");
+                
+                // Ініціалізуємо тільки один раз при першому відображенні
+                if (!_isInitialized && _viewModel != null)
+                {
+                    _isInitialized = true;
+                    System.Diagnostics.Debug.WriteLine("DashboardPage: Запускаємо ініціалізацію...");
+                    _viewModel.Initialize();
+                    System.Diagnostics.Debug.WriteLine("DashboardPage: Ініціалізацію завершено");
+                }
+                else if (_isInitialized && _viewModel != null)
+                {
+                    // Оновлюємо дані при поверненні на сторінку
+                    System.Diagnostics.Debug.WriteLine("DashboardPage: Оновлюємо дані при поверненні...");
+                    _viewModel.RefreshData();
+                }
             }
-            else if (_isInitialized && _viewModel != null)
+            catch (Exception ex)
             {
-                // Оновлюємо дані при поверненні на сторінку
-                System.Diagnostics.Debug.WriteLine("DashboardPage: Оновлюємо дані при поверненні...");
-                _viewModel.RefreshData();
+                System.Diagnostics.Debug.WriteLine($"DashboardPage: Помилка OnAppearing - {ex.Message}");
             }
         }
 
