@@ -1,17 +1,18 @@
-using System.Collections.ObjectModel;
-using System.Windows.Input;
-using Presentation.Helpers;
+using System. Collections.ObjectModel;
+using System.Windows. Input;
+using Presentation. Helpers;
 using Presentation.Models;
 using BLL.Interfaces;
 using BLL.Services;
-using Microsoft.Maui.Controls;
+using Microsoft. Maui.Controls;
+using Microsoft.Maui. Dispatching;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Presentation.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
-        private readonly ISessionService? _sessionService;
+        private readonly ISessionService?  _sessionService;
         private readonly IPomodoroService? _pomodoroService;
         private readonly IServiceProvider? _serviceProvider;
         private ViewMode _currentViewMode = ViewMode.Week;
@@ -22,16 +23,17 @@ namespace Presentation.ViewModels
         private string _userInitials = "U";
         private int _userId;
 
-        private System.Timers.Timer? _pomodoroTimer;
+        // ✅ ВИПРАВЛЕНО:  Використовуємо IDispatcherTimer замість System.Timers.Timer
+        private IDispatcherTimer?  _pomodoroTimer;
         private TimeSpan _remainingTime = TimeSpan.FromMinutes(25);
         private bool _isTimerRunning;
         private bool _isWorkSession = true;
         private int _completedCycles;
-        private DateTime? _sessionStartTime;
+        private DateTime?  _sessionStartTime;
         private bool _isLoadingGoals = false;
         private bool _isMessagingSubscribed = false;
 
-        public MainViewModel(ISessionService? sessionService = null, IPomodoroService? pomodoroService = null, IServiceProvider? serviceProvider = null)
+        public MainViewModel(ISessionService?  sessionService = null, IPomodoroService? pomodoroService = null, IServiceProvider? serviceProvider = null)
         {
             _sessionService = sessionService;
             _pomodoroService = pomodoroService;
@@ -52,133 +54,133 @@ namespace Presentation.ViewModels
             PausePomodoroCommand = new RelayCommand(OnPausePomodoro);
             ResetPomodoroCommand = new RelayCommand(OnResetPomodoro);
             
-        PreviousMonthCommand = new RelayCommand(OnPreviousMonth);
-        NextMonthCommand = new RelayCommand(OnNextMonth);
-        SelectDayCommand = new RelayCommand<CalendarDayModel>(OnSelectDay);
-        
-        // Ініціалізуємо дату тижня на поточну
-        UpdateDateRange();
-        GenerateCalendarDays();
-    }
-    
-    public void Initialize()
-    {
-        System.Diagnostics.Debug.WriteLine("MainViewModel: Initialize викликано");
-        
-        // Відписуємося від старих підписок якщо вони є
-        if (_isMessagingSubscribed)
-        {
-            System.Diagnostics.Debug.WriteLine("MainViewModel: Відписуємося від старих підписок");
-            MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalAdded");
-            MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalUpdated");
-            MessagingCenter.Unsubscribe<ViewPlanViewModel>(this, "GoalDeleted");
-        }
-        
-        _isMessagingSubscribed = true;
-        
-        MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalAdded", (sender) =>
-        {
-            System.Diagnostics.Debug.WriteLine("MainViewModel: Отримано повідомлення про додавання плану");
-            _ = LoadGoalsFromDatabaseAsync();
-        });
-        
-        MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalUpdated", (sender) =>
-        {
-            System.Diagnostics.Debug.WriteLine("MainViewModel: Отримано повідомлення про оновлення плану");
-            _ = LoadGoalsFromDatabaseAsync();
-        });
-        
-        MessagingCenter.Subscribe<ViewPlanViewModel>(this, "GoalDeleted", (sender) =>
-        {
-            System.Diagnostics.Debug.WriteLine("MainViewModel: Отримано повідомлення про видалення плану");
-            _ = LoadGoalsFromDatabaseAsync();
-        });
-        
-        System.Diagnostics.Debug.WriteLine("MainViewModel: Запускаємо фонове завантаження...");
-        _ = InitializeAsync();
-    }
-
-    public async void RefreshData()
-    {
-        System.Diagnostics.Debug.WriteLine("MainViewModel: RefreshData викликано");
-        
-        try
-        {
-            await LoadGoalsFromDatabaseAsync();
+            PreviousMonthCommand = new RelayCommand(OnPreviousMonth);
+            NextMonthCommand = new RelayCommand(OnNextMonth);
+            SelectDayCommand = new RelayCommand<CalendarDayModel>(OnSelectDay);
             
-            // Примусово оновлюємо відображення календаря в UI потоці
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                try
-                {
-                    System.Diagnostics.Debug.WriteLine($"MainViewModel: RefreshData завершено. Events.Count = {Events.Count}");
-                    OnPropertyChanged(nameof(Events));
-                    GenerateCalendarDays();
-                }
-                catch (Exception uiEx)
-                {
-                    System.Diagnostics.Debug.WriteLine($"MainViewModel: Помилка UI оновлення - {uiEx.Message}");
-                }
-            });
+            // Ініціалізуємо дату тижня на поточну
+            UpdateDateRange();
+            GenerateCalendarDays();
         }
-        catch (Exception ex)
+        
+        public void Initialize()
         {
-            System.Diagnostics.Debug.WriteLine($"MainViewModel: Помилка RefreshData - {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"MainViewModel: Stack - {ex.StackTrace}");
-        }
-    }
-
-    private async Task InitializeAsync()
-    {
-        try
-        {
-            System.Diagnostics.Debug.WriteLine("MainViewModel: Початок завантаження сесії...");
+            System.Diagnostics. Debug.WriteLine("MainViewModel:  Initialize викликано");
             
-            if (_sessionService == null)
+            // Відписуємося від старих підписок якщо вони є
+            if (_isMessagingSubscribed)
             {
-                System.Diagnostics.Debug.WriteLine("InitializeAsync: SessionService не доступний");
-                return;
+                System.Diagnostics. Debug.WriteLine("MainViewModel: Відписуємося від старих підписок");
+                MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalAdded");
+                MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalUpdated");
+                MessagingCenter.Unsubscribe<ViewPlanViewModel>(this, "GoalDeleted");
             }
+            
+            _isMessagingSubscribed = true;
+            
+            MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalAdded", (sender) =>
+            {
+                System.Diagnostics.Debug.WriteLine("MainViewModel: Отримано повідомлення про додавання плану");
+                _ = LoadGoalsFromDatabaseAsync();
+            });
+            
+            MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalUpdated", (sender) =>
+            {
+                System. Diagnostics.Debug.WriteLine("MainViewModel: Отримано повідомлення про оновлення плану");
+                _ = LoadGoalsFromDatabaseAsync();
+            });
+            
+            MessagingCenter. Subscribe<ViewPlanViewModel>(this, "GoalDeleted", (sender) =>
+            {
+                System.Diagnostics. Debug.WriteLine("MainViewModel: Отримано повідомлення про видалення плану");
+                _ = LoadGoalsFromDatabaseAsync();
+            });
+            
+            System.Diagnostics. Debug.WriteLine("MainViewModel: Запускаємо фонове завантаження.. .");
+            _ = InitializeAsync();
+        }
 
-            (string Email, int UserId, string? Username)? session;
+        public async void RefreshData()
+        {
+            System.Diagnostics.Debug.WriteLine("MainViewModel: RefreshData викликано");
+            
             try
             {
-                session = await _sessionService.GetUserSessionAsync().ConfigureAwait(false);
-            }
-            catch (Exception sessionEx)
-            {
-                System.Diagnostics.Debug.WriteLine($"InitializeAsync: Помилка отримання сесії - {sessionEx.Message}");
-                return;
-            }
-            
-            if (session.HasValue)
-            {
-                System.Diagnostics.Debug.WriteLine($"InitializeAsync: Сесія отримана - UserId={session.Value.UserId}");
+                await LoadGoalsFromDatabaseAsync();
                 
-                var sessionValue = session.Value;
-                
-                await MainThread.InvokeOnMainThreadAsync(() =>
+                // Примусово оновлюємо відображення календаря в UI потоці
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    SetUserInfo(sessionValue.Email, sessionValue.Username ?? sessionValue.Email);
-                    UserId = sessionValue.UserId;
-                    System.Diagnostics.Debug.WriteLine($"InitializeAsync: Користувач завантажено - {sessionValue.Username}");
+                    try
+                    {
+                        System.Diagnostics.Debug.WriteLine($"MainViewModel: RefreshData завершено.  Events. Count = {Events.Count}");
+                        OnPropertyChanged(nameof(Events));
+                        GenerateCalendarDays();
+                    }
+                    catch (Exception uiEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"MainViewModel:  Помилка UI оновлення - {uiEx.Message}");
+                    }
                 });
-                
-                System.Diagnostics.Debug.WriteLine("InitializeAsync: Завантаження цілей з БД...");
-                await LoadGoalsFromDatabaseAsync().ConfigureAwait(false);
-                System.Diagnostics.Debug.WriteLine("InitializeAsync: Завершено");
             }
-            else
+            catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("InitializeAsync: Сесія не знайдена");
+                System.Diagnostics.Debug.WriteLine($"MainViewModel:  Помилка RefreshData - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"MainViewModel: Stack - {ex.StackTrace}");
             }
         }
-        catch (Exception ex)
+
+        private async Task InitializeAsync()
         {
-            System.Diagnostics.Debug.WriteLine($"❌ MainViewModel: Помилка Initialize - {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"Stack: {ex.StackTrace}");
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("MainViewModel: Початок завантаження сесії.. .");
+                
+                if (_sessionService == null)
+                {
+                    System. Diagnostics.Debug.WriteLine("InitializeAsync: SessionService не доступний");
+                    return;
+                }
+
+                (string Email, int UserId, string?  Username)?  session;
+                try
+                {
+                    session = await _sessionService.GetUserSessionAsync().ConfigureAwait(false);
+                }
+                catch (Exception sessionEx)
+                {
+                    System. Diagnostics.Debug.WriteLine($"InitializeAsync: Помилка отримання сесії - {sessionEx. Message}");
+                    return;
+                }
+                
+                if (session. HasValue)
+                {
+                    System.Diagnostics. Debug.WriteLine($"InitializeAsync:  Сесія отримана - UserId={session.Value.UserId}");
+                    
+                    var sessionValue = session.Value;
+                    
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        SetUserInfo(sessionValue. Email, sessionValue. Username ??  sessionValue.Email);
+                        UserId = sessionValue. UserId;
+                        System.Diagnostics. Debug.WriteLine($"InitializeAsync:  Користувач завантажено - {sessionValue.Username}");
+                    });
+                    
+                    System.Diagnostics. Debug.WriteLine("InitializeAsync: Завантаження цілей з БД...");
+                    await LoadGoalsFromDatabaseAsync().ConfigureAwait(false);
+                    System.Diagnostics.Debug.WriteLine("InitializeAsync:  Завершено");
+                }
+                else
+                {
+                    System. Diagnostics.Debug. WriteLine("InitializeAsync: Сесія не знайдена");
+                }
+            }
+            catch (Exception ex)
+            {
+                System. Diagnostics.Debug. WriteLine($"❌ MainViewModel: Помилка Initialize - {ex.Message}");
+                System.Diagnostics. Debug.WriteLine($"Stack:  {ex.StackTrace}");
+            }
         }
-    }
 
         public ObservableCollection<EventModel> Events { get; }
         public ObservableCollection<TodoItemModel> TodoItems { get; }
@@ -239,7 +241,7 @@ namespace Presentation.ViewModels
 
         public string PomodoroTimeText
         {
-            get => $"{_remainingTime.Minutes:D2}:{_remainingTime.Seconds:D2}";
+            get => $"{_remainingTime.Minutes: D2}:{_remainingTime.Seconds:D2}";
         }
 
         public bool IsTimerRunning
@@ -248,7 +250,7 @@ namespace Presentation.ViewModels
             set => SetProperty(ref _isTimerRunning, value);
         }
 
-        public string TimerButtonText => IsTimerRunning ? "❚❚" : "▶";
+        public string TimerButtonText => IsTimerRunning ?  "❚❚" : "▶";
 
         private DateTime _weekStartDate;
         public DateTime WeekStartDate
@@ -266,7 +268,7 @@ namespace Presentation.ViewModels
 
         public string DateRangeText => CurrentViewMode switch
         {
-            ViewMode.Week => $"{WeekStartDate:dd} — {WeekEndDate:dd MMM yyyy}",
+            ViewMode.Week => $"{WeekStartDate: dd} — {WeekEndDate:dd MMM yyyy}",
             ViewMode.Month => SelectedDate.ToString("MMMM yyyy"),
             ViewMode.Day => SelectedDate.ToString("dd MMMM yyyy"),
             _ => string.Empty
@@ -288,7 +290,7 @@ namespace Presentation.ViewModels
         public ICommand ResetPomodoroCommand { get; }
      
         private DateTime _calendarCurrentMonth = DateTime.Today;
-        private CalendarDayModel? _selectedCalendarDay;
+        private CalendarDayModel?  _selectedCalendarDay;
         
         public ObservableCollection<CalendarDayModel> CalendarDays { get; } = new();
         
@@ -304,7 +306,7 @@ namespace Presentation.ViewModels
             }
         }
         
-        public CalendarDayModel? SelectedCalendarDay
+        public CalendarDayModel?  SelectedCalendarDay
         {
             get => _selectedCalendarDay;
             set => SetProperty(ref _selectedCalendarDay, value);
@@ -328,28 +330,30 @@ namespace Presentation.ViewModels
         {
             SelectedDate = CurrentViewMode switch
             {
-                ViewMode.Day => SelectedDate.AddDays(1),
+                ViewMode.Day => SelectedDate. AddDays(1),
                 ViewMode.Week => SelectedDate.AddDays(7),
                 ViewMode.Month => SelectedDate.AddMonths(1),
                 _ => SelectedDate
             };
         }
+
         private void OnNavigatePrevious()
         {
             SelectedDate = CurrentViewMode switch
             {
                 ViewMode.Day => SelectedDate.AddDays(-1),
-                ViewMode.Week => SelectedDate.AddDays(-7),
+                ViewMode. Week => SelectedDate.AddDays(-7),
                 ViewMode.Month => SelectedDate.AddMonths(-1),
                 _ => SelectedDate
             };
         }
+
         private void OnGoToToday()
         {
             SelectedDate = DateTime.Today;
         }
 
-        private void OnChangeModeObject(object? modeParam)
+        private void OnChangeModeObject(object?  modeParam)
         {
             if (modeParam == null)
                 return;
@@ -384,8 +388,7 @@ namespace Presentation.ViewModels
             CurrentViewMode = mode;
         }
 
-
-        private void OnEditEvent(EventModel? eventModel)
+        private void OnEditEvent(EventModel?  eventModel)
         {
             if (eventModel != null)
             {
@@ -405,7 +408,7 @@ namespace Presentation.ViewModels
         {
             if (todoItem != null)
             {
-                todoItem.IsCompleted = !todoItem.IsCompleted;
+                todoItem.IsCompleted = !todoItem. IsCompleted;
             }
         }
 
@@ -421,7 +424,7 @@ namespace Presentation.ViewModels
         {
             if (CurrentViewMode == ViewMode.Week)
             {
-                var diff = (7 + (SelectedDate.DayOfWeek - DayOfWeek.Sunday)) % 7;
+                var diff = (7 + (SelectedDate.DayOfWeek - DayOfWeek. Sunday)) % 7;
                 WeekStartDate = SelectedDate.AddDays(-diff).Date;
                 WeekEndDate = WeekStartDate.AddDays(6);
             }
@@ -436,7 +439,7 @@ namespace Presentation.ViewModels
                 Title = "Зустріч з командою",
                 Description = "Обговорення проекту",
                 StartDateTime = DateTime.Today.AddHours(10),
-                EndDateTime = DateTime.Today.AddHours(11),
+                EndDateTime = DateTime.Today. AddHours(11),
                 Priority = EventPriority.High,
                 Color = Colors.Red
             });
@@ -447,8 +450,8 @@ namespace Presentation.ViewModels
                 Title = "Робота над завданням",
                 Description = "Розробка UI",
                 StartDateTime = DateTime.Today.AddHours(14),
-                EndDateTime = DateTime.Today.AddHours(16),
-                Priority = EventPriority.Normal,
+                EndDateTime = DateTime.Today. AddHours(16),
+                Priority = EventPriority. Normal,
                 Color = Colors.Blue
             });
 
@@ -471,16 +474,16 @@ namespace Presentation.ViewModels
             UpdateDateRange();
         }
 
-        public void SetUserInfo(string email, string? username = null)
+        public void SetUserInfo(string email, string?  username = null)
         {
             UserEmail = email;
 
-            if (!string.IsNullOrEmpty(username))
+            if (! string.IsNullOrEmpty(username))
             {
                 UserName = username;
                 
                 var parts = username.Split(new[] { ' ', '.', '_' }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length >= 2)
+                if (parts. Length >= 2)
                 {
                     UserInitials = $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[1][0])}";
                 }
@@ -494,12 +497,11 @@ namespace Presentation.ViewModels
                 var emailPart = email.Split('@')[0];
                 UserName = emailPart;
                 
-                if (emailPart.Length > 0)
+                if (emailPart. Length > 0)
                 {
-
-                    if (emailPart.Contains('.') || emailPart.Contains('_'))
+                    if (emailPart. Contains('.') || emailPart.Contains('_'))
                     {
-                        var parts = emailPart.Split(new[] { '.', '_' }, StringSplitOptions.RemoveEmptyEntries);
+                        var parts = emailPart.Split(new[] { '.', '_' }, StringSplitOptions. RemoveEmptyEntries);
                         if (parts.Length >= 2)
                         {
                             UserInitials = $"{char.ToUpper(parts[0][0])}{char.ToUpper(parts[1][0])}";
@@ -517,209 +519,243 @@ namespace Presentation.ViewModels
             }
         }
 
-
         private async Task OnLogout()
         {
+            // ✅ ВИПРАВЛЕНО: Зупиняємо таймер перед виходом
+            StopAndDisposeTimer();
+            
             if (_sessionService != null)
             {
                 await _sessionService.ClearSessionAsync();
             }
 
-            await MainThread.InvokeOnMainThreadAsync(async () =>
+            await MainThread. InvokeOnMainThreadAsync(async () =>
             {
                 await Shell.Current.Navigation.PopToRootAsync();
             });
         }
 
+        // ✅ ВИПРАВЛЕНО:  Новий метод для безпечної зупинки таймера
+        private void StopAndDisposeTimer()
+        {
+            try
+            {
+                if (_pomodoroTimer != null)
+                {
+                    _pomodoroTimer.Stop();
+                    _pomodoroTimer.Tick -= OnTimerTick;
+                    _pomodoroTimer = null;
+                }
+                IsTimerRunning = false;
+            }
+            catch (Exception ex)
+            {
+                System. Diagnostics.Debug. WriteLine($"❌ StopAndDisposeTimer error: {ex.Message}");
+            }
+        }
+
+        // ✅ ВИПРАВЛЕНО:  Використовуємо IDispatcherTimer (безпечний для UI на Windows)
         private void OnStartPomodoro()
         {
-            if (IsTimerRunning)
+            try
             {
-                IsTimerRunning = false;
-                _pomodoroTimer?.Stop();
-                OnPropertyChanged(nameof(TimerButtonText));
+                if (IsTimerRunning)
+                {
+                    // Якщо таймер працює - ставимо на паузу
+                    IsTimerRunning = false;
+                    _pomodoroTimer?.Stop();
+                    OnPropertyChanged(nameof(TimerButtonText));
+                }
+                else
+                {
+                    // Якщо таймер не працює - запускаємо
+                    IsTimerRunning = true;
+                    
+                    if (_sessionStartTime == null)
+                    {
+                        _sessionStartTime = DateTime.Now;
+                    }
+
+                    // ✅ КЛЮЧОВЕ ВИПРАВЛЕННЯ: Створюємо DispatcherTimer замість System.Timers.Timer
+                    if (_pomodoroTimer == null)
+                    {
+                        var dispatcher = Application.Current?. Dispatcher;
+                        if (dispatcher != null)
+                        {
+                            _pomodoroTimer = dispatcher.CreateTimer();
+                            _pomodoroTimer. Interval = TimeSpan.FromSeconds(1);
+                            _pomodoroTimer. Tick += OnTimerTick;
+                            System.Diagnostics. Debug.WriteLine("✅ DispatcherTimer створено успішно");
+                        }
+                        else
+                        {
+                            System. Diagnostics.Debug.WriteLine("❌ Dispatcher недоступний!");
+                            IsTimerRunning = false;
+                            return;
+                        }
+                    }
+
+                    _pomodoroTimer.Start();
+                    OnPropertyChanged(nameof(TimerButtonText));
+                    System.Diagnostics.Debug.WriteLine("✅ Pomodoro таймер запущено");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                IsTimerRunning = true;
-                
-                if (_sessionStartTime == null)
-                {
-                    _sessionStartTime = DateTime.Now;
-                }
-
-                if (_pomodoroTimer == null)
-                {
-                    _pomodoroTimer = new System.Timers.Timer(1000); 
-                    _pomodoroTimer.Elapsed += OnTimerTick;
-                }
-
-                _pomodoroTimer.Start();
-                OnPropertyChanged(nameof(TimerButtonText));
+                System.Diagnostics.Debug.WriteLine($"❌ OnStartPomodoro error: {ex.Message}");
+                IsTimerRunning = false;
             }
         }
 
         private void OnPausePomodoro()
         {
-            if (IsTimerRunning)
+            try
             {
-                IsTimerRunning = false;
-                _pomodoroTimer?.Stop();
-                OnPropertyChanged(nameof(TimerButtonText));
+                if (IsTimerRunning)
+                {
+                    IsTimerRunning = false;
+                    _pomodoroTimer?.Stop();
+                    OnPropertyChanged(nameof(TimerButtonText));
+                }
+            }
+            catch (Exception ex)
+            {
+                System. Diagnostics.Debug.WriteLine($"❌ OnPausePomodoro error: {ex.Message}");
             }
         }
 
         private void OnResetPomodoro()
         {
-            IsTimerRunning = false;
-            _pomodoroTimer?.Stop();
-            _remainingTime = TimeSpan.FromMinutes(25);
-            _sessionStartTime = null;
-            _completedCycles = 0;
-            _isWorkSession = true;
-            
-            OnPropertyChanged(nameof(PomodoroTimeText));
-            OnPropertyChanged(nameof(TimerButtonText));
-        }
-
-        private async void OnTimerTick(object? sender, System.Timers.ElapsedEventArgs e)
-        {
-            _remainingTime = _remainingTime.Subtract(TimeSpan.FromSeconds(1));
-
-            await MainThread.InvokeOnMainThreadAsync(() =>
+            try
             {
+                IsTimerRunning = false;
+                _pomodoroTimer?. Stop();
+                _remainingTime = TimeSpan.FromMinutes(25);
+                _sessionStartTime = null;
+                _completedCycles = 0;
+                _isWorkSession = true;
+                
                 OnPropertyChanged(nameof(PomodoroTimeText));
-            });
-
-            if (_remainingTime.TotalSeconds <= 0)
+                OnPropertyChanged(nameof(TimerButtonText));
+            }
+            catch (Exception ex)
             {
-                await OnTimerCompleted();
+                System. Diagnostics.Debug.WriteLine($"❌ OnResetPomodoro error:  {ex.Message}");
             }
         }
+
+        // ✅ ВИПРАВЛЕНО:  Новий обробник для IDispatcherTimer (працює в UI потоці)
+        private async void OnTimerTick(object? sender, EventArgs e)
+        {
+            try
+            {
+                _remainingTime = _remainingTime. Subtract(TimeSpan.FromSeconds(1));
+                
+                // Оновлюємо UI напряму (DispatcherTimer вже працює в UI потоці)
+                OnPropertyChanged(nameof(PomodoroTimeText));
+
+                if (_remainingTime.TotalSeconds <= 0)
+                {
+                    await OnTimerCompleted();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ OnTimerTick error: {ex.Message}");
+                StopAndDisposeTimer();
+            }
+        }
+
         private async Task OnTimerCompleted()
         {
-            _pomodoroTimer?.Stop();
-            IsTimerRunning = false;
-
-            if (_isWorkSession)
+            try
             {
-                _completedCycles++;
+                _pomodoroTimer?.Stop();
+                IsTimerRunning = false;
 
-                if (_pomodoroService != null && _sessionStartTime.HasValue)
+                if (_isWorkSession)
                 {
-                    var pomodoro = new DAL.Models.Pomodoro
+                    _completedCycles++;
+
+                    if (_pomodoroService != null && _sessionStartTime. HasValue)
                     {
-                        UserId = UserId,
-                        StartTime = _sessionStartTime.Value,
-                        EndTime = DateTime.Now,
-                        WorkCycles = 1
-                    };
+                        try
+                        {
+                            var pomodoro = new DAL.Models.Pomodoro
+                            {
+                                UserId = UserId,
+                                StartTime = _sessionStartTime.Value,
+                                EndTime = DateTime.Now,
+                                WorkCycles = 1
+                            };
 
-                    await _pomodoroService.AddPomodoroAsync(pomodoro);
-                }
+                            await _pomodoroService.AddPomodoroAsync(pomodoro);
+                        }
+                        catch (Exception dbEx)
+                        {
+                            System.Diagnostics. Debug.WriteLine($"❌ Помилка збереження Pomodoro:  {dbEx.Message}");
+                        }
+                    }
 
-                if (_completedCycles % 4 == 0)
-                {
-                    _remainingTime = TimeSpan.FromMinutes(15); 
-                    await Shell.Current.DisplayAlert(
-                        "Помодоро завершено! 🎉",
-                        "Час для довгої перерви (15 хвилин)",
-                        "OK");
+                    if (_completedCycles % 4 == 0)
+                    {
+                        _remainingTime = TimeSpan.FromMinutes(15); 
+                        await Shell.Current.DisplayAlert(
+                            "Помодоро завершено!  🎉",
+                            "Час для довгої перерви (15 хвилин)",
+                            "OK");
+                    }
+                    else
+                    {
+                        _remainingTime = TimeSpan.FromMinutes(5); 
+                        await Shell.Current.DisplayAlert(
+                            "Помодоро завершено! ✅",
+                            "Час для короткої перерви (5 хвилин)",
+                            "OK");
+                    }
+
+                    _isWorkSession = false;
                 }
                 else
                 {
-                    _remainingTime = TimeSpan.FromMinutes(5); 
+                    _remainingTime = TimeSpan.FromMinutes(25);
+                    _isWorkSession = true;
+                    _sessionStartTime = null;
+
                     await Shell.Current.DisplayAlert(
-                        "Помодоро завершено! ✅",
-                        "Час для короткої перерви (5 хвилин)",
+                        "Перерва завершена! 💪",
+                        "Час повертатися до роботи",
                         "OK");
                 }
 
-                _isWorkSession = false;
-            }
-            else
-            {
-                _remainingTime = TimeSpan.FromMinutes(25);
-                _isWorkSession = true;
-                _sessionStartTime = null;
-
-                await Shell.Current.DisplayAlert(
-                    "Перерва завершена! 💪",
-                    "Час повертатися до роботи",
-                    "OK");
-            }
-
-            await MainThread.InvokeOnMainThreadAsync(() =>
-            {
                 OnPropertyChanged(nameof(PomodoroTimeText));
                 OnPropertyChanged(nameof(TimerButtonText));
-            });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics. Debug.WriteLine($"❌ OnTimerCompleted error:  {ex.Message}");
+            }
         }
       
         private void GenerateCalendarDays()
         {
-            CalendarDays.Clear();
-            
-            var firstDayOfMonth = new DateTime(CalendarCurrentMonth.Year, CalendarCurrentMonth.Month, 1);
-            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-            
-            int firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
-            if (firstDayOfWeek == 0) firstDayOfWeek = 7; 
-           
-            var previousMonth = firstDayOfMonth.AddMonths(-1);
-            var daysInPreviousMonth = DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month);
-            
-            for (int i = firstDayOfWeek - 1; i > 0; i--)
+            try
             {
-                var day = daysInPreviousMonth - i + 1;
-                var date = new DateTime(previousMonth.Year, previousMonth.Month, day);
-                var eventCount = GetEventCountForDate(date);
+                CalendarDays. Clear();
                 
-                CalendarDays.Add(new CalendarDayModel
-                {
-                    Day = day,
-                    Date = date,
-                    IsCurrentMonth = false,
-                    IsToday = false,
-                    IsSelected = false,
-                    HasEvents = eventCount > 0,
-                    EventCount = eventCount
-                });
-            }
-            
-            // Додаємо дні поточного місяця
-            for (int day = 1; day <= lastDayOfMonth.Day; day++)
-            {
-                var date = new DateTime(CalendarCurrentMonth.Year, CalendarCurrentMonth.Month, day);
-                var eventCount = GetEventCountForDate(date);
+                var firstDayOfMonth = new DateTime(CalendarCurrentMonth.Year, CalendarCurrentMonth.Month, 1);
+                var lastDayOfMonth = firstDayOfMonth. AddMonths(1).AddDays(-1);
                 
-                CalendarDays.Add(new CalendarDayModel
-                {
-                    Day = day,
-                    Date = date,
-                    IsCurrentMonth = true,
-                    IsToday = date.Date == DateTime.Today,
-                    IsSelected = date.Date == SelectedDate.Date,
-                    HasEvents = eventCount > 0,
-                    EventCount = eventCount
-                });
-            }
-            
-            var totalDays = CalendarDays.Count;
-            var remainingDays = (7 - (totalDays % 7)) % 7;
-            if (remainingDays > 0 || totalDays < 35)
-            {
-                var nextMonth = firstDayOfMonth.AddMonths(1);
-                var daysToAdd = remainingDays > 0 ? remainingDays : 7;
+                int firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+                if (firstDayOfWeek == 0) firstDayOfWeek = 7; 
+               
+                var previousMonth = firstDayOfMonth. AddMonths(-1);
+                var daysInPreviousMonth = DateTime. DaysInMonth(previousMonth.Year, previousMonth.Month);
                 
-                if (totalDays + daysToAdd < 35)
+                for (int i = firstDayOfWeek - 1; i > 0; i--)
                 {
-                    daysToAdd += 7;
-                }
-                
-                for (int day = 1; day <= daysToAdd; day++)
-                {
-                    var date = new DateTime(nextMonth.Year, nextMonth.Month, day);
+                    var day = daysInPreviousMonth - i + 1;
+                    var date = new DateTime(previousMonth.Year, previousMonth.Month, day);
                     var eventCount = GetEventCountForDate(date);
                     
                     CalendarDays.Add(new CalendarDayModel
@@ -733,18 +769,77 @@ namespace Presentation.ViewModels
                         EventCount = eventCount
                     });
                 }
+                
+                // Додаємо дні поточного місяця
+                for (int day = 1; day <= lastDayOfMonth. Day; day++)
+                {
+                    var date = new DateTime(CalendarCurrentMonth.Year, CalendarCurrentMonth.Month, day);
+                    var eventCount = GetEventCountForDate(date);
+                    
+                    CalendarDays.Add(new CalendarDayModel
+                    {
+                        Day = day,
+                        Date = date,
+                        IsCurrentMonth = true,
+                        IsToday = date.Date == DateTime.Today,
+                        IsSelected = date.Date == SelectedDate. Date,
+                        HasEvents = eventCount > 0,
+                        EventCount = eventCount
+                    });
+                }
+                
+                var totalDays = CalendarDays.Count;
+                var remainingDays = (7 - (totalDays % 7)) % 7;
+                if (remainingDays > 0 || totalDays < 35)
+                {
+                    var nextMonth = firstDayOfMonth. AddMonths(1);
+                    var daysToAdd = remainingDays > 0 ? remainingDays : 7;
+                    
+                    if (totalDays + daysToAdd < 35)
+                    {
+                        daysToAdd += 7;
+                    }
+                    
+                    for (int day = 1; day <= daysToAdd; day++)
+                    {
+                        var date = new DateTime(nextMonth.Year, nextMonth.Month, day);
+                        var eventCount = GetEventCountForDate(date);
+                        
+                        CalendarDays.Add(new CalendarDayModel
+                        {
+                            Day = day,
+                            Date = date,
+                            IsCurrentMonth = false,
+                            IsToday = false,
+                            IsSelected = false,
+                            HasEvents = eventCount > 0,
+                            EventCount = eventCount
+                        });
+                    }
+                }
+                
+                System.Diagnostics. Debug.WriteLine($"Calendar generated:  {CalendarDays.Count} days");
+                OnPropertyChanged(nameof(CurrentMonthYear));
+                OnPropertyChanged(nameof(CalendarDays));
             }
-            
-            System.Diagnostics.Debug.WriteLine($"Calendar generated: {CalendarDays.Count} days");
-            OnPropertyChanged(nameof(CurrentMonthYear));
-            OnPropertyChanged(nameof(CalendarDays));
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ GenerateCalendarDays error: {ex.Message}");
+            }
         }
         
         private int GetEventCountForDate(DateTime date)
         {
-            return Events.Count(e => 
-                e.StartDateTime.Date <= date.Date && 
-                e.EndDateTime.Date >= date.Date);
+            try
+            {
+                return Events.Count(e => 
+                    e. StartDateTime. Date <= date. Date && 
+                    e.EndDateTime.Date >= date. Date);
+            }
+            catch
+            {
+                return 0;
+            }
         }
         
         private void OnPreviousMonth()
@@ -757,7 +852,7 @@ namespace Presentation.ViewModels
             CalendarCurrentMonth = CalendarCurrentMonth.AddMonths(1);
         }
         
-        private void OnSelectDay(CalendarDayModel? selectedDay)
+        private void OnSelectDay(CalendarDayModel?  selectedDay)
         {
             if (selectedDay == null) return;
             foreach (var day in CalendarDays)
@@ -774,19 +869,19 @@ namespace Presentation.ViewModels
         {
             if (_isLoadingGoals)
             {
-                System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Завантаження вже виконується, пропускаємо...");
+                System.Diagnostics. Debug.WriteLine("LoadGoalsFromDatabase: Завантаження вже виконується, пропускаємо.. .");
                 return;
             }
 
             if (_serviceProvider == null)
             {
-                System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: ServiceProvider не доступний");
+                System. Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: ServiceProvider не доступний");
                 return;
             }
 
             if (UserId == 0)
             {
-                System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: UserId не встановлено");
+                System. Diagnostics.Debug. WriteLine("LoadGoalsFromDatabase: UserId не встановлено");
                 return;
             }
 
@@ -794,10 +889,10 @@ namespace Presentation.ViewModels
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Завантаження планів для користувача {UserId}...");
+                System.Diagnostics. Debug.WriteLine($"LoadGoalsFromDatabase:  Завантаження планів для користувача {UserId}.. .");
                 
                 // Створюємо новий scope для кожного запиту
-                using var scope = _serviceProvider.CreateScope();
+                using var scope = _serviceProvider. CreateScope();
                 var goalService = scope.ServiceProvider.GetRequiredService<IGoalService>();
                 
                 IEnumerable<DAL.Models.Goal> goals;
@@ -807,22 +902,22 @@ namespace Presentation.ViewModels
                 }
                 catch (Exception dbEx)
                 {
-                    System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Помилка БД - {dbEx.Message}");
+                    System. Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase:  Помилка БД - {dbEx.Message}");
                     return;
                 }
                 
                 var goalsList = goals.ToList();
-                System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Знайдено {goalsList.Count} планів");
+                System.Diagnostics. Debug.WriteLine($"LoadGoalsFromDatabase:  Знайдено {goalsList.Count} планів");
 
                 var eventModels = new List<EventModel>();
                 
                 foreach (var goal in goalsList)
                 {
-                    if (goal.StartTime.HasValue && goal.EndTime.HasValue)
+                    if (goal.StartTime. HasValue && goal.EndTime. HasValue)
                     {
                         // Розбиваємо опис на заголовок та деталі
                         var lines = goal.Description.Split('\n', 2);
-                        string title = lines.Length > 0 ? lines[0] : goal.Description;
+                        string title = lines.Length > 0 ?  lines[0] : goal.Description;
                         string description = lines.Length > 1 ? lines[1] : string.Empty;
 
                         eventModels.Add(new EventModel
@@ -830,7 +925,7 @@ namespace Presentation.ViewModels
                             Id = goal.Id,
                             Title = title,
                             Description = description,
-                            StartDateTime = goal.StartTime.Value,
+                            StartDateTime = goal. StartTime.Value,
                             EndDateTime = goal.EndTime.Value,
                             Priority = (EventPriority)goal.Priority,
                             Color = Colors.Blue,
@@ -839,24 +934,25 @@ namespace Presentation.ViewModels
                     }
                 }
                 
-                MainThread.BeginInvokeOnMainThread(() =>
+                // ✅ ВИПРАВЛЕНО: Використовуємо await для гарантії виконання в UI потоці
+                await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     try
                     {
                         Events.Clear();
                         foreach (var eventModel in eventModels)
                         {
-                            Events.Add(eventModel);
-                            System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Додано план '{eventModel.Title}' (Start: {eventModel.StartDateTime}, End: {eventModel.EndDateTime})");
+                            Events. Add(eventModel);
+                            System.Diagnostics. Debug.WriteLine($"LoadGoalsFromDatabase:  Додано план '{eventModel.Title}' (Start: {eventModel. StartDateTime}, End:  {eventModel.EndDateTime})");
                         }
                        
-                        System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Регенерація календаря...");
+                        System.Diagnostics. Debug.WriteLine("LoadGoalsFromDatabase: Регенерація календаря.. .");
                         
                         // Примусово оновлюємо прив'язку Events
                         OnPropertyChanged(nameof(Events));
                         
                         GenerateCalendarDays();
-                        System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Завершено успішно");
+                        System.Diagnostics. Debug.WriteLine("LoadGoalsFromDatabase:  Завершено успішно");
                     }
                     catch (Exception uiEx)
                     {
@@ -867,8 +963,8 @@ namespace Presentation.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: ПОМИЛКА - {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Stack trace - {ex.StackTrace}");
+                System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase:  ПОМИЛКА - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Stack trace - {ex. StackTrace}");
             }
             finally
             {
@@ -879,10 +975,9 @@ namespace Presentation.ViewModels
         
         public async Task ReloadGoals()
         {
-            System.Diagnostics.Debug.WriteLine("ReloadGoals: Починаємо перезавантаження...");
-            await Task.Delay(300);
+            System.Diagnostics. Debug.WriteLine("ReloadGoals:  Починаємо перезавантаження.. .");
+            await Task. Delay(300);
             await LoadGoalsFromDatabaseAsync();
         }
     }
 }
-

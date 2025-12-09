@@ -1,5 +1,5 @@
 using Presentation.Models;
-using System.Collections.ObjectModel;
+using System. Collections.ObjectModel;
 
 namespace Presentation.Controls
 {
@@ -16,15 +16,15 @@ namespace Presentation.Controls
 
         public static readonly BindableProperty EventsProperty =
             BindableProperty.Create(nameof(Events), typeof(ObservableCollection<EventModel>), typeof(WeekScheduleGrid), 
-                new ObservableCollection<EventModel>(), propertyChanged: OnEventsChanged);
+                null, propertyChanged: OnEventsChanged);
 
         public static readonly BindableProperty WeekStartDateProperty =
             BindableProperty.Create(nameof(WeekStartDate), typeof(DateTime), typeof(WeekScheduleGrid), 
-                DateTime.Today, propertyChanged: OnWeekStartDateChanged);
+                DateTime.Today, propertyChanged:  OnWeekStartDateChanged);
 
-        public ObservableCollection<EventModel> Events
+        public ObservableCollection<EventModel>? Events
         {
-            get => (ObservableCollection<EventModel>)GetValue(EventsProperty);
+            get => (ObservableCollection<EventModel>?)GetValue(EventsProperty);
             set => SetValue(EventsProperty, value);
         }
 
@@ -36,276 +36,388 @@ namespace Presentation.Controls
 
         public WeekScheduleGrid()
         {
-            CreateScheduleGrid();
+            try
+            {
+                CreateScheduleGrid();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics. Debug.WriteLine($"❌ WeekScheduleGrid constructor error: {ex. Message}");
+            }
         }
 
         private void CreateScheduleGrid()
         {
-            var scrollView = new ScrollView
+            try
             {
-                Orientation = ScrollOrientation.Vertical
-            };
+                var scrollView = new ScrollView
+                {
+                    Orientation = ScrollOrientation.Vertical
+                };
 
-            _mainGrid = new Grid
-            {
-                RowSpacing = 0,
-                ColumnSpacing = 1,
-                BackgroundColor = Colors.LightGray,
-                Padding = 0
-            };
+                _mainGrid = new Grid
+                {
+                    RowSpacing = 0,
+                    ColumnSpacing = 1,
+                    BackgroundColor = Colors. LightGray,
+                    Padding = 0
+                };
 
-            // Define columns: Time label + 7 days
-            _mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = 80 });
-            for (int i = 0; i < 7; i++)
-            {
-                _mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                // Define columns:  Time label + 7 days
+                _mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = 80 });
+                for (int i = 0; i < 7; i++)
+                {
+                    _mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType. Star) });
+                }
+
+                // Define rows: Header + hours
+                _mainGrid.RowDefinitions.Add(new RowDefinition { Height = 50 }); // Header
+                for (int hour = _startHour; hour <= _endHour; hour++)
+                {
+                    _mainGrid.RowDefinitions.Add(new RowDefinition { Height = _hourHeight });
+                }
+
+                // Create header
+                CreateHeader();
+
+                // Create time labels and grid cells
+                CreateTimeLabelsAndCells();
+
+                scrollView.Content = _mainGrid;
+                Content = scrollView;
             }
-
-            // Define rows: Header + hours
-            _mainGrid.RowDefinitions.Add(new RowDefinition { Height = 50 }); // Header
-            for (int hour = _startHour; hour <= _endHour; hour++)
+            catch (Exception ex)
             {
-                _mainGrid.RowDefinitions.Add(new RowDefinition { Height = _hourHeight });
+                System.Diagnostics. Debug.WriteLine($"❌ CreateScheduleGrid error:  {ex.Message}");
             }
-
-            // Create header
-            CreateHeader();
-
-            // Create time labels and grid cells
-            CreateTimeLabelsAndCells();
-
-            scrollView.Content = _mainGrid;
-            Content = scrollView;
         }
 
         private void CreateHeader()
         {
-            // Top-left corner (empty)
-            var cornerBorder = new Border
+            try
             {
-                BackgroundColor = Color.FromArgb("#F5F5F5"),
-                Stroke = Color.FromArgb("#E0E0E0"),
-                StrokeThickness = 1
-            };
-            Grid.SetRow(cornerBorder, 0);
-            Grid.SetColumn(cornerBorder, 0);
-            _mainGrid.Children.Add(cornerBorder);
-
-            // Day headers
-            for (int day = 0; day < 7; day++)
-            {
-                var dayDate = WeekStartDate.AddDays(day);
-                var headerBorder = new Border
+                // Top-left corner (empty)
+                var cornerBorder = new Border
                 {
-                    BackgroundColor = Color.FromArgb("#FF69B4"),
+                    BackgroundColor = Color.FromArgb("#F5F5F5"),
                     Stroke = Color.FromArgb("#E0E0E0"),
-                    StrokeThickness = 1,
-                    Padding = new Thickness(10, 5)
+                    StrokeThickness = 1
                 };
+                Grid.SetRow(cornerBorder, 0);
+                Grid. SetColumn(cornerBorder, 0);
+                _mainGrid.Children.Add(cornerBorder);
 
-                var headerStack = new VerticalStackLayout
+                // Day headers
+                for (int day = 0; day < 7; day++)
                 {
-                    Spacing = 2,
-                    HorizontalOptions = LayoutOptions.Center,
-                    VerticalOptions = LayoutOptions.Center
-                };
+                    var dayDate = WeekStartDate.AddDays(day);
+                    var headerBorder = new Border
+                    {
+                        BackgroundColor = Color.FromArgb("#FF69B4"),
+                        Stroke = Color.FromArgb("#E0E0E0"),
+                        StrokeThickness = 1,
+                        Padding = new Thickness(10, 5)
+                    };
 
-                headerStack.Children.Add(new Label
-                {
-                    Text = _daysOfWeek[day],
-                    FontSize = 12, // більший розмір
-                    FontAttributes = FontAttributes.Bold,
-                    TextColor = Colors.White,
-                    HorizontalOptions = LayoutOptions.Center
-                });
+                    var headerStack = new VerticalStackLayout
+                    {
+                        Spacing = 2,
+                        HorizontalOptions = LayoutOptions.Center,
+                        VerticalOptions = LayoutOptions.Center
+                    };
 
-                headerStack.Children.Add(new Label
-                {
-                    Text = dayDate.Day.ToString(),
-                    FontSize = 18,
-                    FontAttributes = FontAttributes.Bold,
-                    TextColor = Colors.White,
-                    HorizontalOptions = LayoutOptions.Center
-                });
+                    headerStack.Children.Add(new Label
+                    {
+                        Text = _daysOfWeek[day],
+                        FontSize = 12,
+                        FontAttributes = FontAttributes.Bold,
+                        TextColor = Colors.White,
+                        HorizontalOptions = LayoutOptions.Center
+                    });
 
-                headerBorder.Content = headerStack;
+                    headerStack.Children. Add(new Label
+                    {
+                        Text = dayDate.Day.ToString(),
+                        FontSize = 18,
+                        FontAttributes = FontAttributes. Bold,
+                        TextColor = Colors. White,
+                        HorizontalOptions = LayoutOptions.Center
+                    });
 
-                // Add tap gesture to day header
-                var headerTapGesture = new TapGestureRecognizer();
-                int capturedDay = day;
-                headerTapGesture.Tapped += (s, e) => DayTapped?.Invoke(this, WeekStartDate.AddDays(capturedDay));
-                headerBorder.GestureRecognizers.Add(headerTapGesture);
+                    headerBorder.Content = headerStack;
 
-                Grid.SetRow(headerBorder, 0);
-                Grid.SetColumn(headerBorder, day + 1);
-                _mainGrid.Children.Add(headerBorder);
+                    // Add tap gesture to day header
+                    var headerTapGesture = new TapGestureRecognizer();
+                    int capturedDay = day;
+                    headerTapGesture. Tapped += (s, e) => 
+                    {
+                        try
+                        {
+                            DayTapped?. Invoke(this, WeekStartDate.AddDays(capturedDay));
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics. Debug.WriteLine($"❌ HeaderTap error: {ex. Message}");
+                        }
+                    };
+                    headerBorder.GestureRecognizers. Add(headerTapGesture);
+
+                    Grid.SetRow(headerBorder, 0);
+                    Grid.SetColumn(headerBorder, day + 1);
+                    _mainGrid. Children.Add(headerBorder);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ CreateHeader error: {ex.Message}");
             }
         }
 
         private void CreateTimeLabelsAndCells()
         {
-            for (int hour = _startHour; hour < _endHour; hour++)
+            try
             {
-                int rowIndex = hour - _startHour + 1;
-
-                // Time label
-                var timeBorder = new Border
+                for (int hour = _startHour; hour < _endHour; hour++)
                 {
-                    BackgroundColor = Color.FromArgb("#F9F9F9"),
-                    Stroke = Color.FromArgb("#E0E0E0"),
-                    StrokeThickness = 1,
-                    Padding = new Thickness(10, 5)
-                };
+                    int rowIndex = hour - _startHour + 1;
 
-                timeBorder.Content = new Label
-                {
-                    Text = $"{hour:D2}:00",
-                    FontSize = 12,
-                    TextColor = Color.FromArgb("#666666"),
-                    VerticalOptions = LayoutOptions.Start,
-                    HorizontalOptions = LayoutOptions.End
-                };
-
-                Grid.SetRow(timeBorder, rowIndex);
-                Grid.SetColumn(timeBorder, 0);
-                _mainGrid.Children.Add(timeBorder);
-
-                // Day cells
-                for (int day = 0; day < 7; day++)
-                {
-                    var cellBorder = new Border
+                    // Time label
+                    var timeBorder = new Border
                     {
-                        BackgroundColor = hour % 2 == 0 ? Colors.White : Color.FromArgb("#FAFAFA"),
+                        BackgroundColor = Color.FromArgb("#F9F9F9"),
                         Stroke = Color.FromArgb("#E0E0E0"),
-                        StrokeThickness = 1
+                        StrokeThickness = 1,
+                        Padding = new Thickness(10, 5)
                     };
 
-                    // Add tap gesture for adding events
-                    var tapGesture = new TapGestureRecognizer();
-                    int capturedDay = day;
-                    int capturedHour = hour;
-                    tapGesture.Tapped += (s, e) => OnCellTapped(capturedDay, capturedHour);
-                    cellBorder.GestureRecognizers.Add(tapGesture);
+                    timeBorder.Content = new Label
+                    {
+                        Text = $"{hour:D2}:00",
+                        FontSize = 12,
+                        TextColor = Color.FromArgb("#666666"),
+                        VerticalOptions = LayoutOptions.Start,
+                        HorizontalOptions = LayoutOptions.End
+                    };
 
-                    Grid.SetRow(cellBorder, rowIndex);
-                    Grid.SetColumn(cellBorder, day + 1);
-                    _mainGrid.Children.Add(cellBorder);
+                    Grid.SetRow(timeBorder, rowIndex);
+                    Grid.SetColumn(timeBorder, 0);
+                    _mainGrid.Children.Add(timeBorder);
+
+                    // Day cells
+                    for (int day = 0; day < 7; day++)
+                    {
+                        var cellBorder = new Border
+                        {
+                            BackgroundColor = hour % 2 == 0 ? Colors.White : Color.FromArgb("#FAFAFA"),
+                            Stroke = Color.FromArgb("#E0E0E0"),
+                            StrokeThickness = 1
+                        };
+
+                        // Add tap gesture for adding events
+                        var tapGesture = new TapGestureRecognizer();
+                        int capturedDay = day;
+                        int capturedHour = hour;
+                        tapGesture. Tapped += (s, e) => OnCellTapped(capturedDay, capturedHour);
+                        cellBorder.GestureRecognizers.Add(tapGesture);
+
+                        Grid. SetRow(cellBorder, rowIndex);
+                        Grid. SetColumn(cellBorder, day + 1);
+                        _mainGrid.Children.Add(cellBorder);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics. Debug.WriteLine($"❌ CreateTimeLabelsAndCells error: {ex. Message}");
             }
         }
 
         private void RenderEvents()
         {
-            if (Events == null || _mainGrid == null) return;
-
-            // Remove existing event views
-            var eventsToRemove = _mainGrid.Children
-                .Where(c => c is Border border && border.StyleId == "EventBlock")
-                .ToList();
-            
-            foreach (var eventView in eventsToRemove)
+            try
             {
-                _mainGrid.Children.Remove(eventView);
+                if (Events == null || _mainGrid == null) return;
+
+                // ✅ ВИПРАВЛЕНО: Безпечне видалення - створюємо копію списку
+                var eventsToRemove = _mainGrid.Children
+                    .OfType<Border>()
+                    .Where(b => b. StyleId == "EventBlock")
+                    . ToList();
+                
+                foreach (var eventView in eventsToRemove)
+                {
+                    _mainGrid.Children.Remove(eventView);
+                }
+
+                // Add new event views
+                foreach (var evt in Events)
+                {
+                    try
+                    {
+                        if (evt.StartDateTime.Date < WeekStartDate || evt.StartDateTime. Date >= WeekStartDate.AddDays(7))
+                            continue;
+
+                        var dayOffset = (evt. StartDateTime.Date - WeekStartDate. Date).Days;
+                        var startRow = evt.StartHour - _startHour + 1;
+                        var durationHours = evt.Duration.TotalHours;
+                        
+                        // ✅ Перевірка валідності індексів
+                        if (startRow < 1 || startRow > _endHour - _startHour + 1)
+                        {
+                            System.Diagnostics. Debug.WriteLine($"⚠️ Invalid startRow: {startRow} for event {evt.Title}");
+                            continue;
+                        }
+                        if (dayOffset < 0 || dayOffset > 6)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"⚠️ Invalid dayOffset:  {dayOffset} for event {evt.Title}");
+                            continue;
+                        }
+                        
+                        var eventBorder = new Border
+                        {
+                            BackgroundColor = evt. Color.WithAlpha(0.3f),
+                            Stroke = evt.Color,
+                            StrokeThickness = 2,
+                            Padding = new Thickness(5),
+                            StyleId = "EventBlock",
+                            Margin = new Thickness(2)
+                        };
+
+                        var eventStack = new VerticalStackLayout
+                        {
+                            Spacing = 2
+                        };
+
+                        eventStack.Children.Add(new Label
+                        {
+                            Text = evt.Title ??  "Без назви",
+                            FontSize = 12,
+                            FontAttributes = FontAttributes. Bold,
+                            TextColor = Color. FromArgb("#333333"),
+                            LineBreakMode = LineBreakMode. TailTruncation
+                        });
+
+                        eventStack. Children.Add(new Label
+                        {
+                            Text = $"{evt.StartDateTime:HH: mm} - {evt.EndDateTime:HH:mm}",
+                            FontSize = 10,
+                            TextColor = Color.FromArgb("#666666")
+                        });
+
+                        eventBorder. Content = eventStack;
+
+                        // ✅ TapGestureRecognizer для кліку по події
+                        var tapGesture = new TapGestureRecognizer();
+                        var capturedEvent = evt;
+                        tapGesture. Tapped += (s, e) => 
+                        {
+                            try
+                            {
+                                EventTapped?. Invoke(this, capturedEvent);
+                            }
+                            catch (Exception ex)
+                            {
+                                System. Diagnostics.Debug. WriteLine($"❌ EventTapped error: {ex.Message}");
+                            }
+                        };
+                        eventBorder.GestureRecognizers.Add(tapGesture);
+
+                        // ❌ ВИДАЛЕНО: MenuFlyout - він крашить на Windows! 
+                        // Замість контекстного меню використовуємо EventTapped подію
+                        // і обробляємо її в DashboardPage через DisplayActionSheet
+
+                        Grid.SetRow(eventBorder, startRow);
+                        Grid.SetColumn(eventBorder, dayOffset + 1);
+                        Grid.SetRowSpan(eventBorder, Math. Max(1, (int)(durationHours)));
+                        
+                        _mainGrid.Children.Add(eventBorder);
+                    }
+                    catch (Exception eventEx)
+                    {
+                        System.Diagnostics. Debug.WriteLine($"❌ RenderEvents single event error: {eventEx.Message}");
+                    }
+                }
             }
-
-            // Add new event views
-            foreach (var evt in Events)
+            catch (Exception ex)
             {
-                if (evt.StartDateTime.Date < WeekStartDate || evt.StartDateTime.Date >= WeekStartDate.AddDays(7))
-                    continue;
-
-                var dayOffset = (evt.StartDateTime.Date - WeekStartDate.Date).Days;
-                var startRow = evt.StartHour - _startHour + 1;
-                var durationHours = evt.Duration.TotalHours;
-                
-                var eventBorder = new Border
-                {
-                    BackgroundColor = evt.Color.WithAlpha(0.3f),
-                    Stroke = evt.Color,
-                    StrokeThickness = 2,
-                    Padding = new Thickness(5),
-                    StyleId = "EventBlock",
-                    Margin = new Thickness(2)
-                };
-
-                var eventStack = new VerticalStackLayout
-                {
-                    Spacing = 2
-                };
-
-                eventStack.Children.Add(new Label
-                {
-                    Text = evt.Title,
-                    FontSize = 12,
-                    FontAttributes = FontAttributes.Bold,
-                    TextColor = Color.FromArgb("#333333"),
-                    LineBreakMode = LineBreakMode.TailTruncation
-                });
-
-                eventStack.Children.Add(new Label
-                {
-                    Text = $"{evt.StartDateTime:HH:mm} - {evt.EndDateTime:HH:mm}",
-                    FontSize = 10,
-                    TextColor = Color.FromArgb("#666666")
-                });
-
-                eventBorder.Content = eventStack;
-
-                // Додаємо TapGestureRecognizer для кліку по події
-                var tapGesture = new TapGestureRecognizer();
-                tapGesture.Tapped += (s, e) => EventTapped?.Invoke(this, evt);
-                eventBorder.GestureRecognizers.Add(tapGesture);
-
-                // Add context menu
-                var menuFlyout = new MenuFlyout();
-                menuFlyout.Add(new MenuFlyoutItem { Text = "Редагувати" });
-                menuFlyout.Add(new MenuFlyoutItem { Text = "Видалити" });
-                menuFlyout.Add(new MenuFlyoutItem { Text = "Дублювати" });
-                FlyoutBase.SetContextFlyout(eventBorder, menuFlyout);
-
-                Grid.SetRow(eventBorder, startRow);
-                Grid.SetColumn(eventBorder, dayOffset + 1);
-                Grid.SetRowSpan(eventBorder, Math.Max(1, (int)(durationHours)));
-                
-                _mainGrid.Children.Add(eventBorder);
+                System. Diagnostics.Debug. WriteLine($"❌ RenderEvents error: {ex.Message}");
             }
         }
 
         private void OnCellTapped(int day, int hour)
         {
-            var selectedDate = WeekStartDate.AddDays(day).AddHours(hour);
-            DayTapped?.Invoke(this, selectedDate.Date);
+            try
+            {
+                var selectedDate = WeekStartDate.AddDays(day).AddHours(hour);
+                DayTapped?.Invoke(this, selectedDate. Date);
+            }
+            catch (Exception ex)
+            {
+                System. Diagnostics.Debug. WriteLine($"❌ OnCellTapped error: {ex.Message}");
+            }
         }
 
         private static void OnEventsChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            if (bindable is WeekScheduleGrid grid)
+            try
             {
-                if (oldValue is ObservableCollection<EventModel> oldCollection)
+                if (bindable is WeekScheduleGrid grid)
                 {
-                    oldCollection.CollectionChanged -= grid.OnEventsCollectionChanged;
-                }
+                    if (oldValue is ObservableCollection<EventModel> oldCollection)
+                    {
+                        oldCollection.CollectionChanged -= grid. OnEventsCollectionChanged;
+                    }
 
-                if (newValue is ObservableCollection<EventModel> newCollection)
-                {
-                    newCollection.CollectionChanged += grid.OnEventsCollectionChanged;
-                }
+                    if (newValue is ObservableCollection<EventModel> newCollection)
+                    {
+                        newCollection. CollectionChanged += grid.OnEventsCollectionChanged;
+                    }
 
-                grid.RenderEvents();
+                    grid.RenderEvents();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics. Debug.WriteLine($"❌ OnEventsChanged error: {ex.Message}");
             }
         }
 
-        private void OnEventsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void OnEventsCollectionChanged(object? sender, System.Collections. Specialized.NotifyCollectionChangedEventArgs e)
         {
-            RenderEvents();
+            try
+            {
+                // ✅ ВИПРАВЛЕНО:  Виконуємо в UI потоці
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    try
+                    {
+                        RenderEvents();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"❌ RenderEvents in MainThread error: {ex.Message}");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System. Diagnostics.Debug. WriteLine($"❌ OnEventsCollectionChanged error: {ex.Message}");
+            }
         }
 
         private static void OnWeekStartDateChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            if (bindable is WeekScheduleGrid grid)
+            try
             {
-                grid.CreateScheduleGrid();
-                grid.RenderEvents();
+                if (bindable is WeekScheduleGrid grid)
+                {
+                    grid.CreateScheduleGrid();
+                    grid.RenderEvents();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ OnWeekStartDateChanged error: {ex.Message}");
             }
         }
     }
