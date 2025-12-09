@@ -22,6 +22,19 @@ namespace Presentation.Views
             MonthView.DayTapped += OnDayTappedInCalendar;
             MonthView.EventTapped += OnEventTapped;
             
+            // Підписуємося на повідомлення про оновлення планів
+            MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalAdded", (sender) =>
+            {
+                System.Diagnostics.Debug.WriteLine("DashboardPage: Отримано GoalAdded, оновлюємо дані");
+                _viewModel?.RefreshData();
+            });
+            
+            MessagingCenter.Subscribe<AddPlanViewModel>(this, "GoalUpdated", (sender) =>
+            {
+                System.Diagnostics.Debug.WriteLine("DashboardPage: Отримано GoalUpdated, оновлюємо дані");
+                _viewModel?.RefreshData();
+            });
+            
             System.Diagnostics.Debug.WriteLine("DashboardPage: Створено");
         }
 
@@ -38,6 +51,12 @@ namespace Presentation.Views
                 System.Diagnostics.Debug.WriteLine("DashboardPage: Запускаємо ініціалізацію...");
                 _viewModel.Initialize();
                 System.Diagnostics.Debug.WriteLine("DashboardPage: Ініціалізацію запущено");
+            }
+            else if (_isInitialized && _viewModel != null)
+            {
+                // Оновлюємо дані при поверненні на сторінку
+                System.Diagnostics.Debug.WriteLine("DashboardPage: Оновлюємо дані при поверненні...");
+                _viewModel.RefreshData();
             }
         }
 
@@ -97,6 +116,15 @@ namespace Presentation.Views
 
             // Відкриваємо сторінку
             await Navigation.PushAsync(viewPlanPage);
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            
+            // Відписуємося від повідомлень
+            MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalAdded");
+            MessagingCenter.Unsubscribe<AddPlanViewModel>(this, "GoalUpdated");
         }
     }
 }

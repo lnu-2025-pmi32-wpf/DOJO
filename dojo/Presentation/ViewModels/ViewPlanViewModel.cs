@@ -149,6 +149,24 @@ namespace Presentation.ViewModels
 
         private async void OnEdit()
         {
+            // Передаємо параметри через Shell navigation
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { "EventId", EventId },
+                { "Title", Title },
+                { "Description", Description },
+                { "StartDate", StartDate },
+                { "StartTime", StartTime },
+                { "EndDate", EndDate },
+                { "EndTime", EndTime },
+                { "Priority", (int)Priority },
+                { "IsCompleted", IsCompleted },
+                { "IsEditMode", true }
+            };
+
+            // Закриваємо поточну сторінку та відкриваємо редагування
+            await Shell.Current.Navigation.PopAsync();
+            
             // Отримуємо AddPlanPage з DI контейнера
             var addPlanPage = Application.Current?.Handler?.MauiContext?.Services.GetService<AddPlanPage>();
             
@@ -158,9 +176,7 @@ namespace Presentation.ViewModels
                 addPlanViewModel.LoadEventForEdit(EventId, Title, Description, 
                     StartDate, StartTime, EndDate, EndTime, Priority, IsCompleted);
                 
-                // Переходимо на сторінку редагування
-                await Shell.Current.Navigation.PopAsync(); // Закриваємо ViewPlanPage
-                await Shell.Current.Navigation.PushAsync(addPlanPage); // Відкриваємо AddPlanPage
+                await Shell.Current.Navigation.PushAsync(addPlanPage);
             }
         }
 

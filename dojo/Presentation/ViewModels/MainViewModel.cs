@@ -77,6 +77,23 @@ namespace Presentation.ViewModels
         _ = InitializeAsync();
     }
 
+    public void RefreshData()
+    {
+        System.Diagnostics.Debug.WriteLine("MainViewModel: RefreshData викликано");
+        Task.Run(async () =>
+        {
+            await LoadGoalsFromDatabaseAsync();
+            
+            // Примусово оновлюємо відображення календаря
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                System.Diagnostics.Debug.WriteLine($"MainViewModel: RefreshData завершено. Events.Count = {Events.Count}");
+                OnPropertyChanged(nameof(Events));
+                OnPropertyChanged(nameof(CalendarDays));
+            });
+        });
+    }
+
     private async Task InitializeAsync()
     {
         try

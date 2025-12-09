@@ -232,6 +232,9 @@ namespace Presentation.ViewModels
                             "✅ Успіх", 
                             $"План '{Title}' успішно оновлено!", 
                             "OK");
+                        
+                        // Очищуємо форму
+                        ClearForm();
                     }
                 }
                 else
@@ -258,9 +261,12 @@ namespace Presentation.ViewModels
                         "✅ Успіх", 
                         $"План '{Title}' успішно створено!", 
                         "OK");
+                    
+                    // Очищуємо форму
+                    ClearForm();
                 }
 
-                await Shell.Current.GoToAsync("..");
+                await Shell.Current.Navigation.PopAsync();
             }
             catch (Exception ex)
             {
@@ -276,6 +282,7 @@ namespace Presentation.ViewModels
 
         private void OnCancel()
         {
+            ClearForm();
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 NavigateBack();
@@ -284,7 +291,23 @@ namespace Presentation.ViewModels
 
         private async void NavigateBack()
         {
-            await Shell.Current.GoToAsync("..");
+            await Shell.Current.Navigation.PopAsync();
+        }
+
+        private void ClearForm()
+        {
+            _eventId = null;
+            Title = string.Empty;
+            Description = string.Empty;
+            StartDate = DateTime.Today;
+            StartTime = new TimeSpan(9, 0, 0);
+            EndDate = DateTime.Today;
+            EndTime = new TimeSpan(10, 0, 0);
+            Priority = EventPriority.Normal;
+            _isCompleted = false;
+            AttachmentPath = string.Empty;
+            
+            OnPropertyChanged(nameof(IsEditMode));
         }
 
         private async Task OnAttachFile()
