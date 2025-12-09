@@ -15,10 +15,18 @@
             HorizontalOptions="Center">
 
             <Label 
-                Text="Створити новий план"
                 FontSize="24"
                 FontAttributes="Bold"
-                TextColor="#333333"/>
+                TextColor="#333333">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsEditMode}" Value="True">
+                        <Setter Property="Text" Value="Редагувати план"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsEditMode}" Value="False">
+                        <Setter Property="Text" Value="Створити новий план"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
 
             <!-- Title -->
             <VerticalStackLayout Spacing="5">
@@ -82,17 +90,31 @@
                         FontAttributes="Bold"
                         TextColor="#333333"/>
                     
-                    <Border 
-                        BackgroundColor="White"
-                        Stroke="#DDD"
-                        StrokeThickness="1"
-                        Padding="12"
-                        StrokeShape="RoundRectangle 8">
+                    <Grid>
+                        <Border 
+                            BackgroundColor="White"
+                            Stroke="#DDD"
+                            StrokeThickness="1"
+                            Padding="12"
+                            StrokeShape="RoundRectangle 8">
+                            <Entry 
+                                x:Name="StartDateEntry"
+                                Text="{Binding StartDateText}"
+                                IsReadOnly="True"
+                                FontSize="16"
+                                TextColor="#333333"
+                                Placeholder="Оберіть дату">
+                                <Entry.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnStartDateTapped"/>
+                                </Entry.GestureRecognizers>
+                            </Entry>
+                        </Border>
                         <DatePicker 
+                            x:Name="StartDatePicker"
                             Date="{Binding StartDate}"
-                            FontSize="16"
-                            TextColor="#333333"/>
-                    </Border>
+                            IsVisible="False"
+                            DateSelected="OnStartDateSelected"/>
+                    </Grid>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Grid.Column="1" Spacing="5">
@@ -102,17 +124,31 @@
                         FontAttributes="Bold"
                         TextColor="#333333"/>
                     
-                    <Border 
-                        BackgroundColor="White"
-                        Stroke="#DDD"
-                        StrokeThickness="1"
-                        Padding="12"
-                        StrokeShape="RoundRectangle 8">
+                    <Grid>
+                        <Border 
+                            BackgroundColor="White"
+                            Stroke="#DDD"
+                            StrokeThickness="1"
+                            Padding="12"
+                            StrokeShape="RoundRectangle 8">
+                            <Entry 
+                                x:Name="StartTimeEntry"
+                                Text="{Binding StartTimeText}"
+                                IsReadOnly="True"
+                                FontSize="16"
+                                TextColor="#333333"
+                                Placeholder="Оберіть час">
+                                <Entry.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnStartTimeTapped"/>
+                                </Entry.GestureRecognizers>
+                            </Entry>
+                        </Border>
                         <TimePicker 
+                            x:Name="StartTimePicker"
                             Time="{Binding StartTime}"
-                            FontSize="16"
-                            TextColor="#333333"/>
-                    </Border>
+                            IsVisible="False"
+                            PropertyChanged="OnStartTimeChanged"/>
+                    </Grid>
                 </VerticalStackLayout>
             </Grid>
 
@@ -125,17 +161,31 @@
                         FontAttributes="Bold"
                         TextColor="#333333"/>
                     
-                    <Border 
-                        BackgroundColor="White"
-                        Stroke="#DDD"
-                        StrokeThickness="1"
-                        Padding="12"
-                        StrokeShape="RoundRectangle 8">
+                    <Grid>
+                        <Border 
+                            BackgroundColor="White"
+                            Stroke="#DDD"
+                            StrokeThickness="1"
+                            Padding="12"
+                            StrokeShape="RoundRectangle 8">
+                            <Entry 
+                                x:Name="EndDateEntry"
+                                Text="{Binding EndDateText}"
+                                IsReadOnly="True"
+                                FontSize="16"
+                                TextColor="#333333"
+                                Placeholder="Оберіть дату">
+                                <Entry.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnEndDateTapped"/>
+                                </Entry.GestureRecognizers>
+                            </Entry>
+                        </Border>
                         <DatePicker 
+                            x:Name="EndDatePicker"
                             Date="{Binding EndDate}"
-                            FontSize="16"
-                            TextColor="#333333"/>
-                    </Border>
+                            IsVisible="False"
+                            DateSelected="OnEndDateSelected"/>
+                    </Grid>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Grid.Column="1" Spacing="5">
@@ -145,17 +195,31 @@
                         FontAttributes="Bold"
                         TextColor="#333333"/>
                     
-                    <Border 
-                        BackgroundColor="White"
-                        Stroke="#DDD"
-                        StrokeThickness="1"
-                        Padding="12"
-                        StrokeShape="RoundRectangle 8">
+                    <Grid>
+                        <Border 
+                            BackgroundColor="White"
+                            Stroke="#DDD"
+                            StrokeThickness="1"
+                            Padding="12"
+                            StrokeShape="RoundRectangle 8">
+                            <Entry 
+                                x:Name="EndTimeEntry"
+                                Text="{Binding EndTimeText}"
+                                IsReadOnly="True"
+                                FontSize="16"
+                                TextColor="#333333"
+                                Placeholder="Оберіть час">
+                                <Entry.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnEndTimeTapped"/>
+                                </Entry.GestureRecognizers>
+                            </Entry>
+                        </Border>
                         <TimePicker 
+                            x:Name="EndTimePicker"
                             Time="{Binding EndTime}"
-                            FontSize="16"
-                            TextColor="#333333"/>
-                    </Border>
+                            IsVisible="False"
+                            PropertyChanged="OnEndTimeChanged"/>
+                    </Grid>
                 </VerticalStackLayout>
             </Grid>
 

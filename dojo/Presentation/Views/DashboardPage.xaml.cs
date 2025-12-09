@@ -16,8 +16,11 @@ namespace Presentation.Views
             BindingContext = _viewModel;
             
             // Підписуємося на події контролів
+            DaySchedule.EventTapped += OnEventTapped;
             WeekSchedule.DayTapped += OnDayTappedInCalendar;
+            WeekSchedule.EventTapped += OnEventTapped;
             MonthView.DayTapped += OnDayTappedInCalendar;
+            MonthView.EventTapped += OnEventTapped;
             
             System.Diagnostics.Debug.WriteLine("DashboardPage: Створено");
         }
@@ -79,6 +82,21 @@ namespace Presentation.Views
                 _viewModel.SelectedDate = selectedDate;
                 _viewModel.CurrentViewMode = ViewMode.Day;
             }
+        }
+
+        private async void OnEventTapped(object? sender, EventModel eventModel)
+        {
+            if (eventModel == null) return;
+
+            // Створюємо ViewPlanViewModel та завантажуємо дані події
+            var viewPlanViewModel = new ViewPlanViewModel();
+            viewPlanViewModel.LoadEvent(eventModel);
+
+            // Створюємо сторінку та передаємо ViewModel
+            var viewPlanPage = new ViewPlanPage(viewPlanViewModel);
+
+            // Відкриваємо сторінку
+            await Navigation.PushAsync(viewPlanPage);
         }
     }
 }

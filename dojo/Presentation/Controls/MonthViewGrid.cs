@@ -17,6 +17,7 @@ namespace Presentation.Controls
             BindableProperty.Create(nameof(Events), typeof(ObservableCollection<EventModel>), typeof(MonthViewGrid), null, propertyChanged: OnEventsChanged);
 
         public event EventHandler<DateTime>? DayTapped;
+        public event EventHandler<EventModel>? EventTapped;
 
         public DateTime SelectedDate
         {
@@ -191,6 +192,16 @@ namespace Presentation.Controls
                     };
 
                     eventBorder.Content = eventLabel;
+
+                    // Додаємо TapGestureRecognizer для кліку по події
+                    var eventTapGesture = new TapGestureRecognizer();
+                    var eventToCapture = evt; // Capture for closure
+                    eventTapGesture.Tapped += (s, e) =>
+                    {
+                        EventTapped?.Invoke(this, eventToCapture);
+                    };
+                    eventBorder.GestureRecognizers.Add(eventTapGesture);
+
                     stackLayout.Children.Add(eventBorder);
                     eventCount++;
                 }

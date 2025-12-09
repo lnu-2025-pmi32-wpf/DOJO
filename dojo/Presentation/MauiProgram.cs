@@ -43,12 +43,14 @@ namespace Presentation
                 new AddPlanViewModel(
                     sp.GetRequiredService<IGoalService>(),
                     sp.GetRequiredService<ISessionService>()));
+            builder.Services.AddTransient<ViewPlanViewModel>();
             builder.Services.AddTransient<StatisticsViewModel>();
 
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<DashboardPage>();
             builder.Services.AddTransient<AddPlanPage>();
+            builder.Services.AddTransient<ViewPlanPage>();
             builder.Services.AddTransient<StatisticsPage>();
 
 #if DEBUG

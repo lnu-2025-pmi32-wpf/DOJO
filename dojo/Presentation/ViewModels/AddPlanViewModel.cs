@@ -12,6 +12,7 @@ namespace Presentation.ViewModels
         private readonly IGoalService _goalService;
         private readonly ISessionService _sessionService;
         
+        private int? _eventId = null;
         private string _title = string.Empty;
         private string _description = string.Empty;
         private DateTime _startDate = DateTime.Today;
@@ -20,6 +21,7 @@ namespace Presentation.ViewModels
         private TimeSpan _endTime = new TimeSpan(10, 0, 0);
         private EventPriority _priority = EventPriority.Normal;
         private string _attachmentPath = string.Empty;
+        private bool _isCompleted = false;
         
         private string _titleError = string.Empty;
         private string _dateError = string.Empty;
@@ -32,6 +34,25 @@ namespace Presentation.ViewModels
             SaveCommand = new AsyncRelayCommand(OnSave, CanSave);
             CancelCommand = new RelayCommand(OnCancel);
             AttachFileCommand = new AsyncRelayCommand(OnAttachFile);
+        }
+
+        public bool IsEditMode => _eventId.HasValue;
+
+        public void LoadEventForEdit(int eventId, string title, string description, 
+            DateTime startDate, TimeSpan startTime, DateTime endDate, TimeSpan endTime, 
+            EventPriority priority, bool isCompleted)
+        {
+            _eventId = eventId;
+            Title = title;
+            Description = description;
+            StartDate = startDate;
+            StartTime = startTime;
+            EndDate = endDate;
+            EndTime = endTime;
+            Priority = priority;
+            _isCompleted = isCompleted;
+            
+            OnPropertyChanged(nameof(IsEditMode));
         }
 
         public string Title
@@ -60,11 +81,14 @@ namespace Presentation.ViewModels
             {
                 if (SetProperty(ref _startDate, value))
                 {
+                    OnPropertyChanged(nameof(StartDateText));
                     ValidateDates();
                     (SaveCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
+
+        public string StartDateText => _startDate.ToString("dd.MM.yyyy");
 
         public TimeSpan StartTime
         {
@@ -73,11 +97,14 @@ namespace Presentation.ViewModels
             {
                 if (SetProperty(ref _startTime, value))
                 {
+                    OnPropertyChanged(nameof(StartTimeText));
                     ValidateDates();
                     (SaveCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
+
+        public string StartTimeText => _startTime.ToString(@"hh\:mm");
 
         public DateTime EndDate
         {
@@ -86,11 +113,14 @@ namespace Presentation.ViewModels
             {
                 if (SetProperty(ref _endDate, value))
                 {
+                    OnPropertyChanged(nameof(EndDateText));
                     ValidateDates();
                     (SaveCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
+
+        public string EndDateText => _endDate.ToString("dd.MM.yyyy");
 
         public TimeSpan EndTime
         {
@@ -99,11 +129,14 @@ namespace Presentation.ViewModels
             {
                 if (SetProperty(ref _endTime, value))
                 {
+                    OnPropertyChanged(nameof(EndTimeText));
                     ValidateDates();
                     (SaveCommand as AsyncRelayCommand)?.RaiseCanExecuteChanged();
                 }
             }
         }
+
+        public string EndTimeText => _endTime.ToString(@"hh\:mm");
 
         public EventPriority Priority
         {
@@ -165,30 +198,67 @@ namespace Presentation.ViewModels
                 // Зберігаємо час початку в описі у спеціальному форматі
                 var descriptionWithStartTime = $"START_TIME:{startDateTimeUtc:O}\n{Title}\n{Description}";
 
-                // Створюємо новий Goal для збереження в БД
-                var newGoal = new Goal
+                if (IsEditMode && _eventId.HasValue)
                 {
-                    UserId = session.Value.UserId,
-                    Description = descriptionWithStartTime,
-                    Deadline = endDateTimeUtc,
-                    Progress = 0
-                };
+                    // Режим редагування - оновлюємо існуючий Goal
+                    var existingGoal = await _goalService.GetGoalByIdAsync(_eventId.Value);
+                    
+                    if (existingGoal != null)
+                    {
+                        existingGoal.Description = descriptionWithStartTime;
+                        existingGoal.Deadline = endDateTimeUtc;
+                        existingGoal.Progress = _isCompleted ? 100 : existingGoal.Progress;
+                        
+                        // Переконуємося, що всі DateTime мають Kind = UTC
+                        if (existingGoal.CreatedAt.Kind == DateTimeKind.Unspecified)
+                        {
+                            existingGoal.CreatedAt = DateTime.SpecifyKind(existingGoal.CreatedAt, DateTimeKind.Utc);
+                        }
+                        if (existingGoal.UpdatedAt.Kind == DateTimeKind.Unspecified)
+                        {
+                            existingGoal.UpdatedAt = DateTime.SpecifyKind(existingGoal.UpdatedAt, DateTimeKind.Utc);
+                        }
 
-                System.Diagnostics.Debug.WriteLine($"Зберігаємо план: UserId={newGoal.UserId}, Title={Title}, StartTime={startDateTime}, Deadline={endDateTime}");
+                        System.Diagnostics.Debug.WriteLine($"Оновлюємо план: Id={existingGoal.Id}, Title={Title}, StartTime={startDateTime}, Deadline={endDateTime}");
 
-                // Зберігаємо в БД
-                await _goalService.AddGoalAsync(newGoal);
+                        await _goalService.UpdateGoalAsync(existingGoal);
 
-                System.Diagnostics.Debug.WriteLine("План успішно збережено!");
+                        System.Diagnostics.Debug.WriteLine("План успішно оновлено!");
 
-                // Відправляємо повідомлення про те, що потрібно перезавантажити плани
-                MessagingCenter.Send(this, "GoalAdded");
+                        // Відправляємо повідомлення про оновлення
+                        MessagingCenter.Send(this, "GoalUpdated");
 
-                // Показуємо повідомлення про успіх
-                await Shell.Current.DisplayAlert(
-                    "✅ Успіх", 
-                    $"План '{Title}' успішно створено!", 
-                    "OK");
+                        await Shell.Current.DisplayAlert(
+                            "✅ Успіх", 
+                            $"План '{Title}' успішно оновлено!", 
+                            "OK");
+                    }
+                }
+                else
+                {
+                    // Режим створення - створюємо новий Goal
+                    var newGoal = new Goal
+                    {
+                        UserId = session.Value.UserId,
+                        Description = descriptionWithStartTime,
+                        Deadline = endDateTimeUtc,
+                        Progress = 0
+                    };
+
+                    System.Diagnostics.Debug.WriteLine($"Зберігаємо план: UserId={newGoal.UserId}, Title={Title}, StartTime={startDateTime}, Deadline={endDateTime}");
+
+                    await _goalService.AddGoalAsync(newGoal);
+
+                    System.Diagnostics.Debug.WriteLine("План успішно збережено!");
+
+                    // Відправляємо повідомлення про те, що потрібно перезавантажити плани
+                    MessagingCenter.Send(this, "GoalAdded");
+
+                    await Shell.Current.DisplayAlert(
+                        "✅ Успіх", 
+                        $"План '{Title}' успішно створено!", 
+                        "OK");
+                }
 
                 await Shell.Current.GoToAsync("..");
             }

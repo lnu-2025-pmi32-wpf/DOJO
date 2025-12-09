@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:Presentation.ViewModels"
+             x:Class="Presentation.Views.ViewPlanPage"
+             x:DataType="viewmodels:ViewPlanViewModel"
+             Title="Деталі плану"
+             BackgroundColor="#F5F5F5">
+
+    <ScrollView>
+        <VerticalStackLayout 
+            Padding="20"
+            Spacing="20"
+            MaximumWidthRequest="800"
+            HorizontalOptions="Center">
+
+            <!-- Header -->
+            <Label 
+                Text="Деталі плану"
+                FontSize="24"
+                FontAttributes="Bold"
+                TextColor="#333333"/>
+
+            <!-- Title -->
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="Назва"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#666666"/>
+                
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="#DDD"
+                    StrokeThickness="1"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8">
+                    <Label 
+                        Text="{Binding Title}"
+                        FontSize="16"
+                        TextColor="#333333"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Description -->
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="Опис"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#666666"/>
+                
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="#DDD"
+                    StrokeThickness="1"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8"
+                    MinimumHeightRequest="100">
+                    <Label 
+                        Text="{Binding Description}"
+                        FontSize="16"
+                        TextColor="#333333"
+                        LineBreakMode="WordWrap"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Date and Time -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                <!-- Start Date & Time -->
+                <VerticalStackLayout Grid.Column="0" Spacing="10">
+                    <Label 
+                        Text="Початок"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="#666666"/>
+                    
+                    <Border 
+                        BackgroundColor="White"
+                        Stroke="#DDD"
+                        StrokeThickness="1"
+                        Padding="12"
+                        StrokeShape="RoundRectangle 8">
+                        <VerticalStackLayout Spacing="5">
+                            <HorizontalStackLayout Spacing="8">
+                                <Label 
+                                    Text="📅"
+                                    FontSize="16"/>
+                                <Label 
+                                    Text="{Binding StartDate, StringFormat='{0:dd.MM.yyyy}'}"
+                                    FontSize="16"
+                                    TextColor="#333333"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="8">
+                                <Label 
+                                    Text="🕐"
+                                    FontSize="16"/>
+                                <Label 
+                                    Text="{Binding StartTime, StringFormat='{0:hh\\:mm}'}"
+                                    FontSize="16"
+                                    TextColor="#333333"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- End Date & Time -->
+                <VerticalStackLayout Grid.Column="1" Spacing="10">
+                    <Label 
+                        Text="Завершення"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="#666666"/>
+                    
+                    <Border 
+                        BackgroundColor="White"
+                        Stroke="#DDD"
+                        StrokeThickness="1"
+                        Padding="12"
+                        StrokeShape="RoundRectangle 8">
+                        <VerticalStackLayout Spacing="5">
+                            <HorizontalStackLayout Spacing="8">
+                                <Label 
+                                    Text="📅"
+                                    FontSize="16"/>
+                                <Label 
+                                    Text="{Binding EndDate, StringFormat='{0:dd.MM.yyyy}'}"
+                                    FontSize="16"
+                                    TextColor="#333333"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="8">
+                                <Label 
+                                    Text="🕐"
+                                    FontSize="16"/>
+                                <Label 
+                                    Text="{Binding EndTime, StringFormat='{0:hh\\:mm}'}"
+                                    FontSize="16"
+                                    TextColor="#333333"/>
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Priority -->
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="Пріоритет"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#666666"/>
+                
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="#DDD"
+                    StrokeThickness="1"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8">
+                    <HorizontalStackLayout Spacing="10">
+                        <BoxView 
+                            WidthRequest="16"
+                            HeightRequest="16"
+                            CornerRadius="8"
+                            Color="{Binding PriorityColor}"/>
+                        <Label 
+                            Text="{Binding PriorityText}"
+                            FontSize="16"
+                            TextColor="#333333"/>
+                    </HorizontalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Attachments -->
+            <VerticalStackLayout Spacing="5" IsVisible="{Binding HasAttachments}">
+                <Label 
+                    Text="Прикріплені файли"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#666666"/>
+                
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="#DDD"
+                    StrokeThickness="1"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8">
+                    <CollectionView ItemsSource="{Binding Attachments}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Border 
+                                    BackgroundColor="#F8F8F8"
+                                    Stroke="#DDD"
+                                    StrokeThickness="1"
+                                    Padding="10"
+                                    Margin="0,5"
+                                    StrokeShape="RoundRectangle 6">
+                                    <HorizontalStackLayout Spacing="10">
+                                        <Label 
+                                            Text="📎"
+                                            FontSize="18"
+                                            VerticalOptions="Center"/>
+                                        <Label 
+                                            Text="{Binding FileName}"
+                                            FontSize="14"
+                                            TextColor="#333333"
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="FillAndExpand"/>
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Status -->
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="Статус"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    TextColor="#666666"/>
+                
+                <Border 
+                    BackgroundColor="White"
+                    Stroke="#DDD"
+                    StrokeThickness="1"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 8">
+                    <HorizontalStackLayout Spacing="10">
+                        <CheckBox 
+                            IsChecked="{Binding IsCompleted}"
+                            IsEnabled="False"
+                            Color="#FF69B4"/>
+                        <Label 
+                            Text="{Binding StatusText}"
+                            FontSize="16"
+                            TextColor="#333333"
+                            VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Action Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15" Margin="0,20,0,0">
+                <Button 
+                    Grid.Column="0"
+                    Text="Редагувати"
+                    BackgroundColor="#FF69B4"
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Command="{Binding EditCommand}"/>
+                
+                <Button 
+                    Grid.Column="1"
+                    Text="Закрити"
+                    BackgroundColor="#CCCCCC"
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Command="{Binding CloseCommand}"/>
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -14,6 +14,8 @@ namespace Presentation.Controls
         public static readonly BindableProperty SelectedDateProperty =
             BindableProperty.Create(nameof(SelectedDate), typeof(DateTime), typeof(DayScheduleGrid), DateTime.Today, propertyChanged: OnSelectedDateChanged);
 
+        public event EventHandler<EventModel>? EventTapped;
+
         public ObservableCollection<EventModel>? Events
         {
             get => (ObservableCollection<EventModel>?)GetValue(EventsProperty);
@@ -165,6 +167,11 @@ namespace Presentation.Controls
                         }
                     }
                 };
+
+                // Додаємо TapGestureRecognizer для кліку по події
+                var tapGesture = new TapGestureRecognizer();
+                tapGesture.Tapped += (s, e) => EventTapped?.Invoke(this, evt);
+                eventBorder.GestureRecognizers.Add(tapGesture);
 
                 this.Add(eventBorder);
                 Grid.SetRow(eventBorder, startRow);

@@ -145,6 +145,7 @@
                         IsVisible="{Binding CurrentViewMode, Converter={StaticResource ViewModeToVisibilityConverter}, ConverterParameter=Day}">
                         <ScrollView>
                             <controls:DayScheduleGrid 
+                                x:Name="DaySchedule"
                                 Events="{Binding Events}"
                                 SelectedDate="{Binding SelectedDate}"/>
                         </ScrollView>

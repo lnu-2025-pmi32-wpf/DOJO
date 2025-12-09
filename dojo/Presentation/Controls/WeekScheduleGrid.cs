@@ -12,6 +12,7 @@ namespace Presentation.Controls
         private readonly int _hourHeight = 60;
 
         public event EventHandler<DateTime>? DayTapped;
+        public event EventHandler<EventModel>? EventTapped;
 
         public static readonly BindableProperty EventsProperty =
             BindableProperty.Create(nameof(Events), typeof(ObservableCollection<EventModel>), typeof(WeekScheduleGrid), 
@@ -249,6 +250,11 @@ namespace Presentation.Controls
                 });
 
                 eventBorder.Content = eventStack;
+
+                // Додаємо TapGestureRecognizer для кліку по події
+                var tapGesture = new TapGestureRecognizer();
+                tapGesture.Tapped += (s, e) => EventTapped?.Invoke(this, evt);
+                eventBorder.GestureRecognizers.Add(tapGesture);
 
                 // Add context menu
                 var menuFlyout = new MenuFlyout();
