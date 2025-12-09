@@ -5,7 +5,7 @@ namespace Presentation;
 
 public partial class AppShell : Shell
 {
-    public AppShell(DashboardPage dashboardPage)
+    public AppShell()
     {
         InitializeComponent();
         
@@ -15,8 +15,5 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));
         Routing.RegisterRoute(nameof(RegisterPage), typeof(RegisterPage));
         Routing.RegisterRoute(nameof(StatisticsPage), typeof(StatisticsPage));
-        
-        // Set the DashboardPage content directly
-        DashboardContent.Content = dashboardPage;
     }
 }

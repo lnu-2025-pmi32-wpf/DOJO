@@ -30,18 +30,18 @@ namespace Presentation
                 options.UseNpgsql(connectionString));
 
             builder.Services.AddSingleton<ISessionService, SessionService>();
-            builder.Services.AddTransient<IUserService, UserService>();
-            builder.Services.AddTransient<IToDoTaskService, ToDoTaskService>();
-            builder.Services.AddTransient<IGoalService, GoalService>();
-            builder.Services.AddTransient<IPomodoroService, PomodoroService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
+            builder.Services.AddScoped<IGoalService, GoalService>();
+            builder.Services.AddScoped<IPomodoroService, PomodoroService>();
 
-            builder.Services.AddSingleton<MainViewModel>(sp => 
-                new MainViewModel(
-                    sp.GetService<ISessionService>(),
-                    sp.GetService<IPomodoroService>(),
-                    sp));
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<RegisterViewModel>();
+            builder.Services.AddTransient<MainViewModel>(sp => 
+                new MainViewModel(
+                    sp.GetRequiredService<ISessionService>(),
+                    sp.GetRequiredService<IPomodoroService>(),
+                    sp));
             builder.Services.AddTransient<AddPlanViewModel>(sp =>
                 new AddPlanViewModel(
                     sp.GetRequiredService<IGoalService>(),
@@ -50,7 +50,7 @@ namespace Presentation
                 new ViewPlanViewModel(sp.GetRequiredService<IGoalService>()));
             builder.Services.AddTransient<StatisticsViewModel>();
 
-            builder.Services.AddSingleton<DashboardPage>();
+            builder.Services.AddTransient<DashboardPage>();
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<AddPlanPage>();
