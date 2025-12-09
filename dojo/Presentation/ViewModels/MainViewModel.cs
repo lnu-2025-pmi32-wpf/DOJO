@@ -54,6 +54,8 @@ namespace Presentation.ViewModels
         NextMonthCommand = new RelayCommand(OnNextMonth);
         SelectDayCommand = new RelayCommand<CalendarDayModel>(OnSelectDay);
         
+        // Ініціалізуємо дату тижня на поточну
+        UpdateDateRange();
         GenerateCalendarDays();
     }
     
