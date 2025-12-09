@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:Presentation.ViewModels"
+             xmlns:dalmodels="clr-namespace:DAL.Models;assembly=DAL"
              x:Class="Presentation.Views.ViewPlanPage"
              x:DataType="viewmodels:ViewPlanViewModel"
              Title="Деталі плану"
@@ -186,7 +187,7 @@
                     StrokeShape="RoundRectangle 8">
                     <CollectionView ItemsSource="{Binding Attachments}">
                         <CollectionView.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="dalmodels:Attachment">
                                 <Border 
                                     BackgroundColor="#F8F8F8"
                                     Stroke="#DDD"

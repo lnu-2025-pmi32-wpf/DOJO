@@ -6,7 +6,6 @@ namespace Presentation.Views
     public partial class LoginPage : ContentPage
     {
         private readonly ISessionService _sessionService;
-        private bool _hasCheckedSession = false;
 
         public LoginPage(LoginViewModel viewModel, ISessionService sessionService)
         {

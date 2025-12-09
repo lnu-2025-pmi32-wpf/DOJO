@@ -200,7 +200,7 @@
                                 
                                 <CollectionView ItemsSource="{Binding Events}">
                                     <CollectionView.ItemTemplate>
-                                        <DataTemplate>
+                                        <DataTemplate x:DataType="models:EventModel">
                                             <HorizontalStackLayout Spacing="8" Padding="0,5">
                                                 <CheckBox IsChecked="{Binding IsCompleted}"/>
                                                 <Label 
@@ -232,7 +232,7 @@
                                 
                                 <CollectionView ItemsSource="{Binding TodoItems}">
                                     <CollectionView.ItemTemplate>
-                                        <DataTemplate>
+                                        <DataTemplate x:DataType="models:TodoItemModel">
                                             <HorizontalStackLayout Spacing="8" Padding="0,5">
                                                 <CheckBox 
                                                     IsChecked="{Binding IsCompleted}">
