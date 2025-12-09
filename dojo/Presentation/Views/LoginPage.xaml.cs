@@ -6,6 +6,7 @@ namespace Presentation.Views
     public partial class LoginPage : ContentPage
     {
         private readonly ISessionService _sessionService;
+        private bool _hasCheckedSession = false;
 
         public LoginPage(LoginViewModel viewModel, ISessionService sessionService)
         {
@@ -21,19 +22,14 @@ namespace Presentation.Views
             
             System.Diagnostics.Debug.WriteLine("🔹 LoginPage OnAppearing");
             
-            // ТИМЧАСОВО ВИМКНЕНО авто-логін для тестування
-            // Розкоментуй цей блок коли все запрацює
-            /*
-            // Перевіряємо сесію тільки один раз при першому відображенні
+            // АВТОЛОГІН: перевіряємо сесію тільки один раз при першому відображенні
             if (!_hasCheckedSession)
             {
                 _hasCheckedSession = true;
-                
                 try
                 {
                     var isLoggedIn = await _sessionService.IsLoggedInAsync();
                     System.Diagnostics.Debug.WriteLine($"🔹 IsLoggedIn: {isLoggedIn}");
-                    
                     if (isLoggedIn)
                     {
                         System.Diagnostics.Debug.WriteLine("🔹 User is logged in, navigating to Dashboard");
@@ -55,7 +51,6 @@ namespace Presentation.Views
                     // Якщо помилка - просто залишаємось на LoginPage
                 }
             }
-            */
             
             // Очищаємо стару сесію
             try
