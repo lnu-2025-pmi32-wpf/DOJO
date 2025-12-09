@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:Presentation.ViewModels"
              xmlns:models="clr-namespace:Presentation.Models"
+             xmlns:dalmodels="clr-namespace:DAL.Models;assembly=DAL"
              xmlns:controls="clr-namespace:Presentation.Controls"
              x:Class="Presentation.Views.DashboardPage"
              x:DataType="viewmodels:MainViewModel"
@@ -29,6 +30,7 @@
                     
                     <Button 
                         Text="📋 TODO"
+                        Command="{Binding OpenTodoPopupCommand}"
                         Style="{StaticResource OutlineButtonStyle}"
                         Padding="12,8"/>
                     
@@ -79,7 +81,7 @@
                             VerticalOptions="Center"/>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnProfileTapped"/>
-                        </Border.GestureRecognizers>
+                        </Border.GestureRecognizers >
                     </Border>
 
                     <Label 
@@ -194,31 +196,52 @@
                                     FontAttributes="Bold"
                                     TextColor="#333"/>
                                 
-                                <CollectionView ItemsSource="{Binding TodoItems}">
+                                <CollectionView ItemsSource="{Binding TodoTasksFromDb}">
                                     <CollectionView.ItemTemplate>
-                                        <DataTemplate>
-                                            <HorizontalStackLayout Spacing="8" Padding="0,5">
-                                                <CheckBox 
-                                                    IsChecked="{Binding IsCompleted}">
-                                                    <CheckBox.GestureRecognizers>
-                                                        <TapGestureRecognizer 
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=ToggleTodoCommand}"
-                                                            CommandParameter="{Binding .}"/>
-                                                    </CheckBox.GestureRecognizers>
-                                                </CheckBox>
-                                                <Label 
-                                                    Text="{Binding Description}"
-                                                    FontSize="14"
-                                                    VerticalOptions="Center"
-                                                    TextColor="#666"
-                                                    TextDecorations="{Binding IsCompleted, Converter={StaticResource BoolToTextDecorationConverter}}"/>
-                                            </HorizontalStackLayout>
+                                        <DataTemplate x:DataType="dalmodels:ToDoTask">
+                                            <Border 
+                                                Padding="8,5"
+                                                Margin="0,3"
+                                                BackgroundColor="Transparent"
+                                                StrokeShape="RoundRectangle 4"
+                                                Stroke="Transparent">
+                                                <Grid ColumnDefinitions="Auto,*">
+                                                    <CheckBox 
+                                                        Grid.Column="0"
+                                                        IsChecked="{Binding IsCompleted}"
+                                                        Color="#FF69B4">
+                                                        <CheckBox.GestureRecognizers>
+                                                            <TapGestureRecognizer 
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=ToggleTodoTaskCommand}"
+                                                                CommandParameter="{Binding . }"/>
+                                                        </CheckBox.GestureRecognizers>
+                                                    </CheckBox>
+                                                    
+                                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center" Margin="5,0,0,0">
+                                                        <Label 
+                                                            Text="{Binding Description}"
+                                                            FontSize="14"
+                                                            FontAttributes="Bold"
+                                                            TextColor="#333"
+                                                            LineBreakMode="HeadTruncation"
+                                                            MaxLines="1"/>
+                                                        <HorizontalStackLayout Spacing="10">
+                                                            <Label 
+                                                                Text="{Binding Priority, StringFormat='🔥 Пріоритет: {0}'}"
+                                                                FontSize="11"
+                                                                TextColor="#FF69B4"
+                                                                FontAttributes="Bold"/>
+                                                        </HorizontalStackLayout>
+                                                    </VerticalStackLayout>
+                                                </Grid>
+                                            </Border>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
                                 
                                 <Button 
                                     Text="+ Додати завдання"
+                                    Command="{Binding OpenTodoPopupCommand}"
                                     Style="{StaticResource AddButtonStyle}"/>
                             </VerticalStackLayout>
                         </Border>

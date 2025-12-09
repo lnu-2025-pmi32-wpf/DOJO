@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using DAL;
-using BLL.Services;
+using BLL. Services;
 using BLL.Interfaces;
 using Presentation.Views;
 using Presentation.ViewModels;
@@ -15,49 +15,51 @@ namespace Presentation
         {
             var builder = MauiApp.CreateBuilder();
             builder
-                .UseMauiApp<App>()
+                . UseMauiApp<App>()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                    fonts.AddFont("OpenSans-Semibold. ttf", "OpenSansSemibold");
                 });
 
             // Підключення до бази даних
-
-            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=14122005Ad";
+            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=24062006";
             builder.Services.AddDbContext<DojoDbContext>(options =>
-                options.UseNpgsql(connectionString));
+                options. UseNpgsql(connectionString));
 
             // Реєстрація сервісів
             builder.Services.AddSingleton<ISessionService, SessionService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
-            builder.Services.AddScoped<IGoalService, GoalService>();
+            builder.Services. AddScoped<IGoalService, GoalService>();
             builder.Services.AddScoped<IPomodoroService, PomodoroService>();
 
             // Реєстрація ViewModels
-            builder.Services.AddTransient<LoginViewModel>();
-            builder.Services.AddTransient<RegisterViewModel>();
-            builder.Services.AddTransient<MainViewModel>(sp => 
+            builder.Services. AddTransient<LoginViewModel>();
+            builder.Services. AddTransient<RegisterViewModel>();
+            builder.Services. AddTransient<MainViewModel>(sp => 
                 new MainViewModel(
                     sp.GetService<ISessionService>(),
                     sp.GetService<IPomodoroService>(),
-                    sp.GetService<IGoalService>()));
+                    sp.GetService<IGoalService>(),
+                    sp.GetService<IToDoTaskService>()));
             builder.Services.AddTransient<AddPlanViewModel>(sp =>
                 new AddPlanViewModel(
                     sp.GetRequiredService<IGoalService>(),
                     sp.GetRequiredService<ISessionService>()));
             builder.Services.AddTransient<StatisticsViewModel>();
+            builder.Services.AddTransient<AddTodoViewModel>();
 
             // Реєстрація Views
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<DashboardPage>();
-            builder.Services.AddTransient<AddPlanPage>();
-            builder.Services.AddTransient<StatisticsPage>();
+            builder. Services.AddTransient<AddPlanPage>();
+            builder. Services.AddTransient<StatisticsPage>();
+            builder.Services.AddTransient<AddTodoPopup>();
 
 #if DEBUG
-            builder.Logging.AddDebug();
+            builder. Logging.AddDebug();
 #endif
 
             return builder.Build();
