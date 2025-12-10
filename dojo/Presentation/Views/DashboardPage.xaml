@@ -31,12 +31,6 @@
                         Command="{Binding OpenTodoPopupCommand}"
                         Style="{StaticResource OutlineButtonStyle}"
                         Padding="12,8"/>
-                    
-                    <Button 
-                        Text="📊 Статистика"
-                        Command="{Binding NavigateToStatisticsCommand}"
-                        Style="{StaticResource OutlineButtonStyle}"
-                        Padding="12,8"/>
                 </HorizontalStackLayout>
 
                 <!-- Center - Date Navigation -->
@@ -305,24 +299,25 @@
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="#333"/>
-                                
+        
                                 <Label 
-                                    Text="Завершено завдань: 12"
+                                    Text="{Binding CompletedTasksCount, StringFormat='Завершено завдань: {0}'}"
                                     FontSize="14"
                                     TextColor="#666"/>
-                                
+        
                                 <Label 
-                                    Text="Час роботи: 8 год"
+                                    Text="{Binding TotalWorkHours, StringFormat='Час роботи: {0:F1} год'}"
                                     FontSize="14"
                                     TextColor="#666"/>
-                                
+        
                                 <Label 
-                                    Text="Продуктивність: 85%"
+                                    Text="{Binding ProductivityPercentage, StringFormat='Продуктивність: {0:F0}%'}"
                                     FontSize="14"
                                     TextColor="#666"/>
-                                
+        
                                 <Button 
                                     Text="Детальніше"
+                                    Command="{Binding NavigateToStatisticsCommand}"
                                     Style="{StaticResource SecondaryButtonStyle}"
                                     Padding="10,5"
                                     FontSize="12"

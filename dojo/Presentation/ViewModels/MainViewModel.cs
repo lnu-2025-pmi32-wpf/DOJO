@@ -293,6 +293,30 @@ namespace Presentation.ViewModels
             get => _userId;
             set => SetProperty(ref _userId, value);
         }
+        
+        // Статистика для Dashboard
+        // Статистика для Dashboard (TODO завдання)
+        public int CompletedTasksCount => TodoTasksFromDb.Count(t => t.IsCompleted);
+        public int TotalTasksCount => TodoTasksFromDb.Count;
+        public double TotalWorkHours
+        {
+            get
+            {
+                // Підраховуємо загальний час роботи з Pomodoro або з планів
+                // Поки що можна показувати 0 або рахувати з Events
+                return Events
+                    .Where(e => e. IsCompleted)
+                    .Sum(e => (e.EndDateTime - e.StartDateTime).TotalHours);
+            }
+        }
+        public double ProductivityPercentage
+        {
+            get
+            {
+                if (TotalTasksCount == 0) return 0;
+                return (double)CompletedTasksCount / TotalTasksCount * 100;
+            }
+        }
 
         public string PomodoroTimeText
         {
@@ -516,6 +540,10 @@ namespace Presentation.ViewModels
                     {
                         OnPropertyChanged(nameof(SortedEvents));
                         OnPropertyChanged(nameof(Events));
+                        OnPropertyChanged(nameof(CompletedTasksCount));
+                        OnPropertyChanged(nameof(TotalTasksCount));
+                        OnPropertyChanged(nameof(TotalWorkHours));
+                        OnPropertyChanged(nameof(ProductivityPercentage));
                     });
                 }
             }
@@ -1031,8 +1059,10 @@ namespace Presentation.ViewModels
                         System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Регенерація календаря...");
 
                         // Примусово оновлюємо прив'язку Events
-                        OnPropertyChanged(nameof(Events));
-                        OnPropertyChanged(nameof(SortedEvents));
+                        OnPropertyChanged(nameof(CompletedTasksCount));
+                        OnPropertyChanged(nameof(TotalTasksCount));
+                        OnPropertyChanged(nameof(TotalWorkHours));
+                        OnPropertyChanged(nameof(ProductivityPercentage));
 
                         GenerateCalendarDays();
                         System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Завершено успішно");
@@ -1074,24 +1104,30 @@ namespace Presentation.ViewModels
 
             try
             {
-                System.Diagnostics.Debug.WriteLine($"LoadTodoItems: Завантаження TODO для користувача {UserId}...");
+                System.Diagnostics.Debug.WriteLine($"LoadTodoItems:  Завантаження TODO для користувача {UserId}.. .");
                 var tasks = await _todoTaskService.GetTasksByUserIdAsync(UserId);
 
                 var sortedTasks = tasks
                     .OrderBy(t => t.IsCompleted)
                     .ThenByDescending(t => t.Priority)
-                    .ThenBy(t => t.DueDate ?? DateTime.MaxValue)
+                    .ThenBy(t => t.DueDate ??  DateTime.MaxValue)
                     .ToList();
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    TodoTasksFromDb.Clear();
+                    TodoTasksFromDb. Clear();
                     foreach (var task in sortedTasks)
                     {
                         TodoTasksFromDb.Add(task);
-                        System.Diagnostics.Debug.WriteLine($"LoadTodoItems: Додано '{task.Description}'");
+                        System.Diagnostics.Debug.WriteLine($"LoadTodoItems:  Додано '{task.Description}'");
                     }
-                    System.Diagnostics.Debug.WriteLine($"LoadTodoItems: Завантажено {sortedTasks.Count} завдань");
+                    System. Diagnostics.Debug.WriteLine($"LoadTodoItems: Завантажено {sortedTasks.Count} завдань");
+            
+                    // Оновлюємо статистику
+                    OnPropertyChanged(nameof(CompletedTasksCount));
+                    OnPropertyChanged(nameof(TotalTasksCount));
+                    OnPropertyChanged(nameof(TotalWorkHours));
+                    OnPropertyChanged(nameof(ProductivityPercentage));
                 });
             }
             catch (Exception ex)
@@ -1118,21 +1154,30 @@ namespace Presentation.ViewModels
             }
         }
 
-        private async Task OnToggleTodoTask(DAL.Models.ToDoTask? task)
+        private async Task OnToggleTodoTask(DAL.Models.ToDoTask?  task)
         {
             if (task == null || _todoTaskService == null) return;
 
             try
             {
-                task.IsCompleted = !task.IsCompleted;
-                task.CompletedAt = task.IsCompleted ? DateTime.UtcNow : null;
+                task.IsCompleted = !task. IsCompleted;
+                task. CompletedAt = task.IsCompleted ? DateTime.UtcNow : null;
 
                 await _todoTaskService.UpdateTaskAsync(task);
                 await LoadTodoItems();
+        
+                // Оновлюємо статистику на Dashboard
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    OnPropertyChanged(nameof(CompletedTasksCount));
+                    OnPropertyChanged(nameof(TotalTasksCount));
+                    OnPropertyChanged(nameof(TotalWorkHours));
+                    OnPropertyChanged(nameof(ProductivityPercentage));
+                });
             }
             catch (Exception ex)
             {
-                await Application.Current!.MainPage!.DisplayAlert("Помилка",
+                await Application. Current! .MainPage!.DisplayAlert("Помилка",
                     $"Не вдалося оновити завдання: {ex.Message}", "OK");
             }
         }
