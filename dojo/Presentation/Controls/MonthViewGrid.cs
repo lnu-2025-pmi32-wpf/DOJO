@@ -1,20 +1,31 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Graphics;
 using Presentation.Models;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace Presentation.Controls
 {
     public class MonthViewGrid : Grid
     {
         public static readonly BindableProperty SelectedDateProperty =
-            BindableProperty.Create(nameof(SelectedDate), typeof(DateTime), typeof(MonthViewGrid), DateTime.Today, propertyChanged: OnSelectedDateChanged);
+            BindableProperty.Create(
+                nameof(SelectedDate),
+                typeof(DateTime),
+                typeof(MonthViewGrid),
+                DateTime.Today,
+                propertyChanged: OnSelectedDateChanged);
 
         public static readonly BindableProperty EventsProperty =
-            BindableProperty.Create(nameof(Events), typeof(ObservableCollection<EventModel>), typeof(MonthViewGrid), null, propertyChanged: OnEventsChanged);
+            BindableProperty.Create(
+                nameof(Events),
+                typeof(ObservableCollection<EventModel>),
+                typeof(MonthViewGrid),
+                null,
+                propertyChanged: OnEventsChanged);
 
         public event EventHandler<DateTime>? DayTapped;
         public event EventHandler<EventModel>? EventTapped;
@@ -25,9 +36,9 @@ namespace Presentation.Controls
             set => SetValue(SelectedDateProperty, value);
         }
 
-        public ObservableCollection<EventModel> Events
+        public ObservableCollection<EventModel>? Events
         {
-            get => (ObservableCollection<EventModel>)GetValue(EventsProperty);
+            get => (ObservableCollection<EventModel>?)GetValue(EventsProperty);
             set => SetValue(EventsProperty, value);
         }
 
@@ -48,13 +59,13 @@ namespace Presentation.Controls
         {
             if (bindable is MonthViewGrid grid)
             {
-                // Відписуємося від старої колекції
+                // Відписуємося від старої колекції (якщо була)
                 if (oldValue is ObservableCollection<EventModel> oldCollection)
                 {
                     oldCollection.CollectionChanged -= grid.OnEventsCollectionChanged;
                 }
 
-                // Підписуємося на нову колекцію
+                // Підписуємося на нову колекцію (якщо є)
                 if (newValue is ObservableCollection<EventModel> newCollection)
                 {
                     newCollection.CollectionChanged += grid.OnEventsCollectionChanged;
@@ -64,7 +75,7 @@ namespace Presentation.Controls
             }
         }
 
-        private void OnEventsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void OnEventsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             BuildMonthView();
         }
@@ -109,7 +120,7 @@ namespace Presentation.Controls
             // Calculate calendar days
             var firstDayOfMonth = new DateTime(SelectedDate.Year, SelectedDate.Month, 1);
             var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-            
+
             // Find Monday of the week containing the first day
             int daysFromMonday = ((int)firstDayOfMonth.DayOfWeek + 6) % 7;
             var startDate = firstDayOfMonth.AddDays(-daysFromMonday);
@@ -239,7 +250,7 @@ namespace Presentation.Controls
 
             border.Content = stackLayout;
 
-            // Add tap gesture
+            // Add tap gesture for day selection
             var tapGesture = new TapGestureRecognizer();
             tapGesture.Tapped += (s, e) =>
             {

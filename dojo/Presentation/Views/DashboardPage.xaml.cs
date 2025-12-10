@@ -16,11 +16,11 @@ namespace Presentation.Views
                 System.Diagnostics.Debug.WriteLine("DashboardPage: Початок конструктора");
                 InitializeComponent();
                 System.Diagnostics.Debug.WriteLine("DashboardPage: InitializeComponent завершено");
-                
+
                 _viewModel = viewModel;
                 BindingContext = _viewModel;
                 System.Diagnostics.Debug.WriteLine("DashboardPage: BindingContext встановлено");
-                
+
                 // Підписуємося на події контролів
                 if (DaySchedule != null)
                 {
@@ -39,10 +39,10 @@ namespace Presentation.Views
                     MonthView.EventTapped += OnEventTapped;
                     System.Diagnostics.Debug.WriteLine("DashboardPage: MonthView підписано");
                 }
-                
+
                 // MessagingCenter підписки перенесено в MainViewModel.Initialize()
                 // щоб уникнути дублювання підписок
-                
+
                 System.Diagnostics.Debug.WriteLine("DashboardPage: Конструктор завершено успішно");
             }
             catch (Exception ex)
@@ -56,11 +56,11 @@ namespace Presentation.Views
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            
+    
             try
             {
                 System.Diagnostics.Debug.WriteLine($"DashboardPage: OnAppearing викликано (IsInitialized: {_isInitialized})");
-                
+        
                 // Ініціалізуємо тільки один раз при першому відображенні
                 if (!_isInitialized && _viewModel != null)
                 {
@@ -72,13 +72,16 @@ namespace Presentation.Views
                 else if (_isInitialized && _viewModel != null)
                 {
                     // Оновлюємо дані при поверненні на сторінку
-                    System.Diagnostics.Debug.WriteLine("DashboardPage: Оновлюємо дані при поверненні...");
+                    System.Diagnostics.Debug. WriteLine("DashboardPage:  Оновлюємо дані при поверненні...");
                     _viewModel.RefreshData();
+            
+                    // Примусово оновлюємо місячний вигляд якщо він активний
+                    _viewModel. ForceRefreshMonthView();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"DashboardPage: Помилка OnAppearing - {ex.Message}");
+                System.Diagnostics. Debug.WriteLine($"DashboardPage: Помилка OnAppearing - {ex.Message}");
             }
         }
 
@@ -96,9 +99,9 @@ namespace Presentation.Views
             if (_viewModel != null)
             {
                 var action = await DisplayActionSheet(
-                    $"👤 {_viewModel.UserName}", 
-                    "Скасувати", 
-                    "Вийти", 
+                    $"👤 {_viewModel.UserName}",
+                    "Скасувати",
+                    "Вийти",
                     $"📧 {_viewModel.UserEmail}");
 
                 if (action == "Вийти")
@@ -140,13 +143,13 @@ namespace Presentation.Views
 
             // Отримуємо ViewPlanViewModel з DI контейнера для правильної ін'єкції залежностей
             var viewPlanViewModel = Application.Current?.Handler?.MauiContext?.Services.GetService<ViewPlanViewModel>();
-            
+
             if (viewPlanViewModel == null)
             {
                 await DisplayAlert("Помилка", "Не вдалося відкрити деталі плану", "OK");
                 return;
             }
-            
+
             viewPlanViewModel.LoadEvent(eventModel);
 
             // Створюємо сторінку та передаємо ViewModel
