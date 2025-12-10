@@ -24,7 +24,7 @@ namespace Presentation
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=A_p131205Kk%";
+            string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=14122005Ad";
             builder.Services.AddDbContext<DojoDbContext>(options =>
                 options.UseNpgsql(connectionString));
 

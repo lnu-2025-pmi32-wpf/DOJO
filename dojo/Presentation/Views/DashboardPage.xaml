@@ -192,7 +192,7 @@
                                     FontAttributes="Bold"
                                     TextColor="#333"/>
                                 
-                                <CollectionView ItemsSource="{Binding SortedEvents}">
+                                <CollectionView ItemsSource="{Binding Events}">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:EventModel">
                                             <Grid ColumnDefinitions="Auto,*,Auto" Padding="0,5" ColumnSpacing="8">
@@ -210,7 +210,7 @@
                                                     TextDecorations="{Binding IsCompleted, Converter={StaticResource BoolToTextDecorationConverter}}"/>
                                                 <Label 
                                                     Grid.Column="2"
-                                                    Text="{Binding EndDateTime, StringFormat='{0:dd.MM}'}"
+                                                    Text="{Binding EndDateTime, StringFormat='{0:dd.MM HH:mm}'}"
                                                     FontSize="11"
                                                     TextColor="#E53935"
                                                     VerticalOptions="Center"
