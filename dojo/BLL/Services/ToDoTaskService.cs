@@ -40,8 +40,21 @@ namespace BLL.Services
 
         public async Task UpdateTaskAsync(ToDoTask task)
         {
-            _context.ToDoTasks.Update(task);
-            await _context.SaveChangesAsync();
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($" Оновлення TODO: ID={task.Id}, IsCompleted={task.IsCompleted}, CompletedAt={task.CompletedAt}");
+        
+                _context.ToDoTasks. Update(task);
+                await _context.SaveChangesAsync();
+        
+                System.Diagnostics.Debug.WriteLine($" TODO успішно оновлено в БД!");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($" Помилка оновлення TODO: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                throw;
+            }
         }
 
         public async Task DeleteTaskAsync(int id)
