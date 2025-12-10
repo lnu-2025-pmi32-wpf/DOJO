@@ -5,7 +5,9 @@ using BLL.Services;
 using BLL. Interfaces;
 using Presentation. Views;
 using Presentation.ViewModels;
-using Presentation. Services;
+using Presentation.Services;
+using Serilog;
+using Serilog.Events;
 
 namespace Presentation
 {
@@ -15,6 +17,26 @@ namespace Presentation
         {
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             
+            var logsFolder = @"C:\DojoLogs";
+            if (!Directory.Exists(logsFolder))
+                Directory.CreateDirectory(logsFolder);
+
+            var logPath = Path.Combine(logsFolder, $"dojo-{DateTime.Now:yyyy-MM-dd}.log");
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                . Enrich. FromLogContext()
+                .WriteTo.File(
+                    logPath,
+                    rollingInterval: RollingInterval.Day,
+                    outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss}] [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss}] [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+
+            Log.Information("🚀 Програма Dojo запущена");
+            Log.Information("📁 Логи зберігаються в: {LogPath}", logPath);
+
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
@@ -24,9 +46,14 @@ namespace Presentation
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            builder. Logging.ClearProviders();
+            builder.Logging.AddSerilog(Log.Logger);
+
             string connectionString = "Host=localhost;Database=dojo;Username=postgres;Password=14122005Ad";
-            builder.Services.AddDbContext<DojoDbContext>(options =>
+            builder.Services. AddDbContext<DojoDbContext>(options =>
                 options.UseNpgsql(connectionString));
+
+            Log.Information("✅ Підключення до бази даних налаштовано");
 
             // Services
             builder.Services.AddSingleton<ISessionService, SessionService>();
@@ -37,7 +64,7 @@ namespace Presentation
             builder.Services.AddScoped<IExperienceService, ExperienceService>();
 
             // ViewModels
-            builder.Services. AddTransient<LoginViewModel>();
+            builder. Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<RegisterViewModel>();
             
             builder.Services.AddTransient<MainViewModel>(sp => 
@@ -46,7 +73,7 @@ namespace Presentation
                     sp.GetRequiredService<IPomodoroService>(),
                     sp,
                     sp.GetRequiredService<IToDoTaskService>(),
-                    sp.GetRequiredService<IExperienceService>())); 
+                    sp. GetRequiredService<IExperienceService>())); 
                     
             builder.Services.AddTransient<AddPlanViewModel>(sp =>
                 new AddPlanViewModel(
@@ -56,8 +83,7 @@ namespace Presentation
             builder. Services.AddTransient<ViewPlanViewModel>(sp =>
                 new ViewPlanViewModel(sp.GetRequiredService<IGoalService>()));
             
-            // ✅ ВИПРАВЛЕНО: StatisticsViewModel з DI
-            builder.Services. AddTransient<StatisticsViewModel>(sp =>
+            builder. Services.AddTransient<StatisticsViewModel>(sp =>
                 new StatisticsViewModel(
                     sp.GetRequiredService<IToDoTaskService>(),
                     sp.GetRequiredService<ISessionService>()));
@@ -65,20 +91,20 @@ namespace Presentation
             builder.Services.AddTransient<AddTodoViewModel>();
 
             // Pages
-            builder.Services.AddTransient<DashboardPage>();
+            builder.Services. AddTransient<DashboardPage>();
             builder.Services.AddTransient<LoginPage>();
-            builder. Services.AddTransient<RegisterPage>();
+            builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<AddPlanPage>();
-            builder.Services.AddTransient<ViewPlanPage>();
+            builder.Services. AddTransient<ViewPlanPage>();
             builder.Services.AddTransient<StatisticsPage>();
             builder.Services.AddTransient<AddTodoPopup>();
             builder.Services.AddTransient<AppShell>();
 
-#if DEBUG
-            builder.Logging.AddDebug();
-#endif
+            Log.Information("✅ Всі сервіси та сторінки зареєстровано");
 
             var app = builder.Build();
+            
+            Log.Information("✅ Програма успішно налаштована");
             
             return app;
         }
