@@ -2,10 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using DAL;
 using BLL.Services;
-using BLL.Interfaces;
-using Presentation.Views;
+using BLL. Interfaces;
+using Presentation. Views;
 using Presentation.ViewModels;
-using Presentation.Services;
+using Presentation. Services;
 
 namespace Presentation
 {
@@ -13,7 +13,6 @@ namespace Presentation
     {
         public static MauiApp CreateMauiApp()
         {
-            // Важливо! Дозволяємо Npgsql працювати з DateTime без timezone
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             
             var builder = MauiApp.CreateBuilder();
@@ -31,17 +30,18 @@ namespace Presentation
 
             builder.Services.AddSingleton<ISessionService, SessionService>();
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
+            builder.Services. AddScoped<IToDoTaskService, ToDoTaskService>();
             builder.Services.AddScoped<IGoalService, GoalService>();
-            builder.Services.AddScoped<IPomodoroService, PomodoroService>();
+            builder.Services. AddScoped<IPomodoroService, PomodoroService>();
 
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<RegisterViewModel>();
-            builder.Services.AddTransient<MainViewModel>(sp => 
+            builder.Services. AddTransient<MainViewModel>(sp => 
                 new MainViewModel(
                     sp.GetRequiredService<ISessionService>(),
                     sp.GetRequiredService<IPomodoroService>(),
-                    sp));
+                    sp,
+                    sp.GetRequiredService<IToDoTaskService>())); 
             builder.Services.AddTransient<AddPlanViewModel>(sp =>
                 new AddPlanViewModel(
                     sp.GetRequiredService<IGoalService>(),
@@ -49,6 +49,7 @@ namespace Presentation
             builder.Services.AddTransient<ViewPlanViewModel>(sp =>
                 new ViewPlanViewModel(sp.GetRequiredService<IGoalService>()));
             builder.Services.AddTransient<StatisticsViewModel>();
+            builder.Services.AddTransient<AddTodoViewModel>(); 
 
             builder.Services.AddTransient<DashboardPage>();
             builder.Services.AddTransient<LoginPage>();
@@ -56,6 +57,7 @@ namespace Presentation
             builder.Services.AddTransient<AddPlanPage>();
             builder.Services.AddTransient<ViewPlanPage>();
             builder.Services.AddTransient<StatisticsPage>();
+            builder.Services.AddTransient<AddTodoPopup>(); 
             builder.Services.AddTransient<AppShell>();
 
 #if DEBUG

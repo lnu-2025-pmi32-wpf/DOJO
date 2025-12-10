@@ -3,10 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:Presentation.ViewModels"
              xmlns:models="clr-namespace:Presentation.Models"
+             xmlns:dalmodels="clr-namespace:DAL.Models;assembly=DAL"
              xmlns:controls="clr-namespace:Presentation.Controls"
              x:Class="Presentation.Views.DashboardPage"
-             x:DataType="viewmodels:MainViewModel"
-             Title="DOJO - Планувальник"
              BackgroundColor="#F5F5F5">
 
     <Grid RowDefinitions="60,*" ColumnDefinitions="*,340">
@@ -28,12 +27,13 @@
                         Padding="15,8"/>
                     
                     <Button 
-                        Text="TODO"
+                        Text="📋 TODO"
+                        Command="{Binding OpenTodoPopupCommand}"
                         Style="{StaticResource OutlineButtonStyle}"
                         Padding="12,8"/>
                     
                     <Button 
-                        Text="Статистика"
+                        Text="📊 Статистика"
                         Command="{Binding NavigateToStatisticsCommand}"
                         Style="{StaticResource OutlineButtonStyle}"
                         Padding="12,8"/>
@@ -77,7 +77,7 @@
                             TextColor="White"
                             HorizontalOptions="Center"
                             VerticalOptions="Center"/>
-                        <Border.GestureRecognizers>
+                        <Border.GestureRecognizers >
                             <TapGestureRecognizer Tapped="OnProfileTapped"/>
                         </Border.GestureRecognizers>
                     </Border>
@@ -193,7 +193,7 @@
                             StrokeShape="RoundRectangle 8">
                             <VerticalStackLayout Spacing="10">
                                 <Label 
-                                    Text="ПЛАН"
+                                    Text="📋 ПЛАН"
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="#333"/>
@@ -238,36 +238,55 @@
                             StrokeShape="RoundRectangle 8">
                             <VerticalStackLayout Spacing="10">
                                 <Label 
-                                    Text="TO DO"
+                                    Text="✓ TO DO"
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="#333"/>
                                 
-                                <CollectionView ItemsSource="{Binding TodoItems}">
+                                <CollectionView ItemsSource="{Binding TodoTasksFromDb}">
                                     <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="models:TodoItemModel">
-                                            <HorizontalStackLayout Spacing="8" Padding="0,5">
-                                                <CheckBox 
-                                                    IsChecked="{Binding IsCompleted}">
-                                                    <CheckBox.GestureRecognizers>
-                                                        <TapGestureRecognizer 
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=ToggleTodoCommand}"
-                                                            CommandParameter="{Binding .}"/>
-                                                    </CheckBox.GestureRecognizers>
-                                                </CheckBox>
-                                                <Label 
-                                                    Text="{Binding Description}"
-                                                    FontSize="14"
-                                                    VerticalOptions="Center"
-                                                    TextColor="#666"
-                                                    TextDecorations="{Binding IsCompleted, Converter={StaticResource BoolToTextDecorationConverter}}"/>
-                                            </HorizontalStackLayout>
+                                        <DataTemplate x:DataType="dalmodels:ToDoTask">
+                                            <Border 
+                                                Padding="8,5"
+                                                Margin="0,3"
+                                                BackgroundColor="Transparent"
+                                                StrokeShape="RoundRectangle 4"
+                                                Stroke="Transparent">
+                                                <Grid ColumnDefinitions="Auto,*">
+                                                    <CheckBox 
+                                                        Grid.Column="0"
+                                                        IsChecked="{Binding IsCompleted}"
+                                                        Color="#FF69B4">
+                                                        <CheckBox.GestureRecognizers>
+                                                            <TapGestureRecognizer 
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:MainViewModel}}, Path=ToggleTodoTaskCommand}"
+                                                                CommandParameter="{Binding . }"/>
+                                                        </CheckBox.GestureRecognizers>
+                                                    </CheckBox>
+                                                    
+                                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center" Margin="5,0,0,0">
+                                                        <Label 
+                                                            Text="{Binding Description}"
+                                                            FontSize="14"
+                                                            FontAttributes="Bold"
+                                                            TextColor="#333"
+                                                            LineBreakMode="HeadTruncation"
+                                                            MaxLines="1"/>
+                                                        <Label 
+                                                            Text="{Binding Priority, StringFormat='🔥 Пріоритет: {0}'}"
+                                                            FontSize="11"
+                                                            TextColor="#FF69B4"
+                                                            FontAttributes="Bold"/>
+                                                    </VerticalStackLayout>
+                                                </Grid>
+                                            </Border>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
                                 
                                 <Button 
                                     Text="+ Додати завдання"
+                                    Command="{Binding OpenTodoPopupCommand}"
                                     Style="{StaticResource AddButtonStyle}"/>
                             </VerticalStackLayout>
                         </Border>
@@ -282,7 +301,7 @@
                             StrokeShape="RoundRectangle 8">
                             <VerticalStackLayout Spacing="10">
                                 <Label 
-                                    Text="СТАТИСТИКА"
+                                    Text="📊 СТАТИСТИКА"
                                     FontSize="16"
                                     FontAttributes="Bold"
                                     TextColor="#333"/>
@@ -330,7 +349,7 @@
                 <!-- Mini Calendar -->
                 <VerticalStackLayout Spacing="10">
                     <Label 
-                        Text="Календар"
+                        Text="📅 Календар"
                         FontSize="16"
                         FontAttributes="Bold"
                         TextColor="#333"/>
@@ -441,7 +460,7 @@
                 <!-- Pomodoro Timer -->
                 <VerticalStackLayout Spacing="10">
                     <Label 
-                        Text="Помодоро"
+                        Text="⏱️ Помодоро"
                         FontSize="16"
                         FontAttributes="Bold"
                         TextColor="#333"/>
@@ -478,7 +497,7 @@
                 <!-- Mascot -->
                 <VerticalStackLayout Spacing="10">
                     <Label 
-                        Text="Твій герой"
+                        Text="🐷 Твій герой"
                         FontSize="16"
                         FontAttributes="Bold"
                         TextColor="#333"/>
@@ -490,7 +509,7 @@
                         Stroke="{StaticResource HotPink}"
                         HeightRequest="150">
                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
-                            <!-- Тут можна замінити на Image з Figma: <Image Source="pig.png" .../> -->
+                            <!-- Тут можна замінити на Image з Figma:  <Image Source="pig.png" . ../> -->
                             <Label 
                                 Text="(^_^)"
                                 FontSize="40"
