@@ -211,60 +211,95 @@ namespace Presentation.Controls
             // Add new event views
             foreach (var evt in Events)
             {
-                if (evt.StartDateTime.Date < WeekStartDate || evt.StartDateTime.Date >= WeekStartDate.AddDays(7))
-                    continue;
-
-                var dayOffset = (evt.StartDateTime.Date - WeekStartDate.Date).Days;
-                var startRow = evt.StartHour - _startHour + 1;
+                // Показуємо на даті ПОЧАТКУ
+                if (evt.StartDateTime.Date >= WeekStartDate && evt.StartDateTime.Date < WeekStartDate.AddDays(7))
+                {
+                    var dayOffset = (evt.StartDateTime.Date - WeekStartDate.Date).Days;
+                    var startRow = evt.StartHour - _startHour + 1;
+                    
+                    var startBorder = CreateEventBorder(evt, isStart: true);
+                    
+                    Grid.SetRow(startBorder, startRow);
+                    Grid.SetColumn(startBorder, dayOffset + 1);
+                    _mainGrid.Children.Add(startBorder);
+                }
                 
-                // Простий вигляд без кольорового блоку
-                var eventBorder = new Border
+                // Показуємо на даті ЗАВЕРШЕННЯ (якщо це інший день)
+                if (evt.EndDateTime.Date != evt.StartDateTime.Date && 
+                    evt.EndDateTime.Date >= WeekStartDate && 
+                    evt.EndDateTime.Date < WeekStartDate.AddDays(7))
                 {
-                    BackgroundColor = Colors.White,
-                    Stroke = Color.FromArgb("#FF69B4"),
-                    StrokeThickness = 1,
-                    Padding = new Thickness(4, 2),
-                    StyleId = "EventBlock",
-                    Margin = new Thickness(2),
-                    StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 4 }
-                };
+                    var dayOffset = (evt.EndDateTime.Date - WeekStartDate.Date).Days;
+                    var endRow = evt.EndDateTime.Hour - _startHour + 1;
+                    
+                    var endBorder = CreateEventBorder(evt, isStart: false);
+                    
+                    Grid.SetRow(endBorder, endRow);
+                    Grid.SetColumn(endBorder, dayOffset + 1);
+                    _mainGrid.Children.Add(endBorder);
+                }
+            }
+        }
+        
+        private Border CreateEventBorder(EventModel evt, bool isStart)
+        {
+            var eventBorder = new Border
+            {
+                BackgroundColor = Colors.White,
+                Stroke = isStart ? Color.FromArgb("#FF69B4") : Color.FromArgb("#E53935"),
+                StrokeThickness = 1,
+                Padding = new Thickness(4, 2),
+                StyleId = "EventBlock",
+                Margin = new Thickness(2),
+                StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 4 }
+            };
 
-                var eventStack = new VerticalStackLayout
-                {
-                    Spacing = 1
-                };
+            var eventStack = new VerticalStackLayout
+            {
+                Spacing = 1
+            };
 
-                // Назва плану
+            // Назва плану
+            eventStack.Children.Add(new Label
+            {
+                Text = evt.Title,
+                FontSize = 11,
+                FontAttributes = FontAttributes.Bold,
+                TextColor = Color.FromArgb("#333333"),
+                LineBreakMode = LineBreakMode.TailTruncation
+            });
+
+            if (isStart)
+            {
+                // На даті початку - показуємо дедлайн
                 eventStack.Children.Add(new Label
                 {
-                    Text = evt.Title,
-                    FontSize = 11,
-                    FontAttributes = FontAttributes.Bold,
-                    TextColor = Color.FromArgb("#333333"),
-                    LineBreakMode = LineBreakMode.TailTruncation
-                });
-
-                // Дедлайн червоним кольором
-                eventStack.Children.Add(new Label
-                {
-                    Text = $"⏰ {evt.EndDateTime:dd.MM HH:mm}",
+                    Text = $"⏰ до {evt.EndDateTime:dd.MM HH:mm}",
                     FontSize = 9,
                     TextColor = Color.FromArgb("#E53935"),
                     FontAttributes = FontAttributes.Bold
                 });
-
-                eventBorder.Content = eventStack;
-
-                // Додаємо TapGestureRecognizer для кліку по події
-                var tapGesture = new TapGestureRecognizer();
-                tapGesture.Tapped += (s, e) => EventTapped?.Invoke(this, evt);
-                eventBorder.GestureRecognizers.Add(tapGesture);
-
-                Grid.SetRow(eventBorder, startRow);
-                Grid.SetColumn(eventBorder, dayOffset + 1);
-                
-                _mainGrid.Children.Add(eventBorder);
             }
+            else
+            {
+                // На даті завершення - показуємо що це кінець
+                eventStack.Children.Add(new Label
+                {
+                    Text = $"🏁 Завершення",
+                    FontSize = 9,
+                    TextColor = Color.FromArgb("#E53935"),
+                    FontAttributes = FontAttributes.Bold
+                });
+            }
+
+            eventBorder.Content = eventStack;
+
+            // Додаємо TapGestureRecognizer для кліку по події
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += (s, e) => EventTapped?.Invoke(this, evt);
+            eventBorder.GestureRecognizers.Add(tapGesture);
+
+            return eventBorder;
         }
 
         private void OnCellTapped(int day, int hour)
