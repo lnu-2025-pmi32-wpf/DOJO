@@ -216,37 +216,41 @@ namespace Presentation.Controls
 
                 var dayOffset = (evt.StartDateTime.Date - WeekStartDate.Date).Days;
                 var startRow = evt.StartHour - _startHour + 1;
-                var durationHours = evt.Duration.TotalHours;
                 
+                // Простий вигляд без кольорового блоку
                 var eventBorder = new Border
                 {
-                    BackgroundColor = evt.Color.WithAlpha(0.3f),
-                    Stroke = evt.Color,
-                    StrokeThickness = 2,
-                    Padding = new Thickness(5),
+                    BackgroundColor = Colors.White,
+                    Stroke = Color.FromArgb("#FF69B4"),
+                    StrokeThickness = 1,
+                    Padding = new Thickness(4, 2),
                     StyleId = "EventBlock",
-                    Margin = new Thickness(2)
+                    Margin = new Thickness(2),
+                    StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 4 }
                 };
 
                 var eventStack = new VerticalStackLayout
                 {
-                    Spacing = 2
+                    Spacing = 1
                 };
 
+                // Назва плану
                 eventStack.Children.Add(new Label
                 {
                     Text = evt.Title,
-                    FontSize = 12,
+                    FontSize = 11,
                     FontAttributes = FontAttributes.Bold,
                     TextColor = Color.FromArgb("#333333"),
                     LineBreakMode = LineBreakMode.TailTruncation
                 });
 
+                // Дедлайн червоним кольором
                 eventStack.Children.Add(new Label
                 {
-                    Text = $"{evt.StartDateTime:HH:mm} - {evt.EndDateTime:HH:mm}",
-                    FontSize = 10,
-                    TextColor = Color.FromArgb("#666666")
+                    Text = $"⏰ {evt.EndDateTime:dd.MM HH:mm}",
+                    FontSize = 9,
+                    TextColor = Color.FromArgb("#E53935"),
+                    FontAttributes = FontAttributes.Bold
                 });
 
                 eventBorder.Content = eventStack;
@@ -256,16 +260,8 @@ namespace Presentation.Controls
                 tapGesture.Tapped += (s, e) => EventTapped?.Invoke(this, evt);
                 eventBorder.GestureRecognizers.Add(tapGesture);
 
-                // Add context menu
-                var menuFlyout = new MenuFlyout();
-                menuFlyout.Add(new MenuFlyoutItem { Text = "Редагувати" });
-                menuFlyout.Add(new MenuFlyoutItem { Text = "Видалити" });
-                menuFlyout.Add(new MenuFlyoutItem { Text = "Дублювати" });
-                FlyoutBase.SetContextFlyout(eventBorder, menuFlyout);
-
                 Grid.SetRow(eventBorder, startRow);
                 Grid.SetColumn(eventBorder, dayOffset + 1);
-                Grid.SetRowSpan(eventBorder, Math.Max(1, (int)(durationHours)));
                 
                 _mainGrid.Children.Add(eventBorder);
             }
