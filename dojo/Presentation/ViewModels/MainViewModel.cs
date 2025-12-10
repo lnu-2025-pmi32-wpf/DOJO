@@ -2,6 +2,7 @@ using System. Collections.ObjectModel;
 using System.Windows.Input;
 using Presentation. Helpers;
 using Presentation.Models;
+using Presentation.Views;
 using BLL.Interfaces;
 using BLL.Services;
 using Microsoft. Maui.Controls;
@@ -554,9 +555,17 @@ namespace Presentation.ViewModels
                 await _sessionService.ClearSessionAsync();
             }
 
-            await MainThread.InvokeOnMainThreadAsync(async () =>
+            await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                await Shell.Current.Navigation.PopToRootAsync();
+                // Використовуємо Window замість застарілого MainPage
+                var window = Application.Current?.Windows[0];
+                if (window != null)
+                {
+                    var loginViewModel = _serviceProvider?.GetRequiredService<LoginViewModel>();
+                    var sessionService = _serviceProvider?.GetRequiredService<ISessionService>();
+                    var loginPage = new LoginPage(loginViewModel!, sessionService!);
+                    window.Page = new NavigationPage(loginPage);
+                }
             });
         }
 
