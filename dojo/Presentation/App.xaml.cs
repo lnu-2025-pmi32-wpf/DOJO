@@ -1,5 +1,6 @@
 ﻿﻿﻿using Presentation.Views;
 using BLL.Interfaces;
+using System.Linq;
 
 namespace Presentation;
 
@@ -38,9 +39,27 @@ public partial class App : Application
         try
         {
             System.Diagnostics.Debug.WriteLine("🔹 CreateWindow started");
-            var loginPage = _services.GetRequiredService<LoginPage>();
-            System.Diagnostics.Debug.WriteLine("✅ LoginPage created, showing login screen");
-            return new Window(new NavigationPage(loginPage));
+            
+            var sessionService = _services.GetRequiredService<ISessionService>();
+            
+            var hasSession = Task.Run(async () => 
+            {
+                var session = await sessionService.GetUserSessionAsync();
+                return session.HasValue;
+            }).Result;
+            
+            if (hasSession)
+            {
+                System.Diagnostics.Debug.WriteLine("✅ Session found, showing AppShell");
+                var appShell = _services.GetRequiredService<AppShell>();
+                return new Window(appShell);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("⚠️ No session found, showing LoginPage");
+                var loginPage = _services.GetRequiredService<LoginPage>();
+                return new Window(new NavigationPage(loginPage));
+            }
         }
         catch (Exception ex)
         {
