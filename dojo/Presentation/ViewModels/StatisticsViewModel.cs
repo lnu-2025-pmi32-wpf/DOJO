@@ -1,4 +1,4 @@
-using System.Windows.Input;
+using System. Windows.Input;
 using BLL. Interfaces;
 using Presentation. Helpers;
 
@@ -14,7 +14,6 @@ namespace Presentation.ViewModels
         private int _inProgressTasks;
         private int _userId;
         
-        // Висота стовпчиків графіка (0-200)
         private double _day1Height;
         private double _day2Height;
         private double _day3Height;
@@ -22,6 +21,42 @@ namespace Presentation.ViewModels
         private double _day5Height;
         private double _day6Height;
         private double _day7Height;
+        
+        private string _motivationQuote;
+
+        private readonly List<string> _motivationQuotes = new()
+        {
+            "🌟 Кожне завдання - це крок до успіху!",
+            "💪 Ти можеш більше, ніж думаєш! ",
+            "🚀 Продуктивність - це звичка, а не талант!",
+            "✨ Маленькі кроки ведуть до великих результатів!",
+            "🎯 Сфокусуйся на процесі, а не на результаті!",
+            "🔥 Твоя мотивація сильніша за будь-які перешкоди!",
+            "🌈 Кожен новий день - нова можливість!",
+            "⚡ Дія - ось що відрізняє мрії від реальності!",
+            "🏆 Успіх складається з маленьких перемог!",
+            "💎 Ти вже на шляху до своєї мети!",
+            "🌱 Зростання відбувається поза зоною комфорту!",
+            "🎨 Твори своє майбутнє прямо зараз!",
+            "⭐ Ти сильніший за вчорашнього себе!",
+            "🌟 Прогрес - це прогрес, навіть якщо він маленький!",
+            "🔑 Дисципліна - це ключ до свободи!",
+            "🎯 Зроби сьогодні краще за вчора!",
+            "💫 Твої зусилля ніколи не марні!",
+            "🌸 Вір у себе і все вийде!",
+            "⚡ Почни зараз - не чекай ідеального моменту!",
+            "🏅 Ти вже молодець, що намагаєшся! ",
+            "🌊 Постійність перемагає талант!",
+            "🎪 Насолоджуйся процесом, а не тільки результатом!",
+            "🌞 Сьогодні - твій день! ",
+            "🦋 Зміни починаються з тебе!",
+            "🎁 Кожна хвилина - це подарунок!",
+            "🌺 Будь кращою версією себе!",
+            "⚡ Енергія йде туди, куди спрямована увага!",
+            "🎯 Чітка мета - половина успіху!",
+            "💪 Не здавайся - ти вже на півдорозі!",
+            "🌟 Твоя наполегливість надихає інших!"
+        };
 
         public StatisticsViewModel(IToDoTaskService? todoTaskService = null, ISessionService? sessionService = null)
         {
@@ -30,6 +65,8 @@ namespace Presentation.ViewModels
             
             RefreshCommand = new AsyncRelayCommand(LoadStatistics);
             BackCommand = new AsyncRelayCommand(OnBack);
+            
+            GenerateRandomMotivation();
             
             _ = InitializeAsync();
         }
@@ -52,7 +89,12 @@ namespace Presentation.ViewModels
             set => SetProperty(ref _inProgressTasks, value);
         }
 
-        // Графік - висота стовпчиків
+        public string MotivationQuote
+        {
+            get => _motivationQuote;
+            set => SetProperty(ref _motivationQuote, value);
+        }
+
         public double Day1Height { get => _day1Height; set => SetProperty(ref _day1Height, value); }
         public double Day2Height { get => _day2Height; set => SetProperty(ref _day2Height, value); }
         public double Day3Height { get => _day3Height; set => SetProperty(ref _day3Height, value); }
@@ -61,9 +103,8 @@ namespace Presentation.ViewModels
         public double Day6Height { get => _day6Height; set => SetProperty(ref _day6Height, value); }
         public double Day7Height { get => _day7Height; set => SetProperty(ref _day7Height, value); }
 
-        // Computed properties
         public string CompletionRate => TotalTasks > 0 ? $"{(CompletedTasks * 100.0 / TotalTasks):F0}%" : "0%";
-        public double CompletionProgress => TotalTasks > 0 ? (double)CompletedTasks / TotalTasks : 0;
+        public double CompletionProgress => TotalTasks > 0 ? (double)CompletedTasks / TotalTasks :  0;
 
         public ICommand RefreshCommand { get; }
         public ICommand BackCommand { get; }
@@ -77,13 +118,13 @@ namespace Presentation.ViewModels
                 var session = await _sessionService.GetUserSessionAsync();
                 if (session. HasValue)
                 {
-                    _userId = session.Value.UserId;
+                    _userId = session.Value. UserId;
                     await LoadStatistics();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"❌ StatisticsViewModel Init Error: {ex.Message}");
+                System. Diagnostics.Debug.WriteLine($"❌ StatisticsViewModel Init Error: {ex.Message}");
             }
         }
 
@@ -102,22 +143,23 @@ namespace Presentation.ViewModels
                 var tasks = await _todoTaskService.GetTasksByUserIdAsync(_userId);
                 var tasksList = tasks.ToList();
 
-                // ✅ Реальні дані з БД
                 TotalTasks = tasksList.Count;
                 CompletedTasks = tasksList.Count(t => t.IsCompleted);
                 InProgressTasks = TotalTasks - CompletedTasks;
 
-                // ✅ Генеруємо графік за останні 7 днів
                 LoadChartData(tasksList);
+                
+                GenerateRandomMotivation();
 
                 System. Diagnostics.Debug.WriteLine($"✅ Статистика:  Всього={TotalTasks}, Виконано={CompletedTasks}, В процесі={InProgressTasks}");
+                System.Diagnostics.Debug.WriteLine($"💬 Мотивація: {MotivationQuote}");
                 
                 OnPropertyChanged(nameof(CompletionRate));
                 OnPropertyChanged(nameof(CompletionProgress));
             }
             catch (Exception ex)
             {
-                System. Diagnostics.Debug.WriteLine($"❌ LoadStatistics Error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ LoadStatistics Error: {ex.Message}");
             }
         }
 
@@ -126,21 +168,18 @@ namespace Presentation.ViewModels
             var today = DateTime.Today;
             var heights = new List<double>();
 
-            // Рахуємо виконані таски за кожен день (останні 7 днів)
             for (int i = 6; i >= 0; i--)
             {
-                var targetDate = today.AddDays(-i);
-                var completedOnDay = tasks.Count(t => 
+                var targetDate = today. AddDays(-i);
+                var completedOnDay = tasks. Count(t => 
                     t.IsCompleted && 
                     t.CompletedAt.HasValue && 
                     t. CompletedAt.Value.Date == targetDate);
-
-                // Висота = кількість * 30 (максимум 200)
+                
                 var height = Math.Min(completedOnDay * 30, 200);
                 heights. Add(height);
             }
 
-            // Присвоюємо висоти
             Day1Height = heights[0];
             Day2Height = heights[1];
             Day3Height = heights[2];
@@ -150,6 +189,13 @@ namespace Presentation.ViewModels
             Day7Height = heights[6];
 
             System.Diagnostics.Debug.WriteLine($"📊 Графік:  {string.Join(", ", heights)}");
+        }
+
+        private void GenerateRandomMotivation()
+        {
+            var random = new Random();
+            var index = random.Next(_motivationQuotes.Count);
+            MotivationQuote = _motivationQuotes[index];
         }
 
         private async Task OnBack()

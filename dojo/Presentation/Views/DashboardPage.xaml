@@ -500,32 +500,51 @@
                     <Border 
                         BackgroundColor="{StaticResource SoftPink}"
                         Padding="20"
-                        StrokeShape="RoundRectangle 8"
+                        StrokeShape="RoundRectangle 12"
                         Stroke="{StaticResource HotPink}"
-                        HeightRequest="150">
-                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
-                            <!-- Тут можна замінити на Image з Figma:  <Image Source="pig.png" . ../> -->
+                        StrokeThickness="2"
+                        HeightRequest="180">
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
+                            <!-- Свинка -->
                             <Label 
                                 Text="(^_^)"
-                                FontSize="40"
+                                FontSize="48"
                                 HorizontalOptions="Center"
-                                TextColor="{StaticResource HotPink}"/>
+                                TextColor="{StaticResource HotPink}"
+                                Margin="0,0,0,5"/>
+                            
+                            <!-- 🔥 ДИНАМІЧНИЙ РІВЕНЬ -->
                             <Label 
-                                Text="Рівень 5"
-                                FontSize="14"
+                                Text="{Binding UserLevel, StringFormat='Рівень {0}'}"
+                                FontSize="18"
                                 HorizontalOptions="Center"
                                 TextColor="{StaticResource HotPink}"
                                 FontAttributes="Bold"/>
-                            <ProgressBar 
-                                Progress="0.65"
-                                ProgressColor="{StaticResource MediumPink}"
-                                Margin="0,10,0,0"
-                                WidthRequest="150"/>
+                            
+                            <!-- 🔥 ПРОГРЕС-БАР З ОБГОРТКОЮ -->
+                            <Border
+                                BackgroundColor="#E0E0E0"
+                                StrokeShape="RoundRectangle 8"
+                                Stroke="Transparent"
+                                HeightRequest="12"
+                                WidthRequest="200"
+                                Padding="0"
+                                Margin="0,5,0,5">
+                                <ProgressBar 
+                                    Progress="{Binding UserProgressPercent}"
+                                    ProgressColor="{StaticResource HotPink}"
+                                    HeightRequest="12"
+                                    VerticalOptions="Fill"
+                                    HorizontalOptions="Fill"/>
+                            </Border>
+                            
+                            <!-- 🔥 ДИНАМІЧНИЙ ТЕКСТ ДОСВІДУ -->
                             <Label 
-                                Text="650 / 1000 XP"
-                                FontSize="12"
+                                Text="{Binding UserExpProgressText}"
+                                FontSize="14"
                                 HorizontalOptions="Center"
-                                TextColor="#666"/>
+                                TextColor="#666"
+                                FontAttributes="Bold"/>
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>

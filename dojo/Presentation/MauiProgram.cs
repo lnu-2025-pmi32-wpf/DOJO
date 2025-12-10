@@ -34,6 +34,7 @@ namespace Presentation
             builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
             builder.Services.AddScoped<IGoalService, GoalService>();
             builder.Services.AddScoped<IPomodoroService, PomodoroService>();
+            builder.Services.AddScoped<IExperienceService, ExperienceService>();
 
             // ViewModels
             builder.Services. AddTransient<LoginViewModel>();
@@ -44,7 +45,8 @@ namespace Presentation
                     sp.GetRequiredService<ISessionService>(),
                     sp.GetRequiredService<IPomodoroService>(),
                     sp,
-                    sp.GetRequiredService<IToDoTaskService>()));
+                    sp.GetRequiredService<IToDoTaskService>(),
+                    sp.GetRequiredService<IExperienceService>())); 
                     
             builder.Services.AddTransient<AddPlanViewModel>(sp =>
                 new AddPlanViewModel(

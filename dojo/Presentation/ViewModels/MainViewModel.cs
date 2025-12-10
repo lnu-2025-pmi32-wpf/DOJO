@@ -26,6 +26,9 @@ namespace Presentation.ViewModels
         private string _userName = "Користувач";
         private string _userInitials = "U";
         private int _userId;
+        private int _userLevel = 1;
+        private int _userExp = 0;
+        private int _userExpToNextLevel = 600;
 
         private System.Timers.Timer? _pomodoroTimer;
         private TimeSpan _remainingTime = TimeSpan.FromMinutes(25);
@@ -35,15 +38,17 @@ namespace Presentation.ViewModels
         private DateTime? _sessionStartTime;
         private bool _isLoadingGoals = false;
         private bool _isMessagingSubscribed = false;
+        private readonly IExperienceService?  _experienceService;
 
         private ObservableCollection<DAL.Models.ToDoTask> _todoTasksFromDb = new();
 
-        public MainViewModel(ISessionService? sessionService = null, IPomodoroService? pomodoroService = null, IServiceProvider? serviceProvider = null, IToDoTaskService? todoTaskService = null)
+        public MainViewModel(ISessionService?  sessionService = null, IPomodoroService? pomodoroService = null, IServiceProvider? serviceProvider = null, IToDoTaskService? todoTaskService = null, IExperienceService? experienceService = null)
         {
             _sessionService = sessionService;
             _pomodoroService = pomodoroService;
             _serviceProvider = serviceProvider;
             _todoTaskService = todoTaskService;
+            _experienceService = experienceService;
 
             Events = new ObservableCollection<EventModel>();
             TodoItems = new ObservableCollection<TodoItemModel>();
@@ -190,6 +195,9 @@ namespace Presentation.ViewModels
 
                     // Завантажуємо TODO завдання
                     await LoadTodoItems();
+                    
+                    // Завантажуємо прогрес користувача
+                    await LoadUserProgress();
 
                     System.Diagnostics.Debug.WriteLine("InitializeAsync: Завершено");
                 }
@@ -286,6 +294,41 @@ namespace Presentation.ViewModels
         {
             get => _userInitials;
             set => SetProperty(ref _userInitials, value);
+        }
+        
+        // Прогрес свинки-героя
+        public int UserLevel
+        {
+            get => _userLevel;
+            set
+            {
+                System.Diagnostics.Debug.WriteLine($"🔄 UserLevel змінюється: {_userLevel} → {value}");
+                SetProperty(ref _userLevel, value);
+            }
+        }
+
+        public int UserExp
+        {
+            get => _userExp;
+            set => SetProperty(ref _userExp, value);
+        }
+
+        public int UserExpToNextLevel
+        {
+            get => _userExpToNextLevel;
+            set => SetProperty(ref _userExpToNextLevel, value);
+        }
+
+        public string UserExpProgressText => $"{UserExp} / 600 XP";  // 🔥 ЗАВЖДИ /600
+        
+        // 🔥 ДОДАЙ ЦЮ НОВУ ВЛАСТИВІСТЬ
+        public double UserProgressPercent
+        {
+            get
+            {
+                if (UserExpToNextLevel == 0) return 0;
+                return (double)UserExp / UserExpToNextLevel;
+            }
         }
 
         public int UserId
@@ -511,9 +554,9 @@ namespace Presentation.ViewModels
         /// </summary>
         public async Task TogglePlanCompletedAsync(EventModel eventModel, bool isCompleted)
         {
-            if (_serviceProvider == null)
+            if (_serviceProvider == null || _experienceService == null)
             {
-                System.Diagnostics.Debug.WriteLine("TogglePlanCompleted: ServiceProvider не доступний");
+                System. Diagnostics.Debug.WriteLine("TogglePlanCompleted: ServiceProvider не доступний");
                 return;
             }
 
@@ -527,15 +570,43 @@ namespace Presentation.ViewModels
                 var goal = await goalService.GetGoalByIdAsync(eventModel.Id);
                 if (goal != null)
                 {
+                    bool wasCompleted = goal.IsCompleted;
                     goal.IsCompleted = isCompleted;
                     goal.Progress = isCompleted ? 100 : 0;
                     goal.UpdatedAt = DateTime.Now;
 
                     await goalService.UpdateGoalAsync(goal);
 
+                    // 🎮 НАРАХОВУЄМО ДОСВІД ПРИ ВИКОНАННІ ПЛАНУ
+                    if (isCompleted && !wasCompleted)
+                    {
+                        int oldLevel = UserLevel;  // 🔥 ЗАПАМ'ЯТОВУЄМО СТАРИЙ РІВЕНЬ
+    
+                        int expGained = await _experienceService.AwardExperienceForPlanAsync(UserId, goal.Priority);
+                        System.Diagnostics.Debug.WriteLine($"✨ Отримано {expGained} досвіду за Plan (пріоритет {goal. Priority})!");
+
+                        // Оновлюємо прогрес героя
+                        await LoadUserProgress();
+    
+                        // 🔥 ПЕРЕВІРЯЄМО ЧИ ПІДВИЩИВСЯ РІВЕНЬ
+                        if (UserLevel > oldLevel)
+                        {
+                            await Application.Current?. MainPage?.DisplayAlert(
+                                "🎉 НОВИЙ РІВЕНЬ!", 
+                                $"Вітаємо! Ви досягли {UserLevel} рівня!\n+{expGained} досвіду", 
+                                "Чудово!");
+                        }
+                        else
+                        {
+                            await Application.Current?.MainPage?.DisplayAlert(
+                                "✨ Досвід отримано!", 
+                                $"Ви виконали план і отримали {expGained} досвіду!\n{UserExp}/600 XP", 
+                                "OK");
+                        }
+                    }
+
                     System.Diagnostics.Debug.WriteLine($"TogglePlanCompleted: План '{eventModel.Title}' позначено як {(isCompleted ? "виконаний" : "невиконаний")}");
 
-                    // Оновлюємо UI
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
                         OnPropertyChanged(nameof(SortedEvents));
@@ -1156,17 +1227,46 @@ namespace Presentation.ViewModels
 
         private async Task OnToggleTodoTask(DAL.Models.ToDoTask?  task)
         {
-            if (task == null || _todoTaskService == null) return;
+            if (task == null || _todoTaskService == null || _experienceService == null) return;
 
             try
             {
-                task.IsCompleted = !task. IsCompleted;
-                task. CompletedAt = task.IsCompleted ? DateTime.UtcNow : null;
+                bool wasCompleted = task.IsCompleted;
+                task.IsCompleted = !task.IsCompleted;
+                task.CompletedAt = task.IsCompleted ? DateTime. UtcNow : null;
 
                 await _todoTaskService.UpdateTaskAsync(task);
+
+                // 🎮 НАРАХОВУЄМО ДОСВІД ПРИ ВИКОНАННІ TODO
+                if (task.IsCompleted && ! wasCompleted)
+                {
+                    int oldLevel = UserLevel;  // 🔥 ЗАПАМ'ЯТОВУЄМО СТАРИЙ РІВЕНЬ
+    
+                    int expGained = await _experienceService.AwardExperienceForTodoAsync(UserId, task.Priority);
+                    System.Diagnostics.Debug.WriteLine($"✨ Отримано {expGained} досвіду за TODO (пріоритет {task.Priority})!");
+
+                    // Оновлюємо прогрес героя
+                    await LoadUserProgress();
+    
+                    // 🔥 ПЕРЕВІРЯЄМО ЧИ ПІДВИЩИВСЯ РІВЕНЬ
+                    if (UserLevel > oldLevel)
+                    {
+                        await Application.Current?. MainPage?.DisplayAlert(
+                            "🎉 НОВИЙ РІВЕНЬ!", 
+                            $"Вітаємо!  Ви досягли {UserLevel} рівня!\n+{expGained} досвіду", 
+                            "Чудово!");
+                    }
+                    else
+                    {
+                        await Application.Current?.MainPage?.DisplayAlert(
+                            "✨ Досвід отримано!", 
+                            $"Ви отримали {expGained} досвіду за виконання завдання!\n{UserExp}/600 XP", 
+                            "OK");
+                    }
+                }
+
                 await LoadTodoItems();
-        
-                // Оновлюємо статистику на Dashboard
+
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     OnPropertyChanged(nameof(CompletedTasksCount));
@@ -1177,7 +1277,7 @@ namespace Presentation.ViewModels
             }
             catch (Exception ex)
             {
-                await Application. Current! .MainPage!.DisplayAlert("Помилка",
+                await Application.Current?.MainPage?.DisplayAlert("Помилка",
                     $"Не вдалося оновити завдання: {ex.Message}", "OK");
             }
         }
@@ -1189,6 +1289,51 @@ namespace Presentation.ViewModels
                 System.Diagnostics.Debug.WriteLine("ForceRefreshMonthView:  Примусове оновлення місячного вигляду");
                 OnPropertyChanged(nameof(SelectedDate));
                 OnPropertyChanged(nameof(Events));
+            }
+        }
+        
+        /// <summary>
+        /// Завантажує прогрес користувача (рівень, досвід)
+        /// </summary>
+        /// <summary>
+        /// Завантажує прогрес користувача (рівень, досвід)
+        /// </summary>
+        private async Task LoadUserProgress()
+        {
+            if (_experienceService == null || UserId == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("LoadUserProgress: Сервіс або UserId не доступні");
+                return;
+            }
+
+            try
+            {
+                // 🔥 ТЕПЕР ОТРИМУЄМО 4 ЗНАЧЕННЯ
+                var (totalExp, level, expInCurrentLevel, expToNextLevel) = await _experienceService.GetUserProgressAsync(UserId);
+                
+                // 🔥 ДОДАЙ ЦІ ЛОГИ ДЛЯ ДЕБАГУ
+                System.Diagnostics.Debug.WriteLine($"=== DEBUG LoadUserProgress ===");
+                System.Diagnostics.Debug.WriteLine($"UserId: {UserId}");
+                System.Diagnostics.Debug.WriteLine($"TotalExp з БД: {totalExp}");
+                System.Diagnostics.Debug.WriteLine($"Level з БД: {level}");
+                System.Diagnostics.Debug.WriteLine($"ExpInCurrentLevel: {expInCurrentLevel}");
+                System.Diagnostics. Debug.WriteLine($"Поточний UserLevel (до оновлення): {UserLevel}");
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    UserLevel = level;
+                    UserExp = expInCurrentLevel;  // 🔥 ВИКОРИСТОВУЄМО expInCurrentLevel (завжди 0-599)
+                    UserExpToNextLevel = 600;     // 🔥 ЗАВЖДИ 600! 
+            
+                    OnPropertyChanged(nameof(UserExpProgressText));
+                    OnPropertyChanged(nameof(UserProgressPercent));
+            
+                    System.Diagnostics. Debug.WriteLine($"✅ Прогрес завантажено:  Рівень {level}, Досвід {expInCurrentLevel}/600 ({UserProgressPercent:P0}), Всього: {totalExp} XP");
+                });
+            }
+            catch (Exception ex)
+            {
+                System. Diagnostics.Debug.WriteLine($"❌ Помилка завантаження прогресу: {ex. Message}");
             }
         }
     }
