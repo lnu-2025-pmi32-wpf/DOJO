@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewmodels="clr-namespace:Presentation.ViewModels"
              x:Class="Presentation.Views.StatisticsPage"
-             x:DataType="viewmodels:StatisticsViewModel"
              Title="Статистика"
              BackgroundColor="#F5F5F5">
 
@@ -20,14 +18,14 @@
                 FontAttributes="Bold"
                 TextColor="#333333"/>
 
-            <!-- Summary Cards -->
-            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="15">
+            <!-- Summary Cards - ТІЛЬКИ 2 картки -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
                 
                 <!-- Completed Tasks Card -->
                 <Border 
                     Grid.Column="0"
                     BackgroundColor="White"
-                    Stroke="{StaticResource HotPink}"
+                    Stroke="#FF1493"
                     StrokeThickness="2"
                     Padding="20"
                     StrokeShape="RoundRectangle 12">
@@ -35,7 +33,7 @@
                         <Label 
                             Text="✓"
                             FontSize="32"
-                            TextColor="{StaticResource HotPink}"
+                            TextColor="#FF1493"
                             HorizontalOptions="Center"/>
                         <Label 
                             Text="{Binding CompletedTasks}"
@@ -55,7 +53,7 @@
                 <Border 
                     Grid.Column="1"
                     BackgroundColor="White"
-                    Stroke="{StaticResource DeepPink}"
+                    Stroke="#FF1493"
                     StrokeThickness="2"
                     Padding="20"
                     StrokeShape="RoundRectangle 12">
@@ -78,59 +76,6 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Total Hours Card -->
-                <Border 
-                    Grid.Column="2"
-                    BackgroundColor="White"
-                    Stroke="#FF9800"
-                    StrokeThickness="2"
-                    Padding="20"
-                    StrokeShape="RoundRectangle 12">
-                    <VerticalStackLayout Spacing="10">
-                        <Label 
-                            Text="⏱️"
-                            FontSize="32"
-                            HorizontalOptions="Center"/>
-                        <Label 
-                            Text="{Binding TotalHours, StringFormat='{0:F1}'}"
-                            FontSize="36"
-                            FontAttributes="Bold"
-                            TextColor="#333"
-                            HorizontalOptions="Center"/>
-                        <Label 
-                            Text="Годин роботи"
-                            FontSize="14"
-                            TextColor="#666"
-                            HorizontalOptions="Center"/>
-                    </VerticalStackLayout>
-                </Border>
-
-                <!-- Streak Card -->
-                <Border 
-                    Grid.Column="3"
-                    BackgroundColor="White"
-                    Stroke="#F44336"
-                    StrokeThickness="2"
-                    Padding="20"
-                    StrokeShape="RoundRectangle 12">
-                    <VerticalStackLayout Spacing="10">
-                        <Label 
-                            Text="🔥"
-                            FontSize="32"
-                            HorizontalOptions="Center"/>
-                        <Label 
-                            Text="{Binding CurrentStreak}"
-                            FontSize="36"
-                            FontAttributes="Bold"
-                            TextColor="#333"
-                            HorizontalOptions="Center"/>
-                        <Label 
-                            Text="Днів підряд"
-                            FontSize="14"
-                            TextColor="#666"
-                            HorizontalOptions="Center"/>
-                    </VerticalStackLayout>
-                </Border>
             </Grid>
 
             <!-- Progress Section -->
@@ -159,11 +104,11 @@
                                 Text="{Binding CompletionRate}"
                                 FontSize="16"
                                 FontAttributes="Bold"
-                                TextColor="{StaticResource DarkPink}"/>
+                                TextColor="#FF1493"/>
                         </HorizontalStackLayout>
                         <ProgressBar 
                             Progress="{Binding CompletionProgress}"
-                            ProgressColor="{StaticResource DeepPink}"
+                            ProgressColor="#FF1493"
                             HeightRequest="12"/>
                     </VerticalStackLayout>
 
@@ -179,11 +124,11 @@
                                 Text="{Binding ProductivityText}"
                                 FontSize="16"
                                 FontAttributes="Bold"
-                                TextColor="{StaticResource DeepPink}"/>
+                                TextColor="#FF1493"/>
                         </HorizontalStackLayout>
                         <ProgressBar 
                             Progress="{Binding ProductivityProgress}"
-                            ProgressColor="{StaticResource DeepPink}"
+                            ProgressColor="#FF1493"
                             HeightRequest="12"/>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
@@ -246,7 +191,7 @@
                             BackgroundColor="#FFF3E0"
                             Padding="15"
                             StrokeShape="RoundRectangle 8"
-                            Stroke="{StaticResource HotPink}">
+                            Stroke="#FF1493">
                             <VerticalStackLayout Spacing="5">
                                 <Label 
                                     Text="🌟"
@@ -256,7 +201,7 @@
                                     Text="Перше завдання"
                                     FontSize="14"
                                     FontAttributes="Bold"
-                                    TextColor="{StaticResource Raspberry}"
+                                    TextColor="#D81B60"
                                     HorizontalOptions="Center"/>
                                 <Label 
                                     Text="Виконано"
@@ -268,10 +213,10 @@
 
                         <Border 
                             Grid.Column="1"
-                            BackgroundColor="{StaticResource SoftPink}"
+                            BackgroundColor="#FFE0F0"
                             Padding="15"
                             StrokeShape="RoundRectangle 8"
-                            Stroke="{StaticResource HotPink}">
+                            Stroke="#FF1493">
                             <VerticalStackLayout Spacing="5">
                                 <Label 
                                     Text="💪"

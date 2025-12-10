@@ -4,11 +4,10 @@ namespace Presentation.Views
 {
     public partial class StatisticsPage : ContentPage
     {
-        public StatisticsPage()
+        public StatisticsPage(StatisticsViewModel viewModel)
         {
             InitializeComponent();
-            BindingContext = new StatisticsViewModel();
+            BindingContext = viewModel;
         }
     }
 }
-
