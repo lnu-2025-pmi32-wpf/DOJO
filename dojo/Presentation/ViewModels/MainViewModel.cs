@@ -15,6 +15,9 @@ namespace Presentation.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
+        // 🎉 Подія підвищення рівня для показу анімованого popup
+        public event EventHandler<(int NewLevel, int ExpGained)>? LevelUp;
+
         private readonly ISessionService? _sessionService;
         private readonly IPomodoroService? _pomodoroService;
         private readonly IServiceProvider? _serviceProvider;
@@ -591,10 +594,22 @@ namespace Presentation.ViewModels
                         // 🔥 ПЕРЕВІРЯЄМО ЧИ ПІДВИЩИВСЯ РІВЕНЬ
                         if (UserLevel > oldLevel)
                         {
-                            await Application.Current?. MainPage?.DisplayAlert(
-                                "🎉 НОВИЙ РІВЕНЬ!", 
-                                $"Вітаємо! Ви досягли {UserLevel} рівня!\n+{expGained} досвіду", 
-                                "Чудово!");
+                            // Викликаємо подію для показу анімованого popup
+                            System.Diagnostics.Debug.WriteLine($"🎉 Рівень підвищено! {oldLevel} -> {UserLevel}");
+                            
+                            if (LevelUp != null)
+                            {
+                                LevelUp.Invoke(this, (UserLevel, expGained));
+                            }
+                            else
+                            {
+                                // Fallback якщо подія не підписана
+                                System.Diagnostics.Debug.WriteLine("⚠️ LevelUp подія не має підписників, показуємо DisplayAlert");
+                                await Application.Current?.MainPage?.DisplayAlert(
+                                    "🎉 НОВИЙ РІВЕНЬ!", 
+                                    $"Вітаємо! Ви досягли {UserLevel} рівня!\n+{expGained} досвіду", 
+                                    "Чудово!");
+                            }
                         }
                         else
                         {
@@ -1251,10 +1266,22 @@ namespace Presentation.ViewModels
                     // 🔥 ПЕРЕВІРЯЄМО ЧИ ПІДВИЩИВСЯ РІВЕНЬ
                     if (UserLevel > oldLevel)
                     {
-                        await Application.Current?. MainPage?.DisplayAlert(
-                            "🎉 НОВИЙ РІВЕНЬ!", 
-                            $"Вітаємо!  Ви досягли {UserLevel} рівня!\n+{expGained} досвіду", 
-                            "Чудово!");
+                        // Викликаємо подію для показу анімованого popup
+                        System.Diagnostics.Debug.WriteLine($"🎉 Рівень підвищено через TODO! {oldLevel} -> {UserLevel}");
+                        
+                        if (LevelUp != null)
+                        {
+                            LevelUp.Invoke(this, (UserLevel, expGained));
+                        }
+                        else
+                        {
+                            // Fallback якщо подія не підписана
+                            System.Diagnostics.Debug.WriteLine("⚠️ LevelUp подія не має підписників, показуємо DisplayAlert");
+                            await Application.Current?.MainPage?.DisplayAlert(
+                                "🎉 НОВИЙ РІВЕНЬ!", 
+                                $"Вітаємо! Ви досягли {UserLevel} рівня!\n+{expGained} досвіду", 
+                                "Чудово!");
+                        }
                     }
                     else
                     {

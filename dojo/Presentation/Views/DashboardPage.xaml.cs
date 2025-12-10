@@ -21,6 +21,9 @@ namespace Presentation.Views
                 BindingContext = _viewModel;
                 System.Diagnostics.Debug.WriteLine("DashboardPage: BindingContext встановлено");
 
+                // Підписуємося на подію підвищення рівня
+                _viewModel.LevelUp += OnLevelUp;
+
                 // Підписуємося на події контролів
                 if (DaySchedule != null)
                 {
@@ -159,10 +162,30 @@ namespace Presentation.Views
             await Navigation.PushAsync(viewPlanPage);
         }
 
+        /// <summary>
+        /// Обробник події підвищення рівня - показує анімований popup
+        /// </summary>
+        private async void OnLevelUp(object? sender, (int NewLevel, int ExpGained) e)
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine($"🎉 DashboardPage: Показуємо popup рівня {e.NewLevel}");
+                    await LevelUpPopup.ShowAsync(e.NewLevel, e.ExpGained);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"❌ Помилка показу popup: {ex.Message}");
+                }
+            });
+        }
+
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
             // MessagingCenter підписки керуються в MainViewModel
+            // LevelUp підписка залишається активною бо підписуємо в конструкторі
         }
     }
 }

@@ -5,10 +5,14 @@
              xmlns:models="clr-namespace:Presentation.Models"
              xmlns:dalmodels="clr-namespace:DAL.Models;assembly=DAL"
              xmlns:controls="clr-namespace:Presentation.Controls"
+             xmlns:views="clr-namespace:Presentation.Views"
              x:Class="Presentation.Views.DashboardPage"
              BackgroundColor="#F5F5F5">
 
-    <Grid RowDefinitions="60,*" ColumnDefinitions="*,340">
+    <!-- Wrapper Grid для overlay popup -->
+    <Grid>
+        <!-- Основний контент -->
+        <Grid RowDefinitions="60,*" ColumnDefinitions="*,340">
         
         <!-- Top Toolbar -->
         <Border 
@@ -553,6 +557,11 @@
             </VerticalStackLayout>
         </Border>
 
+        </Grid>
+        
+        <!-- Level Up Popup (overlay поверх всього контенту) -->
+        <views:LevelUpPopup x:Name="LevelUpPopup" IsVisible="False"/>
+        
     </Grid>
 
 </ContentPage>

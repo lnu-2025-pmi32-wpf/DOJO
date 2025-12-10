@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Presentation.Views.LevelUpPopup"
+             BackgroundColor="Transparent">
+
+    <!-- Затемнений фон -->
+    <Grid x:Name="OverlayGrid" BackgroundColor="#80000000" Opacity="0">
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnBackgroundTapped"/>
+        </Grid.GestureRecognizers>
+        
+        <!-- Модальне вікно -->
+        <Border x:Name="PopupCard"
+                BackgroundColor="White"
+                StrokeShape="RoundRectangle 24"
+                Stroke="#FF69B4"
+                StrokeThickness="3"
+                Padding="30"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                WidthRequest="320"
+                Scale="0"
+                Opacity="0">
+            
+            <Border.Shadow>
+                <Shadow Brush="#40000000" Offset="0,10" Radius="20" Opacity="0.3"/>
+            </Border.Shadow>
+            
+            <VerticalStackLayout Spacing="20" HorizontalOptions="Center">
+                
+                <!-- Зірочки зверху -->
+                <Label x:Name="StarsLabel"
+                       Text="⭐ ⭐ ⭐"
+                       FontSize="32"
+                       HorizontalOptions="Center"
+                       Opacity="0"/>
+                
+                <!-- Свинка -->
+                <Image x:Name="PigImage"
+                       Source="group1"
+                       HeightRequest="120"
+                       WidthRequest="120"
+                       HorizontalOptions="Center"
+                       Aspect="AspectFit"
+                       Scale="0"/>
+                
+                <!-- Заголовок -->
+                <Label x:Name="TitleLabel"
+                       Text="🎉 НОВИЙ РІВЕНЬ!"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="#FF69B4"
+                       HorizontalOptions="Center"
+                       Opacity="0"/>
+                
+                <!-- Рівень -->
+                <Label x:Name="LevelLabel"
+                       FontSize="22"
+                       TextColor="#333"
+                       HorizontalOptions="Center"
+                       Opacity="0"/>
+                
+                <!-- Опис -->
+                <Label x:Name="DescriptionLabel"
+                       FontSize="16"
+                       TextColor="#666"
+                       HorizontalOptions="Center"
+                       Opacity="0"/>
+                
+                <!-- Кнопка закриття -->
+                <Button x:Name="CloseButton"
+                        Text="Чудово! 🎊"
+                        BackgroundColor="#FF69B4"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        FontSize="18"
+                        CornerRadius="20"
+                        Padding="30,15"
+                        HorizontalOptions="Center"
+                        Clicked="OnCloseClicked"
+                        Opacity="0"
+                        Scale="0"/>
+                
+            </VerticalStackLayout>
+        </Border>
+        
+        <!-- Конфетті/частинки (декоративні елементи) -->
+        <Label x:Name="Confetti1" Text="🎊" FontSize="30" Opacity="0" 
+               HorizontalOptions="Start" VerticalOptions="Start" Margin="50,200,0,0"/>
+        <Label x:Name="Confetti2" Text="✨" FontSize="25" Opacity="0" 
+               HorizontalOptions="End" VerticalOptions="Start" Margin="0,250,50,0"/>
+        <Label x:Name="Confetti3" Text="🎉" FontSize="28" Opacity="0" 
+               HorizontalOptions="Start" VerticalOptions="End" Margin="80,0,0,200"/>
+        <Label x:Name="Confetti4" Text="⭐" FontSize="24" Opacity="0" 
+               HorizontalOptions="End" VerticalOptions="End" Margin="0,0,70,180"/>
+    </Grid>
+    
+</ContentView>
