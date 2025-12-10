@@ -506,11 +506,12 @@
                         HeightRequest="180">
                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
                             <!-- Свинка -->
-                            <Label 
-                                Text="(^_^)"
-                                FontSize="48"
+                            <Image 
+                                Source="group2"
+                                HeightRequest="80"
+                                WidthRequest="80"
+                                Aspect="AspectFit"
                                 HorizontalOptions="Center"
-                                TextColor="{StaticResource HotPink}"
                                 Margin="0,0,0,5"/>
                             
                             <!-- 🔥 ДИНАМІЧНИЙ РІВЕНЬ -->
