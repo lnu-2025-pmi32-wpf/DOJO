@@ -18,6 +18,9 @@ namespace DAL.Models
         
         // 0 = Low, 1 = Normal, 2 = High
         public int Priority { get; set; } = 1;
+        
+        // Чи виконаний план
+        public bool IsCompleted { get; set; } = false;
 
         [Column(TypeName = "timestamp without time zone")]
         public DateTime CreatedAt { get; set; } 

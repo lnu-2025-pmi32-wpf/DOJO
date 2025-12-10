@@ -82,6 +82,15 @@ namespace Presentation.Views
             }
         }
 
+        private async void OnPlanCheckChanged(object? sender, CheckedChangedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.BindingContext is EventModel eventModel)
+            {
+                System.Diagnostics.Debug.WriteLine($"OnPlanCheckChanged: {eventModel.Title} -> IsCompleted: {e.Value}");
+                await _viewModel.TogglePlanCompletedAsync(eventModel, e.Value);
+            }
+        }
+
         private async void OnProfileTapped(object sender, EventArgs e)
         {
             if (_viewModel != null)

@@ -410,6 +410,56 @@ namespace Presentation.ViewModels
             }
         }
 
+        /// <summary>
+        /// Повертає події відсортовані: невиконані першими, виконані в кінці
+        /// </summary>
+        public IEnumerable<EventModel> SortedEvents => Events
+            .OrderBy(e => e.IsCompleted)
+            .ThenBy(e => e.EndDateTime);
+
+        /// <summary>
+        /// Позначає план як виконаний/невиконаний та зберігає в БД
+        /// </summary>
+        public async Task TogglePlanCompletedAsync(EventModel eventModel, bool isCompleted)
+        {
+            if (_serviceProvider == null)
+            {
+                System.Diagnostics.Debug.WriteLine("TogglePlanCompleted: ServiceProvider не доступний");
+                return;
+            }
+
+            try
+            {
+                eventModel.IsCompleted = isCompleted;
+                
+                using var scope = _serviceProvider.CreateScope();
+                var goalService = scope.ServiceProvider.GetRequiredService<IGoalService>();
+                
+                var goal = await goalService.GetGoalByIdAsync(eventModel.Id);
+                if (goal != null)
+                {
+                    goal.IsCompleted = isCompleted;
+                    goal.Progress = isCompleted ? 100 : 0;
+                    goal.UpdatedAt = DateTime.Now;
+                    
+                    await goalService.UpdateGoalAsync(goal);
+                    
+                    System.Diagnostics.Debug.WriteLine($"TogglePlanCompleted: План '{eventModel.Title}' позначено як {(isCompleted ? "виконаний" : "невиконаний")}");
+                    
+                    // Оновлюємо UI
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        OnPropertyChanged(nameof(SortedEvents));
+                        OnPropertyChanged(nameof(Events));
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"TogglePlanCompleted: Помилка - {ex.Message}");
+            }
+        }
+
         private async void OnNavigateToStatistics()
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -843,7 +893,7 @@ namespace Presentation.ViewModels
                             EndDateTime = goal.EndTime.Value,
                             Priority = (EventPriority)goal.Priority,
                             Color = Colors.Blue,
-                            IsCompleted = goal.Progress >= 100
+                            IsCompleted = goal.IsCompleted
                         });
                     }
                 }
@@ -856,13 +906,14 @@ namespace Presentation.ViewModels
                         foreach (var eventModel in eventModels)
                         {
                             Events.Add(eventModel);
-                            System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Додано план '{eventModel.Title}' (Start: {eventModel.StartDateTime}, End: {eventModel.EndDateTime})");
+                            System.Diagnostics.Debug.WriteLine($"LoadGoalsFromDatabase: Додано план '{eventModel.Title}' (Start: {eventModel.StartDateTime}, End: {eventModel.EndDateTime}, IsCompleted: {eventModel.IsCompleted})");
                         }
                        
                         System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Регенерація календаря...");
                         
                         // Примусово оновлюємо прив'язку Events
                         OnPropertyChanged(nameof(Events));
+                        OnPropertyChanged(nameof(SortedEvents));
                         
                         GenerateCalendarDays();
                         System.Diagnostics.Debug.WriteLine("LoadGoalsFromDatabase: Завершено успішно");

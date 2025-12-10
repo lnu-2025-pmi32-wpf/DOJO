@@ -47,6 +47,10 @@ namespace DAL
                 eb.Property(g => g.Priority)
                   .HasColumnName("priority")
                   .HasDefaultValue(1);
+                  
+                eb.Property(g => g.IsCompleted)
+                  .HasColumnName("is_completed")
+                  .HasDefaultValue(false);
                 
                 eb.Property(g => g.CreatedAt)
                   .HasColumnName("created_at")

@@ -198,17 +198,30 @@
                                     FontAttributes="Bold"
                                     TextColor="#333"/>
                                 
-                                <CollectionView ItemsSource="{Binding Events}">
+                                <CollectionView ItemsSource="{Binding SortedEvents}">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:EventModel">
-                                            <HorizontalStackLayout Spacing="8" Padding="0,5">
-                                                <CheckBox IsChecked="{Binding IsCompleted}"/>
+                                            <Grid ColumnDefinitions="Auto,*,Auto" Padding="0,5" ColumnSpacing="8">
+                                                <CheckBox 
+                                                    Grid.Column="0"
+                                                    IsChecked="{Binding IsCompleted}"
+                                                    CheckedChanged="OnPlanCheckChanged"
+                                                    VerticalOptions="Center"/>
                                                 <Label 
+                                                    Grid.Column="1"
                                                     Text="{Binding Title}"
                                                     FontSize="14"
                                                     VerticalOptions="Center"
-                                                    TextColor="#666"/>
-                                            </HorizontalStackLayout>
+                                                    TextColor="{Binding IsCompleted, Converter={StaticResource BoolToGrayTextConverter}}"
+                                                    TextDecorations="{Binding IsCompleted, Converter={StaticResource BoolToTextDecorationConverter}}"/>
+                                                <Label 
+                                                    Grid.Column="2"
+                                                    Text="{Binding EndDateTime, StringFormat='{0:dd.MM}'}"
+                                                    FontSize="11"
+                                                    TextColor="#E53935"
+                                                    VerticalOptions="Center"
+                                                    FontAttributes="Bold"/>
+                                            </Grid>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
