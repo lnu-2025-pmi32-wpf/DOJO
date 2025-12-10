@@ -3,6 +3,7 @@ using DAL;
 using DAL.Models;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace BLL.Tests.Services
@@ -16,8 +17,7 @@ namespace BLL.Tests.Services
         public GoalServiceTests()
         {
             this.context = TestDbContextFactory.CreateInMemoryContext();
-            this.goalService = new GoalService(this.context);
-
+            this.goalService = new GoalService(this.context, NullLogger<GoalService>.Instance);
 
             this.testUser = new User
             {

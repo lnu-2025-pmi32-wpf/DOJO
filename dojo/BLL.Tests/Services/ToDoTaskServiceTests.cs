@@ -3,13 +3,11 @@ using DAL;
 using DAL.Models;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace BLL.Tests.Services
 {
-    /// <summary>
-    /// Тести для ToDoTaskService - перевіряють CRUD операції з завданнями.
-    /// </summary>
     public class ToDoTaskServiceTests : IDisposable
     {
         private readonly DojoDbContext context;
@@ -19,9 +17,8 @@ namespace BLL.Tests.Services
         public ToDoTaskServiceTests()
         {
             this.context = TestDbContextFactory.CreateInMemoryContext();
-            this.taskService = new ToDoTaskService(this.context);
+            this.taskService = new ToDoTaskService(this.context, NullLogger<ToDoTaskService>.Instance);
 
-            // Створюємо тестового користувача
             this.testUser = new User
             {
                 Username = "TestUser",
