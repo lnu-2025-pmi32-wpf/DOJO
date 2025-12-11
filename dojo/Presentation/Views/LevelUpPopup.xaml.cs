@@ -25,7 +25,7 @@ namespace Presentation.Views
 
             // Показуємо overlay
             this.IsVisible = true;
-            
+
             // Анімація появи
             await AnimateShowAsync();
 
@@ -37,18 +37,18 @@ namespace Presentation.Views
         {
             // Паралельні анімації для overlay та картки
             var overlayFade = OverlayGrid.FadeTo(1, 300, Easing.CubicOut);
-            
+
             await Task.Delay(100);
-            
+
             // Анімація появи картки (bounce effect)
             var cardScale = PopupCard.ScaleTo(1, 400, Easing.SpringOut);
             var cardFade = PopupCard.FadeTo(1, 300, Easing.CubicOut);
-            
+
             await Task.WhenAll(overlayFade, cardScale, cardFade);
-            
+
             // Послідовна анімація елементів всередині
             await AnimateElementsAsync();
-            
+
             // Анімація конфетті
             AnimateConfetti();
         }
@@ -63,22 +63,22 @@ namespace Presentation.Views
             // Свинка з bounce
             var pigScale = PigImage.ScaleTo(1, 400, Easing.SpringOut);
             await Task.Delay(100);
-            
+
             // Заголовок
             await TitleLabel.FadeTo(1, 200, Easing.CubicOut);
-            
+
             await pigScale;
-            
+
             // Рівень
             await LevelLabel.FadeTo(1, 200, Easing.CubicOut);
-            
+
             // Опис
             await DescriptionLabel.FadeTo(1, 200, Easing.CubicOut);
-            
+
             // Кнопка з bounce
             CloseButton.Opacity = 1;
             await CloseButton.ScaleTo(1, 300, Easing.SpringOut);
-            
+
             // Пульсуюча анімація свинки
             StartPigPulseAnimation();
         }
@@ -89,13 +89,13 @@ namespace Presentation.Views
             this.Dispatcher.StartTimer(TimeSpan.FromMilliseconds(1500), () =>
             {
                 if (!this.IsVisible) return false;
-                
+
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
                     await PigImage.ScaleTo(1.1, 300, Easing.CubicOut);
                     await PigImage.ScaleTo(1, 300, Easing.CubicIn);
                 });
-                
+
                 return this.IsVisible;
             });
         }
@@ -115,17 +115,17 @@ namespace Presentation.Views
             confetti.TranslationX = 0;
             confetti.TranslationY = 0;
             confetti.Scale = 0;
-            
+
             await Task.Delay(new Random().Next(100, 500));
-            
+
             confetti.Opacity = 1;
-            
+
             var moveX = confetti.TranslateTo(xOffset, yOffset, 1000, Easing.CubicOut);
             var scale = confetti.ScaleTo(1.5, 500, Easing.CubicOut);
             var rotate = confetti.RotateTo(360, 1000, Easing.Linear);
-            
+
             await Task.WhenAll(moveX, scale, rotate);
-            
+
             await confetti.FadeTo(0, 500, Easing.CubicIn);
         }
 
@@ -135,11 +135,11 @@ namespace Presentation.Views
             var cardScale = PopupCard.ScaleTo(0.8, 200, Easing.CubicIn);
             var cardFade = PopupCard.FadeTo(0, 200, Easing.CubicIn);
             var overlayFade = OverlayGrid.FadeTo(0, 300, Easing.CubicIn);
-            
+
             await Task.WhenAll(cardScale, cardFade, overlayFade);
-            
+
             this.IsVisible = false;
-            
+
             // Скидаємо стан для наступного показу
             ResetState();
         }
@@ -156,7 +156,7 @@ namespace Presentation.Views
             DescriptionLabel.Opacity = 0;
             CloseButton.Opacity = 0;
             CloseButton.Scale = 0;
-            
+
             Confetti1.Opacity = 0;
             Confetti2.Opacity = 0;
             Confetti3.Opacity = 0;

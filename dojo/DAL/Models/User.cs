@@ -9,33 +9,33 @@ namespace DAL.Models
         [Key]
         [Column("id")]
         public int Id { get; set; }
-        
+
         [Required]
         [Column("email")]
         [MaxLength(255)]
         public string Email { get; set; } = string.Empty;
-        
+
         [Column("username")]
         [MaxLength(100)]
         public string? Username { get; set; }
-        
+
         [Required]
         [Column("password")]
         [MaxLength(255)]
-        public string Password { get; set; } = string.Empty; 
-        
+        public string Password { get; set; } = string.Empty;
+
         [Column("exp_points")]
         public int ExpPoints { get; set; }
-        
+
         [Column("level")]
         public int Level { get; set; }
-        
+
         [Column("current_streak")]
         public int CurrentStreak { get; set; }
-        
+
         [Column("last_completion_date", TypeName = "timestamp without time zone")]
         public DateTime? LastCompletionDate { get; set; }
-        
+
         [Column("created_at", TypeName = "timestamp without time zone")]
         public DateTime CreatedAt { get; set; }
 

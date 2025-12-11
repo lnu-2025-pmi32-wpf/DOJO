@@ -1,5 +1,5 @@
-using Presentation.Models;
 using System.Collections.ObjectModel;
+using Presentation.Models;
 
 namespace Presentation.Controls
 {
@@ -15,11 +15,11 @@ namespace Presentation.Controls
         public event EventHandler<EventModel>? EventTapped;
 
         public static readonly BindableProperty EventsProperty =
-            BindableProperty.Create(nameof(Events), typeof(ObservableCollection<EventModel>), typeof(WeekScheduleGrid), 
+            BindableProperty.Create(nameof(Events), typeof(ObservableCollection<EventModel>), typeof(WeekScheduleGrid),
                 new ObservableCollection<EventModel>(), propertyChanged: OnEventsChanged);
 
         public static readonly BindableProperty WeekStartDateProperty =
-            BindableProperty.Create(nameof(WeekStartDate), typeof(DateTime), typeof(WeekScheduleGrid), 
+            BindableProperty.Create(nameof(WeekStartDate), typeof(DateTime), typeof(WeekScheduleGrid),
                 DateTime.Today, propertyChanged: OnWeekStartDateChanged);
 
         public ObservableCollection<EventModel> Events
@@ -202,7 +202,7 @@ namespace Presentation.Controls
             var eventsToRemove = _mainGrid.Children
                 .Where(c => c is Border border && border.StyleId == "EventBlock")
                 .ToList();
-            
+
             foreach (var eventView in eventsToRemove)
             {
                 _mainGrid.Children.Remove(eventView);
@@ -216,31 +216,31 @@ namespace Presentation.Controls
                 {
                     var dayOffset = (evt.StartDateTime.Date - WeekStartDate.Date).Days;
                     var startRow = evt.StartHour - _startHour + 1;
-                    
+
                     var startBorder = CreateEventBorder(evt, isStart: true);
-                    
+
                     Grid.SetRow(startBorder, startRow);
                     Grid.SetColumn(startBorder, dayOffset + 1);
                     _mainGrid.Children.Add(startBorder);
                 }
-                
+
                 // Показуємо на даті ЗАВЕРШЕННЯ (якщо це інший день)
-                if (evt.EndDateTime.Date != evt.StartDateTime.Date && 
-                    evt.EndDateTime.Date >= WeekStartDate && 
+                if (evt.EndDateTime.Date != evt.StartDateTime.Date &&
+                    evt.EndDateTime.Date >= WeekStartDate &&
                     evt.EndDateTime.Date < WeekStartDate.AddDays(7))
                 {
                     var dayOffset = (evt.EndDateTime.Date - WeekStartDate.Date).Days;
                     var endRow = evt.EndDateTime.Hour - _startHour + 1;
-                    
+
                     var endBorder = CreateEventBorder(evt, isStart: false);
-                    
+
                     Grid.SetRow(endBorder, endRow);
                     Grid.SetColumn(endBorder, dayOffset + 1);
                     _mainGrid.Children.Add(endBorder);
                 }
             }
         }
-        
+
         private Border CreateEventBorder(EventModel evt, bool isStart)
         {
             var eventBorder = new Border

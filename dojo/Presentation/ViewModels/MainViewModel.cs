@@ -3,13 +3,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using BLL.Interfaces;
+using BLL.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Controls;
 using Presentation.Helpers;
 using Presentation.Models;
 using Presentation.Views;
-using BLL.Interfaces;
-using BLL.Services;
-using Microsoft.Maui.Controls;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Presentation.ViewModels
 {
@@ -41,11 +41,11 @@ namespace Presentation.ViewModels
         private DateTime? _sessionStartTime;
         private bool _isLoadingGoals = false;
         private bool _isMessagingSubscribed = false;
-        private readonly IExperienceService?  _experienceService;
+        private readonly IExperienceService? _experienceService;
 
         private ObservableCollection<DAL.Models.ToDoTask> _todoTasksFromDb = new();
 
-        public MainViewModel(ISessionService?  sessionService = null, IPomodoroService? pomodoroService = null, IServiceProvider? serviceProvider = null, IToDoTaskService? todoTaskService = null, IExperienceService? experienceService = null)
+        public MainViewModel(ISessionService? sessionService = null, IPomodoroService? pomodoroService = null, IServiceProvider? serviceProvider = null, IToDoTaskService? todoTaskService = null, IExperienceService? experienceService = null)
         {
             _sessionService = sessionService;
             _pomodoroService = pomodoroService;
@@ -198,7 +198,7 @@ namespace Presentation.ViewModels
 
                     // Завантажуємо TODO завдання
                     await LoadTodoItems();
-                    
+
                     // Завантажуємо прогрес користувача
                     await LoadUserProgress();
 
@@ -234,21 +234,21 @@ namespace Presentation.ViewModels
                 {
                     System.Diagnostics.Debug.WriteLine($"CurrentViewMode змінився на:  {value}");
                     UpdateDateRange();
-            
+
                     // Коли повертаємося на місячний вигляд - примусово оновлюємо SelectedDate
                     if (value == ViewMode.Month)
                     {
                         // Зберігаємо поточну дату
                         var currentDate = SelectedDate;
-                
+
                         // Оновлюємо CalendarCurrentMonth
-                        CalendarCurrentMonth = new DateTime(currentDate. Year, currentDate.Month, 1);
-                
+                        CalendarCurrentMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+
                         // Примусово тригеримо оновлення SelectedDate, навіть якщо значення не змінилось
                         // Це змусить MonthViewGrid перебудуватись
                         OnPropertyChanged(nameof(SelectedDate));
-                
-                        System.Diagnostics.Debug. WriteLine($"Місячний вигляд активовано.  SelectedDate: {SelectedDate: yyyy-MM-dd}");
+
+                        System.Diagnostics.Debug.WriteLine($"Місячний вигляд активовано.  SelectedDate: {SelectedDate: yyyy-MM-dd}");
                     }
                 }
             }
@@ -263,13 +263,13 @@ namespace Presentation.ViewModels
                 {
                     System.Diagnostics.Debug.WriteLine($"SelectedDate змінився на: {value:yyyy-MM-dd}");
                     UpdateDateRange();
-            
+
                     // Оновлюємо CalendarCurrentMonth якщо місяць змінився
-                    if (CalendarCurrentMonth. Month != value.Month || CalendarCurrentMonth.Year != value.Year)
+                    if (CalendarCurrentMonth.Month != value.Month || CalendarCurrentMonth.Year != value.Year)
                     {
-                        CalendarCurrentMonth = new DateTime(value. Year, value.Month, 1);
+                        CalendarCurrentMonth = new DateTime(value.Year, value.Month, 1);
                     }
-            
+
                     GenerateCalendarDays();
                 }
             }
@@ -298,7 +298,7 @@ namespace Presentation.ViewModels
             get => _userInitials;
             set => SetProperty(ref _userInitials, value);
         }
-        
+
         // Прогрес свинки-героя
         public int UserLevel
         {
@@ -323,7 +323,7 @@ namespace Presentation.ViewModels
         }
 
         public string UserExpProgressText => $"{UserExp} / 600 XP";  // 🔥 ЗАВЖДИ /600
-        
+
         // 🔥 ДОДАЙ ЦЮ НОВУ ВЛАСТИВІСТЬ
         public double UserProgressPercent
         {
@@ -339,7 +339,7 @@ namespace Presentation.ViewModels
             get => _userId;
             set => SetProperty(ref _userId, value);
         }
-        
+
         // Статистика для Dashboard
         // Статистика для Dashboard (TODO завдання)
         public int CompletedTasksCount => TodoTasksFromDb.Count(t => t.IsCompleted);
@@ -351,7 +351,7 @@ namespace Presentation.ViewModels
                 // Підраховуємо загальний час роботи з Pomodoro або з планів
                 // Поки що можна показувати 0 або рахувати з Events
                 return Events
-                    .Where(e => e. IsCompleted)
+                    .Where(e => e.IsCompleted)
                     .Sum(e => (e.EndDateTime - e.StartDateTime).TotalHours);
             }
         }
@@ -559,7 +559,7 @@ namespace Presentation.ViewModels
         {
             if (_serviceProvider == null || _experienceService == null)
             {
-                System. Diagnostics.Debug.WriteLine("TogglePlanCompleted: ServiceProvider не доступний");
+                System.Diagnostics.Debug.WriteLine("TogglePlanCompleted: ServiceProvider не доступний");
                 return;
             }
 
@@ -584,19 +584,19 @@ namespace Presentation.ViewModels
                     if (isCompleted && !wasCompleted)
                     {
                         int oldLevel = UserLevel;  // 🔥 ЗАПАМ'ЯТОВУЄМО СТАРИЙ РІВЕНЬ
-    
+
                         int expGained = await _experienceService.AwardExperienceForPlanAsync(UserId, goal.Priority);
-                        System.Diagnostics.Debug.WriteLine($"✨ Отримано {expGained} досвіду за Plan (пріоритет {goal. Priority})!");
+                        System.Diagnostics.Debug.WriteLine($"✨ Отримано {expGained} досвіду за Plan (пріоритет {goal.Priority})!");
 
                         // Оновлюємо прогрес героя
                         await LoadUserProgress();
-    
+
                         // 🔥 ПЕРЕВІРЯЄМО ЧИ ПІДВИЩИВСЯ РІВЕНЬ
                         if (UserLevel > oldLevel)
                         {
                             // Викликаємо подію для показу анімованого popup
                             System.Diagnostics.Debug.WriteLine($"🎉 Рівень підвищено! {oldLevel} -> {UserLevel}");
-                            
+
                             if (LevelUp != null)
                             {
                                 LevelUp.Invoke(this, (UserLevel, expGained));
@@ -606,16 +606,16 @@ namespace Presentation.ViewModels
                                 // Fallback якщо подія не підписана
                                 System.Diagnostics.Debug.WriteLine("⚠️ LevelUp подія не має підписників, показуємо DisplayAlert");
                                 await Application.Current?.MainPage?.DisplayAlert(
-                                    "🎉 НОВИЙ РІВЕНЬ!", 
-                                    $"Вітаємо! Ви досягли {UserLevel} рівня!\n+{expGained} досвіду", 
+                                    "🎉 НОВИЙ РІВЕНЬ!",
+                                    $"Вітаємо! Ви досягли {UserLevel} рівня!\n+{expGained} досвіду",
                                     "Чудово!");
                             }
                         }
                         else
                         {
                             await Application.Current?.MainPage?.DisplayAlert(
-                                "✨ Досвід отримано!", 
-                                $"Ви виконали план і отримали {expGained} досвіду!\n{UserExp}/600 XP", 
+                                "✨ Досвід отримано!",
+                                $"Ви виконали план і отримали {expGained} досвіду!\n{UserExp}/600 XP",
                                 "OK");
                         }
                     }
@@ -1196,19 +1196,19 @@ namespace Presentation.ViewModels
                 var sortedTasks = tasks
                     .OrderBy(t => t.IsCompleted)
                     .ThenByDescending(t => t.Priority)
-                    .ThenBy(t => t.DueDate ??  DateTime.MaxValue)
+                    .ThenBy(t => t.DueDate ?? DateTime.MaxValue)
                     .ToList();
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    TodoTasksFromDb. Clear();
+                    TodoTasksFromDb.Clear();
                     foreach (var task in sortedTasks)
                     {
                         TodoTasksFromDb.Add(task);
                         System.Diagnostics.Debug.WriteLine($"LoadTodoItems:  Додано '{task.Description}'");
                     }
-                    System. Diagnostics.Debug.WriteLine($"LoadTodoItems: Завантажено {sortedTasks.Count} завдань");
-            
+                    System.Diagnostics.Debug.WriteLine($"LoadTodoItems: Завантажено {sortedTasks.Count} завдань");
+
                     // Оновлюємо статистику
                     OnPropertyChanged(nameof(CompletedTasksCount));
                     OnPropertyChanged(nameof(TotalTasksCount));
@@ -1240,7 +1240,7 @@ namespace Presentation.ViewModels
             }
         }
 
-        private async Task OnToggleTodoTask(DAL.Models.ToDoTask?  task)
+        private async Task OnToggleTodoTask(DAL.Models.ToDoTask? task)
         {
             if (task == null || _todoTaskService == null || _experienceService == null) return;
 
@@ -1248,27 +1248,27 @@ namespace Presentation.ViewModels
             {
                 bool wasCompleted = task.IsCompleted;
                 task.IsCompleted = !task.IsCompleted;
-                task.CompletedAt = task.IsCompleted ? DateTime. UtcNow : null;
+                task.CompletedAt = task.IsCompleted ? DateTime.UtcNow : null;
 
                 await _todoTaskService.UpdateTaskAsync(task);
 
                 // 🎮 НАРАХОВУЄМО ДОСВІД ПРИ ВИКОНАННІ TODO
-                if (task.IsCompleted && ! wasCompleted)
+                if (task.IsCompleted && !wasCompleted)
                 {
                     int oldLevel = UserLevel;  // 🔥 ЗАПАМ'ЯТОВУЄМО СТАРИЙ РІВЕНЬ
-    
+
                     int expGained = await _experienceService.AwardExperienceForTodoAsync(UserId, task.Priority);
                     System.Diagnostics.Debug.WriteLine($"✨ Отримано {expGained} досвіду за TODO (пріоритет {task.Priority})!");
 
                     // Оновлюємо прогрес героя
                     await LoadUserProgress();
-    
+
                     // 🔥 ПЕРЕВІРЯЄМО ЧИ ПІДВИЩИВСЯ РІВЕНЬ
                     if (UserLevel > oldLevel)
                     {
                         // Викликаємо подію для показу анімованого popup
                         System.Diagnostics.Debug.WriteLine($"🎉 Рівень підвищено через TODO! {oldLevel} -> {UserLevel}");
-                        
+
                         if (LevelUp != null)
                         {
                             LevelUp.Invoke(this, (UserLevel, expGained));
@@ -1278,16 +1278,16 @@ namespace Presentation.ViewModels
                             // Fallback якщо подія не підписана
                             System.Diagnostics.Debug.WriteLine("⚠️ LevelUp подія не має підписників, показуємо DisplayAlert");
                             await Application.Current?.MainPage?.DisplayAlert(
-                                "🎉 НОВИЙ РІВЕНЬ!", 
-                                $"Вітаємо! Ви досягли {UserLevel} рівня!\n+{expGained} досвіду", 
+                                "🎉 НОВИЙ РІВЕНЬ!",
+                                $"Вітаємо! Ви досягли {UserLevel} рівня!\n+{expGained} досвіду",
                                 "Чудово!");
                         }
                     }
                     else
                     {
                         await Application.Current?.MainPage?.DisplayAlert(
-                            "✨ Досвід отримано!", 
-                            $"Ви отримали {expGained} досвіду за виконання завдання!\n{UserExp}/600 XP", 
+                            "✨ Досвід отримано!",
+                            $"Ви отримали {expGained} досвіду за виконання завдання!\n{UserExp}/600 XP",
                             "OK");
                     }
                 }
@@ -1308,7 +1308,7 @@ namespace Presentation.ViewModels
                     $"Не вдалося оновити завдання: {ex.Message}", "OK");
             }
         }
-        
+
         public void ForceRefreshMonthView()
         {
             if (CurrentViewMode == ViewMode.Month)
@@ -1318,7 +1318,7 @@ namespace Presentation.ViewModels
                 OnPropertyChanged(nameof(Events));
             }
         }
-        
+
         /// <summary>
         /// Завантажує прогрес користувача (рівень, досвід)
         /// </summary>
@@ -1337,30 +1337,30 @@ namespace Presentation.ViewModels
             {
                 // 🔥 ТЕПЕР ОТРИМУЄМО 4 ЗНАЧЕННЯ
                 var (totalExp, level, expInCurrentLevel, expToNextLevel) = await _experienceService.GetUserProgressAsync(UserId);
-                
+
                 // 🔥 ДОДАЙ ЦІ ЛОГИ ДЛЯ ДЕБАГУ
                 System.Diagnostics.Debug.WriteLine($"=== DEBUG LoadUserProgress ===");
                 System.Diagnostics.Debug.WriteLine($"UserId: {UserId}");
                 System.Diagnostics.Debug.WriteLine($"TotalExp з БД: {totalExp}");
                 System.Diagnostics.Debug.WriteLine($"Level з БД: {level}");
                 System.Diagnostics.Debug.WriteLine($"ExpInCurrentLevel: {expInCurrentLevel}");
-                System.Diagnostics. Debug.WriteLine($"Поточний UserLevel (до оновлення): {UserLevel}");
+                System.Diagnostics.Debug.WriteLine($"Поточний UserLevel (до оновлення): {UserLevel}");
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     UserLevel = level;
                     UserExp = expInCurrentLevel;  // 🔥 ВИКОРИСТОВУЄМО expInCurrentLevel (завжди 0-599)
                     UserExpToNextLevel = 600;     // 🔥 ЗАВЖДИ 600! 
-            
+
                     OnPropertyChanged(nameof(UserExpProgressText));
                     OnPropertyChanged(nameof(UserProgressPercent));
-            
-                    System.Diagnostics. Debug.WriteLine($"✅ Прогрес завантажено:  Рівень {level}, Досвід {expInCurrentLevel}/600 ({UserProgressPercent:P0}), Всього: {totalExp} XP");
+
+                    System.Diagnostics.Debug.WriteLine($"✅ Прогрес завантажено:  Рівень {level}, Досвід {expInCurrentLevel}/600 ({UserProgressPercent:P0}), Всього: {totalExp} XP");
                 });
             }
             catch (Exception ex)
             {
-                System. Diagnostics.Debug.WriteLine($"❌ Помилка завантаження прогресу: {ex. Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ Помилка завантаження прогресу: {ex.Message}");
             }
         }
     }

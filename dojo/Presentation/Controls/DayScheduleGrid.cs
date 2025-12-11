@@ -1,8 +1,8 @@
+using System.Collections.ObjectModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Graphics;
 using Presentation.Models;
-using System.Collections.ObjectModel;
 
 namespace Presentation.Controls
 {

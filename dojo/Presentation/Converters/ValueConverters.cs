@@ -110,7 +110,7 @@ namespace Presentation.Converters
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             // true = success (green), false = error (red)
-            return value is bool b && b 
+            return value is bool b && b
                 ? Color.FromArgb("#FF69B4") // рожевий для успіху
                 : Color.FromArgb("#F44336"); // червоний для помилки
         }
@@ -136,7 +136,7 @@ namespace Presentation.Converters
             throw new NotImplementedException();
         }
     }
-    
+
     public class BoolToGrayTextConverter : IValueConverter
     {
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)

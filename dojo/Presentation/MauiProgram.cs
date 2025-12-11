@@ -1,14 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
-using DAL;
-using BLL.Services;
 using BLL.Interfaces;
-using Presentation.Views;
-using Presentation.ViewModels;
+using BLL.Services;
+using DAL;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Storage;
 using Presentation.Services;
+using Presentation.ViewModels;
+using Presentation.Views;
 using Serilog;
 using Serilog.Events;
-using Microsoft.Maui.Storage;
 
 namespace Presentation
 {
@@ -78,28 +78,28 @@ namespace Presentation
             // ViewModels
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<RegisterViewModel>();
-            
-            builder.Services.AddTransient<MainViewModel>(sp => 
+
+            builder.Services.AddTransient<MainViewModel>(sp =>
                 new MainViewModel(
                     sp.GetRequiredService<ISessionService>(),
                     sp.GetRequiredService<IPomodoroService>(),
                     sp,
                     sp.GetRequiredService<IToDoTaskService>(),
-                    sp.GetRequiredService<IExperienceService>())); 
-                    
+                    sp.GetRequiredService<IExperienceService>()));
+
             builder.Services.AddTransient<AddPlanViewModel>(sp =>
                 new AddPlanViewModel(
                     sp.GetRequiredService<IGoalService>(),
                     sp.GetRequiredService<ISessionService>()));
-                    
+
             builder.Services.AddTransient<ViewPlanViewModel>(sp =>
                 new ViewPlanViewModel(sp.GetRequiredService<IGoalService>()));
-            
+
             builder.Services.AddTransient<StatisticsViewModel>(sp =>
                 new StatisticsViewModel(
                     sp.GetRequiredService<IToDoTaskService>(),
                     sp.GetRequiredService<ISessionService>()));
-            
+
             builder.Services.AddTransient<AddTodoViewModel>();
 
             // Pages

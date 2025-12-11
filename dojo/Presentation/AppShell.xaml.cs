@@ -1,4 +1,4 @@
-﻿using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls;
 using Presentation.Views;
 
 namespace Presentation;
@@ -8,7 +8,7 @@ public partial class AppShell : Shell
     public AppShell()
     {
         InitializeComponent();
-        
+
         // Register routes for navigation
         Routing.RegisterRoute(nameof(AddPlanPage), typeof(AddPlanPage));
         Routing.RegisterRoute(nameof(ViewPlanPage), typeof(ViewPlanPage));

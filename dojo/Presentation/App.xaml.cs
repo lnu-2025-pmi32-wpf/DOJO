@@ -1,18 +1,18 @@
-﻿﻿﻿using Presentation.Views;
-using BLL.Interfaces;
 using System.Linq;
+using BLL.Interfaces;
+using Presentation.Views;
 
 namespace Presentation;
 
 public partial class App : Application
 {
     private readonly IServiceProvider _services;
-    
+
     public App(IServiceProvider services)
     {
         _services = services;
         InitializeComponent();
-        
+
         // Глобальний обробник винятків
         AppDomain.CurrentDomain.UnhandledException += (s, e) =>
         {
@@ -22,7 +22,7 @@ public partial class App : Application
             System.Diagnostics.Debug.WriteLine($"Stack: {ex?.StackTrace}");
             System.Diagnostics.Debug.WriteLine($"Inner: {ex?.InnerException?.Message}");
         };
-        
+
         TaskScheduler.UnobservedTaskException += (s, e) =>
         {
             System.Diagnostics.Debug.WriteLine($"❌❌❌ UNOBSERVED TASK EXCEPTION ❌❌❌");
@@ -30,7 +30,7 @@ public partial class App : Application
             System.Diagnostics.Debug.WriteLine($"Stack: {e.Exception?.StackTrace}");
             e.SetObserved();
         };
-        
+
         System.Diagnostics.Debug.WriteLine("🔹 App started");
     }
 
@@ -39,15 +39,15 @@ public partial class App : Application
         try
         {
             System.Diagnostics.Debug.WriteLine("🔹 CreateWindow started");
-            
+
             var sessionService = _services.GetRequiredService<ISessionService>();
-            
-            var hasSession = Task.Run(async () => 
+
+            var hasSession = Task.Run(async () =>
             {
                 var session = await sessionService.GetUserSessionAsync();
                 return session.HasValue;
             }).Result;
-            
+
             if (hasSession)
             {
                 System.Diagnostics.Debug.WriteLine("✅ Session found, showing AppShell");

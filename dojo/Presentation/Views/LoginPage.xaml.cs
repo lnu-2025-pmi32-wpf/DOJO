@@ -1,5 +1,5 @@
-using Presentation.ViewModels;
 using BLL.Interfaces;
+using Presentation.ViewModels;
 
 namespace Presentation.Views
 {
@@ -19,9 +19,9 @@ namespace Presentation.Views
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            
+
             System.Diagnostics.Debug.WriteLine("🔹 LoginPage OnAppearing");
-            
+
             // АВТОЛОГІН: перевіряємо сесію тільки один раз при першому відображенні
             if (!_hasCheckedSession)
             {
@@ -51,7 +51,7 @@ namespace Presentation.Views
                     // Якщо помилка - просто залишаємось на LoginPage
                 }
             }
-            
+
             // Очищаємо стару сесію
             try
             {

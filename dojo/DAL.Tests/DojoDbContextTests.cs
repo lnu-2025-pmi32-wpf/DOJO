@@ -69,7 +69,7 @@ namespace DAL.Tests
             var savedGoal = this.context.Goals
                 .Include(g => g.User)
                 .FirstOrDefault(g => g.Description.Contains("Complete Project"));
-            
+
             savedGoal.Should().NotBeNull();
             savedGoal!.UserId.Should().Be(user.Id);
             savedGoal.User.Should().NotBeNull();

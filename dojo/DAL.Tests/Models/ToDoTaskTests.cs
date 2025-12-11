@@ -24,7 +24,7 @@ namespace DAL.Tests.Models
         {
             var dueDate = DateTime.UtcNow.AddDays(3);
             var createdAt = DateTime.UtcNow;
-            
+
             var task = new ToDoTask
             {
                 UserId = 1,

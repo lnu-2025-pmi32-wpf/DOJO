@@ -1,8 +1,8 @@
+using BLL.Interfaces;
 using DAL;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using BLL.Interfaces;
 
 namespace BLL.Services
 {
@@ -19,11 +19,11 @@ namespace BLL.Services
 
         public async Task<IEnumerable<Pomodoro>> GetAllPomodorosAsync()
         {
-            _logger. LogInformation("⏰ Завантаження всіх Pomodoro сесій");
+            _logger.LogInformation("⏰ Завантаження всіх Pomodoro сесій");
 
             try
             {
-                var pomodoros = await _context. Pomodoros.ToListAsync();
+                var pomodoros = await _context.Pomodoros.ToListAsync();
                 _logger.LogInformation("✅ Завантажено {Count} Pomodoro сесій", pomodoros.Count);
                 return pomodoros;
             }
@@ -40,11 +40,11 @@ namespace BLL.Services
 
             try
             {
-                var pomodoros = await _context. Pomodoros
+                var pomodoros = await _context.Pomodoros
                     .Where(p => p.TaskId == taskId)
                     .ToListAsync();
 
-                _logger.LogInformation("✅ Завантажено {Count} Pomodoro сесій для завдання {TaskId}", 
+                _logger.LogInformation("✅ Завантажено {Count} Pomodoro сесій для завдання {TaskId}",
                     pomodoros.Count, taskId);
                 return pomodoros;
             }
@@ -65,28 +65,28 @@ namespace BLL.Services
                     .Where(p => p.UserId == userId)
                     .ToListAsync();
 
-                _logger.LogInformation("✅ Завантажено {Count} Pomodoro сесій для користувача {UserId}", 
+                _logger.LogInformation("✅ Завантажено {Count} Pomodoro сесій для користувача {UserId}",
                     pomodoros.Count, userId);
                 return pomodoros;
             }
             catch (Exception ex)
             {
-                _logger. LogError(ex, "❌ Помилка завантаження Pomodoro сесій для користувача {UserId}", userId);
+                _logger.LogError(ex, "❌ Помилка завантаження Pomodoro сесій для користувача {UserId}", userId);
                 throw;
             }
         }
 
-        public async Task<Pomodoro? > GetPomodoroByIdAsync(int id)
+        public async Task<Pomodoro?> GetPomodoroByIdAsync(int id)
         {
             _logger.LogDebug("🔍 Пошук Pomodoro сесії за ID: {PomodoroId}", id);
 
             try
             {
-                var pomodoro = await _context. Pomodoros. FindAsync(id);
+                var pomodoro = await _context.Pomodoros.FindAsync(id);
 
                 if (pomodoro != null)
                 {
-                    _logger.LogDebug("✅ Pomodoro сесію знайдено: {PomodoroId}, UserId={UserId}, Duration={DurationMinutes} хв", 
+                    _logger.LogDebug("✅ Pomodoro сесію знайдено: {PomodoroId}, UserId={UserId}, Duration={DurationMinutes} хв",
                         id, pomodoro.UserId, pomodoro.DurationMinutes);
                 }
                 else
@@ -105,15 +105,15 @@ namespace BLL.Services
 
         public async Task AddPomodoroAsync(Pomodoro pomodoro)
         {
-            _logger.LogInformation("▶️ Запуск Pomodoro сесії: UserId={UserId}, TaskId={TaskId}, Duration={DurationMinutes} хв", 
-                pomodoro. UserId, pomodoro.TaskId, pomodoro.DurationMinutes);
+            _logger.LogInformation("▶️ Запуск Pomodoro сесії: UserId={UserId}, TaskId={TaskId}, Duration={DurationMinutes} хв",
+                pomodoro.UserId, pomodoro.TaskId, pomodoro.DurationMinutes);
 
             try
             {
-                await _context.Pomodoros. AddAsync(pomodoro);
+                await _context.Pomodoros.AddAsync(pomodoro);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("✅ Pomodoro сесію створено: ID={PomodoroId}, StartTime={StartTime}, Duration={DurationMinutes} хв", 
+                _logger.LogInformation("✅ Pomodoro сесію створено: ID={PomodoroId}, StartTime={StartTime}, Duration={DurationMinutes} хв",
                     pomodoro.Id, pomodoro.StartTime, pomodoro.DurationMinutes);
             }
             catch (Exception ex)
@@ -135,7 +135,7 @@ namespace BLL.Services
                 if (pomodoro.EndTime.HasValue)
                 {
                     var duration = (pomodoro.EndTime.Value - pomodoro.StartTime).TotalMinutes;
-                    _logger.LogInformation("⏹️ Pomodoro сесію завершено: ID={PomodoroId}, Тривалість={Duration: F1} хв, Цикли={WorkCycles}", 
+                    _logger.LogInformation("⏹️ Pomodoro сесію завершено: ID={PomodoroId}, Тривалість={Duration: F1} хв, Цикли={WorkCycles}",
                         pomodoro.Id, duration, pomodoro.WorkCycles);
                 }
                 else
@@ -156,8 +156,8 @@ namespace BLL.Services
 
             try
             {
-                var pomodoro = await _context.Pomodoros. FindAsync(id);
-                
+                var pomodoro = await _context.Pomodoros.FindAsync(id);
+
                 if (pomodoro != null)
                 {
                     _context.Pomodoros.Remove(pomodoro);
@@ -172,7 +172,7 @@ namespace BLL.Services
             }
             catch (Exception ex)
             {
-                _logger. LogError(ex, "❌ Помилка видалення Pomodoro сесії ID={PomodoroId}", id);
+                _logger.LogError(ex, "❌ Помилка видалення Pomodoro сесії ID={PomodoroId}", id);
                 throw;
             }
         }

@@ -2,11 +2,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using BLL.Interfaces;
+using Microsoft.Maui.Controls;
 using Presentation.Helpers;
 using Presentation.Models;
 using Presentation.Views;
-using BLL.Interfaces;
-using Microsoft.Maui.Controls;
 
 namespace Presentation.ViewModels
 {
@@ -148,7 +148,7 @@ namespace Presentation.ViewModels
             EndTime = eventModel.EndDateTime.TimeOfDay;
             Priority = eventModel.Priority;
             IsCompleted = eventModel.IsCompleted;
-            
+
             // TODO: Load attachments from database when available
             Attachments = new ObservableCollection<AttachmentModel>();
         }
@@ -158,26 +158,26 @@ namespace Presentation.ViewModels
             try
             {
                 System.Diagnostics.Debug.WriteLine($"OnEdit: Починаємо редагування плану Id={EventId}");
-                
+
                 // Отримуємо AddPlanPage з DI контейнера
                 var addPlanPage = Application.Current?.Handler?.MauiContext?.Services.GetService<AddPlanPage>();
-                
+
                 if (addPlanPage != null && addPlanPage.BindingContext is AddPlanViewModel addPlanViewModel)
                 {
                     System.Diagnostics.Debug.WriteLine($"OnEdit: AddPlanPage отримано, завантажуємо дані");
-                    
+
                     // Завантажуємо дані для редагування
-                    addPlanViewModel.LoadEventForEdit(EventId, Title, Description, 
+                    addPlanViewModel.LoadEventForEdit(EventId, Title, Description,
                         StartDate, StartTime, EndDate, EndTime, Priority, IsCompleted);
-                    
+
                     System.Diagnostics.Debug.WriteLine($"OnEdit: Дані завантажено, навігація...");
-                    
+
                     // Закриваємо поточну сторінку ViewPlanPage
                     await Shell.Current.Navigation.PopAsync();
-                    
+
                     // Відкриваємо AddPlanPage в режимі редагування
                     await Shell.Current.Navigation.PushAsync(addPlanPage);
-                    
+
                     System.Diagnostics.Debug.WriteLine($"OnEdit: Навігація завершена");
                 }
                 else
@@ -214,15 +214,15 @@ namespace Presentation.ViewModels
                 if (_goalService != null)
                 {
                     await _goalService.DeleteGoalAsync(EventId);
-                    
+
                     // Відправляємо повідомлення про видалення
                     MessagingCenter.Send(this, "GoalDeleted");
-                    
+
                     await Shell.Current.DisplayAlert(
                         "✅ Успіх",
                         "План успішно видалено!",
                         "OK");
-                    
+
                     await Shell.Current.Navigation.PopAsync();
                 }
                 else

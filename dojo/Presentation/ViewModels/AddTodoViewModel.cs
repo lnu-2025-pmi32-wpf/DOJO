@@ -1,7 +1,7 @@
-﻿using System.Windows.Input;
-using Presentation.Helpers;
+using System.Windows.Input;
 using BLL.Interfaces;
 using DAL.Models;
+using Presentation.Helpers;
 
 namespace Presentation.ViewModels
 {
@@ -13,13 +13,13 @@ namespace Presentation.ViewModels
         private string _titleError = string.Empty;
         private string _description = string.Empty;
         private string _descriptionError = string.Empty;
-        private int _priority = 1; 
+        private int _priority = 1;
 
         public AddTodoViewModel(IToDoTaskService todoTaskService, ISessionService sessionService)
         {
             _todoTaskService = todoTaskService;
             _sessionService = sessionService;
-            
+
             SaveCommand = new AsyncRelayCommand(OnSave, CanSave);
             CloseCommand = new RelayCommand(OnClose);
         }
@@ -73,8 +73,8 @@ namespace Presentation.ViewModels
 
         private bool CanSave()
         {
-            return !string.IsNullOrWhiteSpace(Title) && 
-                   ! string.IsNullOrWhiteSpace(Description) && 
+            return !string.IsNullOrWhiteSpace(Title) &&
+                   !string.IsNullOrWhiteSpace(Description) &&
                    string.IsNullOrEmpty(TitleError) &&
                    string.IsNullOrEmpty(DescriptionError);
         }
@@ -118,28 +118,28 @@ namespace Presentation.ViewModels
                 var session = await _sessionService.GetUserSessionAsync();
                 if (session == null)
                 {
-                    await Application.Current! .MainPage!.DisplayAlert("Помилка", "Сесія користувача не знайдена", "OK");
+                    await Application.Current!.MainPage!.DisplayAlert("Помилка", "Сесія користувача не знайдена", "OK");
                     return;
                 }
 
                 var newTask = new ToDoTask
                 {
                     UserId = session.Value.UserId,
-                    Description = $"{Title. Trim()}\n{Description.Trim()}",
+                    Description = $"{Title.Trim()}\n{Description.Trim()}",
                     Priority = Priority,
                     IsCompleted = false,
                     CreatedAt = DateTime.UtcNow
                 };
 
                 await _todoTaskService.AddTaskAsync(newTask);
-                
-               
+
+
                 MessagingCenter.Send(this, "TodoAdded");
-                await Application.Current!.MainPage!. Navigation.PopModalAsync();
+                await Application.Current!.MainPage!.Navigation.PopModalAsync();
             }
             catch (Exception ex)
             {
-                await Application. Current!.MainPage!.DisplayAlert("Помилка", $"Не вдалося додати завдання: {ex. Message}", "OK");
+                await Application.Current!.MainPage!.DisplayAlert("Помилка", $"Не вдалося додати завдання: {ex.Message}", "OK");
             }
         }
 

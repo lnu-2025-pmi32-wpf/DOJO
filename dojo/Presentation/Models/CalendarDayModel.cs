@@ -29,7 +29,7 @@ namespace Presentation.Models
         public FontAttributes FontAttributes =>
             IsToday ? FontAttributes.Bold :
             FontAttributes.None;
-            
+
         public bool ShowEventDot => HasEvents && EventCount > 0;
         public string EventDotColor => "#FF1493";
     }

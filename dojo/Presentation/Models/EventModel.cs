@@ -11,7 +11,7 @@ namespace Presentation.Models
         public Color Color { get; set; } = Colors.Blue;
         public bool IsCompleted { get; set; }
         public int? TaskId { get; set; }
-        
+
         public TimeSpan Duration => EndDateTime - StartDateTime;
         public int DayOfWeek => (int)StartDateTime.DayOfWeek;
         public int StartHour => StartDateTime.Hour;

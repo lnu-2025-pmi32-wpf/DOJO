@@ -1,19 +1,19 @@
-using System. Windows.Input;
-using BLL. Interfaces;
-using Presentation. Helpers;
+using System.Windows.Input;
+using BLL.Interfaces;
+using Presentation.Helpers;
 
 namespace Presentation.ViewModels
 {
     public class StatisticsViewModel : BaseViewModel
     {
-        private readonly IToDoTaskService?  _todoTaskService;
+        private readonly IToDoTaskService? _todoTaskService;
         private readonly ISessionService? _sessionService;
-        
+
         private int _totalTasks;
         private int _completedTasks;
         private int _inProgressTasks;
         private int _userId;
-        
+
         private double _day1Height;
         private double _day2Height;
         private double _day3Height;
@@ -21,7 +21,7 @@ namespace Presentation.ViewModels
         private double _day5Height;
         private double _day6Height;
         private double _day7Height;
-        
+
         private string _motivationQuote;
 
         private readonly List<string> _motivationQuotes = new()
@@ -62,12 +62,12 @@ namespace Presentation.ViewModels
         {
             _todoTaskService = todoTaskService;
             _sessionService = sessionService;
-            
+
             RefreshCommand = new AsyncRelayCommand(LoadStatistics);
             BackCommand = new AsyncRelayCommand(OnBack);
-            
+
             GenerateRandomMotivation();
-            
+
             _ = InitializeAsync();
         }
 
@@ -104,7 +104,7 @@ namespace Presentation.ViewModels
         public double Day7Height { get => _day7Height; set => SetProperty(ref _day7Height, value); }
 
         public string CompletionRate => TotalTasks > 0 ? $"{(CompletedTasks * 100.0 / TotalTasks):F0}%" : "0%";
-        public double CompletionProgress => TotalTasks > 0 ? (double)CompletedTasks / TotalTasks :  0;
+        public double CompletionProgress => TotalTasks > 0 ? (double)CompletedTasks / TotalTasks : 0;
 
         public ICommand RefreshCommand { get; }
         public ICommand BackCommand { get; }
@@ -116,15 +116,15 @@ namespace Presentation.ViewModels
                 if (_sessionService == null) return;
 
                 var session = await _sessionService.GetUserSessionAsync();
-                if (session. HasValue)
+                if (session.HasValue)
                 {
-                    _userId = session.Value. UserId;
+                    _userId = session.Value.UserId;
                     await LoadStatistics();
                 }
             }
             catch (Exception ex)
             {
-                System. Diagnostics.Debug.WriteLine($"❌ StatisticsViewModel Init Error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ StatisticsViewModel Init Error: {ex.Message}");
             }
         }
 
@@ -148,12 +148,12 @@ namespace Presentation.ViewModels
                 InProgressTasks = TotalTasks - CompletedTasks;
 
                 LoadChartData(tasksList);
-                
+
                 GenerateRandomMotivation();
 
-                System. Diagnostics.Debug.WriteLine($"✅ Статистика:  Всього={TotalTasks}, Виконано={CompletedTasks}, В процесі={InProgressTasks}");
+                System.Diagnostics.Debug.WriteLine($"✅ Статистика:  Всього={TotalTasks}, Виконано={CompletedTasks}, В процесі={InProgressTasks}");
                 System.Diagnostics.Debug.WriteLine($"💬 Мотивація: {MotivationQuote}");
-                
+
                 OnPropertyChanged(nameof(CompletionRate));
                 OnPropertyChanged(nameof(CompletionProgress));
             }
@@ -170,14 +170,14 @@ namespace Presentation.ViewModels
 
             for (int i = 6; i >= 0; i--)
             {
-                var targetDate = today. AddDays(-i);
-                var completedOnDay = tasks. Count(t => 
-                    t.IsCompleted && 
-                    t.CompletedAt.HasValue && 
-                    t. CompletedAt.Value.Date == targetDate);
-                
+                var targetDate = today.AddDays(-i);
+                var completedOnDay = tasks.Count(t =>
+                   t.IsCompleted &&
+                   t.CompletedAt.HasValue &&
+                   t.CompletedAt.Value.Date == targetDate);
+
                 var height = Math.Min(completedOnDay * 30, 200);
-                heights. Add(height);
+                heights.Add(height);
             }
 
             Day1Height = heights[0];

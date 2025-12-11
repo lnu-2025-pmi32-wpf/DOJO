@@ -1,8 +1,8 @@
+using BLL.Interfaces;
 using DAL;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using BLL.Interfaces;
 
 namespace BLL.Services
 {
@@ -45,7 +45,7 @@ namespace BLL.Services
                     .Include(t => t.Goal)
                     .ToListAsync();
 
-                _logger.LogInformation("✅ Завантажено {Count} завдань для користувача {UserId}", tasks. Count, userId);
+                _logger.LogInformation("✅ Завантажено {Count} завдань для користувача {UserId}", tasks.Count, userId);
                 return tasks;
             }
             catch (Exception ex)
@@ -55,13 +55,13 @@ namespace BLL.Services
             }
         }
 
-        public async Task<ToDoTask? > GetTaskByIdAsync(int id)
+        public async Task<ToDoTask?> GetTaskByIdAsync(int id)
         {
             _logger.LogDebug("🔍 Пошук завдання за ID:  {TaskId}", id);
 
             try
             {
-                var task = await _context.ToDoTasks. Include(t => t.Goal).FirstOrDefaultAsync(t => t.Id == id);
+                var task = await _context.ToDoTasks.Include(t => t.Goal).FirstOrDefaultAsync(t => t.Id == id);
 
                 if (task != null)
                 {
@@ -83,20 +83,20 @@ namespace BLL.Services
 
         public async Task AddTaskAsync(ToDoTask task)
         {
-            _logger. LogInformation("📝 Створення нового завдання для користувача {UserId}:  '{Description}'", 
-                task. UserId, task.Description);
+            _logger.LogInformation("📝 Створення нового завдання для користувача {UserId}:  '{Description}'",
+                task.UserId, task.Description);
 
             try
             {
-                await _context.ToDoTasks. AddAsync(task);
+                await _context.ToDoTasks.AddAsync(task);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("✅ Завдання створено: ID={TaskId}, Опис='{Description}', UserId={UserId}, Пріоритет={Priority}", 
+                _logger.LogInformation("✅ Завдання створено: ID={TaskId}, Опис='{Description}', UserId={UserId}, Пріоритет={Priority}",
                     task.Id, task.Description, task.UserId, task.Priority);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Помилка створення завдання '{Description}' для користувача {UserId}", 
+                _logger.LogError(ex, "❌ Помилка створення завдання '{Description}' для користувача {UserId}",
                     task.Description, task.UserId);
                 throw;
             }
@@ -104,8 +104,8 @@ namespace BLL.Services
 
         public async Task UpdateTaskAsync(ToDoTask task)
         {
-            _logger. LogInformation("🔄 Оновлення завдання:  ID={TaskId}, IsCompleted={IsCompleted}", 
-                task.Id, task. IsCompleted);
+            _logger.LogInformation("🔄 Оновлення завдання:  ID={TaskId}, IsCompleted={IsCompleted}",
+                task.Id, task.IsCompleted);
 
             try
             {
@@ -114,7 +114,7 @@ namespace BLL.Services
 
                 if (task.IsCompleted)
                 {
-                    _logger.LogInformation("✅ Завдання виконано: ID={TaskId}, '{Description}', CompletedAt={CompletedAt}", 
+                    _logger.LogInformation("✅ Завдання виконано: ID={TaskId}, '{Description}', CompletedAt={CompletedAt}",
                         task.Id, task.Description, task.CompletedAt);
                 }
                 else
@@ -124,22 +124,22 @@ namespace BLL.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Помилка оновлення завдання ID={TaskId}", task. Id);
+                _logger.LogError(ex, "❌ Помилка оновлення завдання ID={TaskId}", task.Id);
                 throw;
             }
         }
 
         public async Task DeleteTaskAsync(int id)
         {
-            _logger. LogInformation("🗑️ Видалення завдання:  ID={TaskId}", id);
+            _logger.LogInformation("🗑️ Видалення завдання:  ID={TaskId}", id);
 
             try
             {
                 var task = await _context.ToDoTasks.FindAsync(id);
-                
+
                 if (task != null)
                 {
-                    _context.ToDoTasks. Remove(task);
+                    _context.ToDoTasks.Remove(task);
                     await _context.SaveChangesAsync();
 
                     _logger.LogInformation("✅ Завдання видалено: ID={TaskId}, Опис='{Description}'", id, task.Description);

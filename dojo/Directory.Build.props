@@ -1,0 +1,13 @@
+<Project>
+    <PropertyGroup>
+        <!-- Увімкнути застосування code-style під час збірки -->
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+        <!-- На початку не переводимо всі warnings у errors. Пізніше можна змінити. -->
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+        <!-- Щоб analyzers застосовувалися в усіх проєктах -->
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <EnableAnalyzers>true</EnableAnalyzers>
+    </PropertyGroup>
+</Project>

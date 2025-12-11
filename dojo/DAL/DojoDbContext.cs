@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using DAL.Models;
 using System.Text.RegularExpressions;
+using DAL.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL
 {
@@ -20,7 +20,7 @@ namespace DAL
             modelBuilder.Entity<ToDoTask>().ToTable("tasks");
             modelBuilder.Entity<Attachment>().ToTable("attachments");
             modelBuilder.Entity<Pomodoro>().ToTable("pomodoros");
-            
+
             modelBuilder.Entity<User>(eb =>
             {
                 eb.Property(u => u.CreatedAt)
@@ -28,7 +28,7 @@ namespace DAL
                   .HasColumnType("timestamp without time zone")
                   .HasDefaultValueSql("CURRENT_TIMESTAMP")
                   .ValueGeneratedOnAdd();
-                
+
                 eb.Property(u => u.LastCompletionDate)
                   .HasColumnName("last_completion_date")
                   .HasColumnType("timestamp without time zone");
@@ -39,19 +39,19 @@ namespace DAL
                 eb.Property(g => g.StartTime)
                   .HasColumnName("start_time")
                   .HasColumnType("timestamp without time zone");
-                
+
                 eb.Property(g => g.EndTime)
                   .HasColumnName("end_time")
                   .HasColumnType("timestamp without time zone");
-                  
+
                 eb.Property(g => g.Priority)
                   .HasColumnName("priority")
                   .HasDefaultValue(1);
-                  
+
                 eb.Property(g => g.IsCompleted)
                   .HasColumnName("is_completed")
                   .HasDefaultValue(false);
-                
+
                 eb.Property(g => g.CreatedAt)
                   .HasColumnName("created_at")
                   .HasColumnType("timestamp without time zone")
@@ -90,13 +90,13 @@ namespace DAL
                 eb.Property(p => p.StartTime)
                   .HasColumnName("start_time")
                   .HasColumnType("timestamp without time zone");
-                  
+
                 eb.Property(p => p.EndTime)
                   .HasColumnName("end_time")
                   .HasColumnType("timestamp without time zone");
-                  
+
                 eb.Property(p => p.WorkCycles).HasColumnName("work_cycles");
-                
+
                 eb.HasOne(p => p.Task)
                   .WithMany()
                   .HasForeignKey(p => p.TaskId)
@@ -109,18 +109,18 @@ namespace DAL
                 eb.Property(a => a.FileName).HasColumnName("file_name");
                 eb.Property(a => a.TaskId).HasColumnName("task_id");
                 eb.Property(a => a.GoalId).HasColumnName("goal_id");
-                
+
                 eb.HasOne(a => a.Task)
                   .WithMany()
                   .HasForeignKey(a => a.TaskId)
                   .OnDelete(DeleteBehavior.Cascade);
-                  
+
                 eb.HasOne(a => a.Goal)
                   .WithMany()
                   .HasForeignKey(a => a.GoalId)
                   .OnDelete(DeleteBehavior.Cascade);
             });
-            
+
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
             {
                 foreach (var property in entity.GetProperties())
@@ -129,7 +129,7 @@ namespace DAL
                 }
             }
         }
-        
+
         private static string ToSnakeCase(string name)
         {
             return Regex.Replace(name, "([a-z0-9])([A-Z])", "$1_$2").ToLowerInvariant();

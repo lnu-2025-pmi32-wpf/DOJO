@@ -1,11 +1,11 @@
+using BLL.Interfaces;
 using DAL;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
-using BLL.Interfaces;
 
 namespace BLL.Services
 {
-    public class ExperienceService :  IExperienceService
+    public class ExperienceService : IExperienceService
     {
         private readonly DojoDbContext _context;
 
@@ -75,29 +75,29 @@ namespace BLL.Services
             }
 
             System.Diagnostics.Debug.WriteLine($"=== ДОДАВАННЯ ДОСВІДУ ===");
-            System.Diagnostics. Debug.WriteLine($"UserId: {userId}");
-            System.Diagnostics.Debug.WriteLine($"ДО: ExpPoints={user.ExpPoints}, Level={user. Level}");
-            
+            System.Diagnostics.Debug.WriteLine($"UserId: {userId}");
+            System.Diagnostics.Debug.WriteLine($"ДО: ExpPoints={user.ExpPoints}, Level={user.Level}");
+
             // Додаємо досвід
             user.ExpPoints += expAmount;
 
             // 🔥 ЗАВЖДИ ПЕРЕРАХОВУЄМО РІВЕНЬ (не тільки при підвищенні!)
             int correctLevel = (user.ExpPoints / EXP_PER_LEVEL) + 1;
-            
+
             System.Diagnostics.Debug.WriteLine($"Додано: +{expAmount} XP");
             System.Diagnostics.Debug.WriteLine($"ПІСЛЯ: ExpPoints={user.ExpPoints}");
             System.Diagnostics.Debug.WriteLine($"EXP_PER_LEVEL={EXP_PER_LEVEL}");
             System.Diagnostics.Debug.WriteLine($"Розрахунок:   ({user.ExpPoints} / {EXP_PER_LEVEL}) + 1 = {correctLevel}");
-            
+
             // 🔥 ПЕРЕВІРЯЄМО ЧИ ЗМІНИВСЯ РІВЕНЬ
             if (correctLevel != user.Level)
             {
                 int oldLevel = user.Level;
                 user.Level = correctLevel;  // 🔥 ЗАВЖДИ ОНОВЛЮЄМО! 
-                
+
                 if (correctLevel > oldLevel)
                 {
-                    System.Diagnostics. Debug.WriteLine($"🎉 РІВЕНЬ ПІДВИЩЕНО! {oldLevel} → {correctLevel}");
+                    System.Diagnostics.Debug.WriteLine($"🎉 РІВЕНЬ ПІДВИЩЕНО! {oldLevel} → {correctLevel}");
                 }
                 else
                 {
@@ -106,7 +106,7 @@ namespace BLL.Services
             }
             else
             {
-                System. Diagnostics.Debug.WriteLine($"📊 Рівень залишився:   {user.Level}");
+                System.Diagnostics.Debug.WriteLine($"📊 Рівень залишився:   {user.Level}");
             }
 
             // Оновлюємо дату
@@ -117,8 +117,8 @@ namespace BLL.Services
             _context.Entry(user).Property(u => u.ExpPoints).IsModified = true;
 
             await _context.SaveChangesAsync();
-            System.Diagnostics. Debug.WriteLine($"✅ Зміни збережено в БД (Level={user.Level})");
-            System.Diagnostics.Debug. WriteLine($"=== КІНЕЦЬ ДОДАВАННЯ ===\n");
+            System.Diagnostics.Debug.WriteLine($"✅ Зміни збережено в БД (Level={user.Level})");
+            System.Diagnostics.Debug.WriteLine($"=== КІНЕЦЬ ДОДАВАННЯ ===\n");
         }
 
         /// <summary>
@@ -129,13 +129,13 @@ namespace BLL.Services
             // 🔥 ПЕРЕЗАВАНТАЖУЄМО КОРИСТУВАЧА З БД (БЕЗ КЕШУ)
             var user = await _context.Users
                 .AsNoTracking()  // Не використовуємо кеш
-                .FirstOrDefaultAsync(u => u. Id == userId);
-        
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
             if (user == null) return (0, 1, 0, EXP_PER_LEVEL);
 
             // Розраховуємо досвід В ПОТОЧНОМУ рівні (0-599)
             int expInCurrentLevel = user.ExpPoints % EXP_PER_LEVEL;
-    
+
             // Скільки треба ДО наступного рівня
             int expToNextLevel = EXP_PER_LEVEL - expInCurrentLevel;
 

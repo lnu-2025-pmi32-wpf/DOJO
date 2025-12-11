@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Input;
-using Presentation.Helpers;
 using BLL.Interfaces;
+using Presentation.Helpers;
 using Presentation.Views;
 
 namespace Presentation.ViewModels
@@ -116,7 +116,7 @@ namespace Presentation.ViewModels
             {
                 // Викликаємо LoginAsync
                 var user = await _userService.LoginAsync(Email, Password);
-                
+
                 if (user == null)
                 {
                     // Невірний email або пароль
@@ -124,7 +124,7 @@ namespace Presentation.ViewModels
                     IsNotificationSuccess = false;
                     return;
                 }
-                
+
                 // Успішний вхід
                 NotificationMessage = "Вхід виконано успішно!";
                 IsNotificationSuccess = true;
@@ -134,10 +134,10 @@ namespace Presentation.ViewModels
 
                 // Невелика затримка щоб показати повідомлення
                 await Task.Delay(500);
-                
+
                 // Встановлюємо IsLoading = false перед навігацією
                 IsLoading = false;
-                
+
                 // Navigate to dashboard page - просто замінюємо сторінку на AppShell
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
@@ -167,7 +167,7 @@ namespace Presentation.ViewModels
             {
                 var registerPage = Application.Current?.Handler?.MauiContext?.Services
                     .GetService<Views.RegisterPage>();
-                if (registerPage != null && Application.Current?.Windows.Count > 0 && 
+                if (registerPage != null && Application.Current?.Windows.Count > 0 &&
                     Application.Current.Windows[0].Page is NavigationPage navPage)
                 {
                     await navPage.PushAsync(registerPage);

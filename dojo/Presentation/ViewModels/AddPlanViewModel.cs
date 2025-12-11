@@ -1,9 +1,9 @@
 using System.Windows.Input;
+using BLL.Interfaces;
+using BLL.Services;
+using DAL.Models;
 using Presentation.Helpers;
 using Presentation.Models;
-using BLL.Services;
-using BLL.Interfaces;
-using DAL.Models;
 
 namespace Presentation.ViewModels
 {
@@ -11,7 +11,7 @@ namespace Presentation.ViewModels
     {
         private readonly IGoalService _goalService;
         private readonly ISessionService _sessionService;
-        
+
         private int? _eventId = null;
         private string _title = string.Empty;
         private string _description = string.Empty;
@@ -22,7 +22,7 @@ namespace Presentation.ViewModels
         private EventPriority _priority = EventPriority.Normal;
         private string _attachmentPath = string.Empty;
         private bool _isCompleted = false;
-        
+
         private string _titleError = string.Empty;
         private string _dateError = string.Empty;
 
@@ -30,7 +30,7 @@ namespace Presentation.ViewModels
         {
             _goalService = goalService;
             _sessionService = sessionService;
-            
+
             SaveCommand = new AsyncRelayCommand(OnSave, CanSave);
             CancelCommand = new RelayCommand(OnCancel);
             AttachFileCommand = new AsyncRelayCommand(OnAttachFile);
@@ -38,8 +38,8 @@ namespace Presentation.ViewModels
 
         public bool IsEditMode => _eventId.HasValue;
 
-        public void LoadEventForEdit(int eventId, string title, string description, 
-            DateTime startDate, TimeSpan startTime, DateTime endDate, TimeSpan endTime, 
+        public void LoadEventForEdit(int eventId, string title, string description,
+            DateTime startDate, TimeSpan startTime, DateTime endDate, TimeSpan endTime,
             EventPriority priority, bool isCompleted)
         {
             _eventId = eventId;
@@ -51,7 +51,7 @@ namespace Presentation.ViewModels
             EndTime = endTime;
             Priority = priority;
             _isCompleted = isCompleted;
-            
+
             OnPropertyChanged(nameof(IsEditMode));
         }
 
@@ -143,7 +143,7 @@ namespace Presentation.ViewModels
             get => _priority;
             set => SetProperty(ref _priority, value);
         }
-        
+
         // Для біндингу з Picker.SelectedIndex
         public int PriorityIndex
         {
@@ -198,7 +198,7 @@ namespace Presentation.ViewModels
             {
                 // Зберігаємо заголовок для повідомлення (до очистки форми)
                 var savedTitle = Title;
-                
+
                 // Отримуємо поточну сесію користувача
                 var session = await _sessionService.GetUserSessionAsync();
                 if (!session.HasValue)
@@ -217,7 +217,7 @@ namespace Presentation.ViewModels
                 {
                     // Режим редагування - оновлюємо існуючий Goal
                     var existingGoal = await _goalService.GetGoalByIdAsync(_eventId.Value);
-                    
+
                     if (existingGoal != null)
                     {
                         existingGoal.Description = fullDescription;
@@ -243,15 +243,15 @@ namespace Presentation.ViewModels
                             System.Diagnostics.Debug.WriteLine("Відправляємо GoalUpdated...");
                             MessagingCenter.Send(this, "GoalUpdated");
                             System.Diagnostics.Debug.WriteLine("GoalUpdated відправлено!");
-                            
+
                             await Shell.Current.DisplayAlert(
-                                "✅ Успіх", 
-                                $"План '{savedTitle}' успішно оновлено!", 
+                                "✅ Успіх",
+                                $"План '{savedTitle}' успішно оновлено!",
                                 "OK");
-                            
+
                             await Shell.Current.Navigation.PopAsync();
                         });
-                        
+
                         return;
                     }
                 }
@@ -284,15 +284,15 @@ namespace Presentation.ViewModels
                         System.Diagnostics.Debug.WriteLine("Відправляємо GoalAdded...");
                         MessagingCenter.Send(this, "GoalAdded");
                         System.Diagnostics.Debug.WriteLine("GoalAdded відправлено!");
-                        
+
                         await Shell.Current.DisplayAlert(
-                            "✅ Успіх", 
-                            $"План '{savedTitle}' успішно створено!", 
+                            "✅ Успіх",
+                            $"План '{savedTitle}' успішно створено!",
                             "OK");
-                        
+
                         await Shell.Current.Navigation.PopAsync();
                     });
-                    
+
                     return;
                 }
             }
@@ -300,13 +300,13 @@ namespace Presentation.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"Помилка збереження: {ex}");
                 System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-                
+
                 var errorMessage = ex.InnerException?.Message ?? ex.Message;
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
                     await Shell.Current.DisplayAlert(
-                        "Помилка", 
-                        $"Не вдалося зберегти план:\n{errorMessage}", 
+                        "Помилка",
+                        $"Не вдалося зберегти план:\n{errorMessage}",
                         "OK");
                 });
             }
@@ -338,7 +338,7 @@ namespace Presentation.ViewModels
             Priority = EventPriority.Normal;
             _isCompleted = false;
             AttachmentPath = string.Empty;
-            
+
             OnPropertyChanged(nameof(IsEditMode));
         }
 

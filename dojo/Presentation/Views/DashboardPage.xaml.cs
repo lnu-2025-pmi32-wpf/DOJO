@@ -1,6 +1,6 @@
-using Presentation.ViewModels;
-using Presentation.Models;
 using BLL.Interfaces;
+using Presentation.Models;
+using Presentation.ViewModels;
 
 namespace Presentation.Views
 {
@@ -59,11 +59,11 @@ namespace Presentation.Views
         protected override void OnAppearing()
         {
             base.OnAppearing();
-    
+
             try
             {
                 System.Diagnostics.Debug.WriteLine($"DashboardPage: OnAppearing викликано (IsInitialized: {_isInitialized})");
-        
+
                 // Ініціалізуємо тільки один раз при першому відображенні
                 if (!_isInitialized && _viewModel != null)
                 {
@@ -75,16 +75,16 @@ namespace Presentation.Views
                 else if (_isInitialized && _viewModel != null)
                 {
                     // Оновлюємо дані при поверненні на сторінку
-                    System.Diagnostics.Debug. WriteLine("DashboardPage:  Оновлюємо дані при поверненні...");
+                    System.Diagnostics.Debug.WriteLine("DashboardPage:  Оновлюємо дані при поверненні...");
                     _viewModel.RefreshData();
-            
+
                     // Примусово оновлюємо місячний вигляд якщо він активний
-                    _viewModel. ForceRefreshMonthView();
+                    _viewModel.ForceRefreshMonthView();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics. Debug.WriteLine($"DashboardPage: Помилка OnAppearing - {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"DashboardPage: Помилка OnAppearing - {ex.Message}");
             }
         }
 

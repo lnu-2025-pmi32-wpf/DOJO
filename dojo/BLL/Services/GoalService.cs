@@ -1,8 +1,8 @@
+using BLL.Interfaces;
 using DAL;
 using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using BLL. Interfaces;
 
 namespace BLL.Services
 {
@@ -23,13 +23,13 @@ namespace BLL.Services
 
             try
             {
-                var goals = await _context.Goals. Include(g => g.Tasks).ToListAsync();
+                var goals = await _context.Goals.Include(g => g.Tasks).ToListAsync();
                 _logger.LogInformation("✅ Завантажено {Count} планів", goals.Count);
                 return goals;
             }
             catch (Exception ex)
             {
-                _logger. LogError(ex, "❌ Помилка завантаження всіх планів");
+                _logger.LogError(ex, "❌ Помилка завантаження всіх планів");
                 throw;
             }
         }
@@ -42,7 +42,7 @@ namespace BLL.Services
             {
                 var goals = await _context.Goals
                     .Where(g => g.UserId == userId)
-                    .Include(g => g. Tasks)
+                    .Include(g => g.Tasks)
                     .ToListAsync();
 
                 _logger.LogInformation("✅ Завантажено {Count} планів для користувача {UserId}", goals.Count, userId);
@@ -55,7 +55,7 @@ namespace BLL.Services
             }
         }
 
-        public async Task<Goal? > GetGoalByIdAsync(int id)
+        public async Task<Goal?> GetGoalByIdAsync(int id)
         {
             _logger.LogDebug("🔍 Пошук плану за ID: {GoalId}", id);
 
@@ -63,12 +63,12 @@ namespace BLL.Services
             {
                 var goal = await _context.Goals
                     .Include(g => g.Tasks)
-                    .FirstOrDefaultAsync(g => g. Id == id);
+                    .FirstOrDefaultAsync(g => g.Id == id);
 
                 if (goal != null)
                 {
-                    _logger.LogDebug("✅ План знайдено: {GoalId} - '{Description}' ({TaskCount} завдань)", 
-                        id, goal.Description, goal.Tasks?. Count ?? 0);
+                    _logger.LogDebug("✅ План знайдено: {GoalId} - '{Description}' ({TaskCount} завдань)",
+                        id, goal.Description, goal.Tasks?.Count ?? 0);
                 }
                 else
                 {
@@ -86,20 +86,20 @@ namespace BLL.Services
 
         public async Task AddGoalAsync(Goal goal)
         {
-            _logger.LogInformation("📝 Створення нового плану для користувача {UserId}:  '{Description}'", 
-                goal. UserId, goal.Description);
+            _logger.LogInformation("📝 Створення нового плану для користувача {UserId}:  '{Description}'",
+                goal.UserId, goal.Description);
 
             try
             {
                 await _context.Goals.AddAsync(goal);
-                await _context. SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-                _logger.LogInformation("✅ План створено:  ID={GoalId}, Опис='{Description}', UserId={UserId}, Пріоритет={Priority}, Дедлайн={EndTime}", 
-                    goal. Id, goal.Description, goal. UserId, goal.Priority, goal.EndTime);
+                _logger.LogInformation("✅ План створено:  ID={GoalId}, Опис='{Description}', UserId={UserId}, Пріоритет={Priority}, Дедлайн={EndTime}",
+                    goal.Id, goal.Description, goal.UserId, goal.Priority, goal.EndTime);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Помилка створення плану '{Description}' для користувача {UserId}", 
+                _logger.LogError(ex, "❌ Помилка створення плану '{Description}' для користувача {UserId}",
                     goal.Description, goal.UserId);
                 throw;
             }
@@ -107,13 +107,13 @@ namespace BLL.Services
 
         public async Task UpdateGoalAsync(Goal goal)
         {
-            _logger.LogInformation("🔄 Оновлення плану:  ID={GoalId}, '{Description}', Прогрес={Progress}%", 
+            _logger.LogInformation("🔄 Оновлення плану:  ID={GoalId}, '{Description}', Прогрес={Progress}%",
                 goal.Id, goal.Description, goal.Progress);
 
             try
             {
                 _context.Goals.Update(goal);
-                await _context. SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
                 if (goal.IsCompleted)
                 {
@@ -121,13 +121,13 @@ namespace BLL.Services
                 }
                 else
                 {
-                    _logger.LogInformation("✅ План оновлено:  ID={GoalId}, Опис='{Description}', Прогрес={Progress}%", 
+                    _logger.LogInformation("✅ План оновлено:  ID={GoalId}, Опис='{Description}', Прогрес={Progress}%",
                         goal.Id, goal.Description, goal.Progress);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Помилка оновлення плану ID={GoalId}", goal. Id);
+                _logger.LogError(ex, "❌ Помилка оновлення плану ID={GoalId}", goal.Id);
                 throw;
             }
         }
@@ -138,14 +138,14 @@ namespace BLL.Services
 
             try
             {
-                var goal = await _context. Goals.FindAsync(id);
-                
+                var goal = await _context.Goals.FindAsync(id);
+
                 if (goal != null)
                 {
                     _context.Goals.Remove(goal);
                     await _context.SaveChangesAsync();
 
-                    _logger.LogInformation("✅ План видалено: ID={GoalId}, Опис='{Description}'", id, goal. Description);
+                    _logger.LogInformation("✅ План видалено: ID={GoalId}, Опис='{Description}'", id, goal.Description);
                 }
                 else
                 {

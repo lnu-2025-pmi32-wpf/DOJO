@@ -1,10 +1,10 @@
+using System.Security.Cryptography;
+using System.Text;
 using BLL.Services;
 using DAL;
 using DAL.Models;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
 using Xunit;
 
 namespace BLL.Tests.Services

@@ -49,7 +49,7 @@ namespace BLL.Tests.Services
 
             var savedGoal = await this.context.Goals
                 .FirstOrDefaultAsync(g => g.Description.Contains("Test Goal"));
-            
+
             savedGoal.Should().NotBeNull();
             savedGoal!.UserId.Should().Be(this.testUser.Id);
             savedGoal.Priority.Should().Be(2);
@@ -58,28 +58,28 @@ namespace BLL.Tests.Services
         [Fact]
         public async Task GetGoalsByUserIdAsync_ShouldReturnUserGoals()
         {
-            var goal1 = new Goal 
-            { 
-                UserId = this.testUser.Id, 
+            var goal1 = new Goal
+            {
+                UserId = this.testUser.Id,
                 Description = "Goal 1",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-            var goal2 = new Goal 
-            { 
-                UserId = this.testUser.Id, 
+            var goal2 = new Goal
+            {
+                UserId = this.testUser.Id,
                 Description = "Goal 2",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-            var goal3 = new Goal 
-            { 
-                UserId = this.testUser.Id, 
+            var goal3 = new Goal
+            {
+                UserId = this.testUser.Id,
                 Description = "Goal 3",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-            
+
             this.context.Goals.AddRange(goal1, goal2, goal3);
             await this.context.SaveChangesAsync();
 
@@ -250,7 +250,7 @@ namespace BLL.Tests.Services
 
             var goal1 = new Goal { UserId = this.testUser.Id, Description = "Goal 1", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
             var goal2 = new Goal { UserId = user2.Id, Description = "Goal 2", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
-            
+
             this.context.Goals.AddRange(goal1, goal2);
             await this.context.SaveChangesAsync();
 

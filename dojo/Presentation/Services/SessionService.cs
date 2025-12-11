@@ -46,7 +46,7 @@ namespace Presentation.Services
                     email = Preferences.Get(EmailKey, string.Empty);
                     userIdStr = Preferences.Get(UserIdKey, string.Empty);
                     username = Preferences.Get(UsernameKey, string.Empty);
-                    
+
                     if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(userIdStr))
                         return null;
                 }
@@ -61,15 +61,15 @@ namespace Presentation.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error getting session: {ex.Message}");
-                
+
                 // Try fallback to Preferences
                 try
                 {
                     var email = Preferences.Get(EmailKey, string.Empty);
                     var userIdStr = Preferences.Get(UserIdKey, string.Empty);
                     var username = Preferences.Get(UsernameKey, string.Empty);
-                    
-                    if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(userIdStr) && 
+
+                    if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(userIdStr) &&
                         int.TryParse(userIdStr, out int userId))
                     {
                         return (email, userId, username);
@@ -79,7 +79,7 @@ namespace Presentation.Services
                 {
                     // Ignore fallback errors
                 }
-                
+
                 return null;
             }
         }
@@ -96,7 +96,7 @@ namespace Presentation.Services
             {
                 System.Diagnostics.Debug.WriteLine($"Error clearing session: {ex.Message}");
             }
-            
+
             // Also clear from Preferences
             try
             {
@@ -108,7 +108,7 @@ namespace Presentation.Services
             {
                 // Ignore errors
             }
-            
+
             await Task.CompletedTask;
         }
 

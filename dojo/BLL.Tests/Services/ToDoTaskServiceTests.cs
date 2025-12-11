@@ -50,7 +50,7 @@ namespace BLL.Tests.Services
             // Assert
             var savedTask = await this.context.ToDoTasks
                 .FirstOrDefaultAsync(t => t.Description == "Complete homework");
-            
+
             savedTask.Should().NotBeNull();
             savedTask!.UserId.Should().Be(this.testUser.Id);
             savedTask.Priority.Should().Be(2);
@@ -63,7 +63,7 @@ namespace BLL.Tests.Services
             var task1 = new ToDoTask { UserId = this.testUser.Id, Description = "Task 1", CreatedAt = DateTime.UtcNow };
             var task2 = new ToDoTask { UserId = this.testUser.Id, Description = "Task 2", CreatedAt = DateTime.UtcNow };
             var task3 = new ToDoTask { UserId = this.testUser.Id, Description = "Task 3", CreatedAt = DateTime.UtcNow };
-            
+
             this.context.ToDoTasks.AddRange(task1, task2, task3);
             await this.context.SaveChangesAsync();
 
@@ -205,7 +205,7 @@ namespace BLL.Tests.Services
             var savedTask = await this.context.ToDoTasks
                 .Include(t => t.Goal)
                 .FirstOrDefaultAsync(t => t.Description == "Linked Task");
-            
+
             savedTask.Should().NotBeNull();
             savedTask!.GoalId.Should().Be(goal.Id);
             savedTask.Goal.Should().NotBeNull();
@@ -228,7 +228,7 @@ namespace BLL.Tests.Services
 
             var task1 = new ToDoTask { UserId = this.testUser.Id, Description = "Task 1", CreatedAt = DateTime.UtcNow };
             var task2 = new ToDoTask { UserId = user2.Id, Description = "Task 2", CreatedAt = DateTime.UtcNow };
-            
+
             this.context.ToDoTasks.AddRange(task1, task2);
             await this.context.SaveChangesAsync();
 

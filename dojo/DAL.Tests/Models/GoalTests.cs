@@ -15,7 +15,7 @@ namespace DAL.Tests.Models
             goal.UserId.Should().Be(0);
             goal.Description.Should().BeEmpty();
             goal.Progress.Should().Be(0);
-            goal.Priority.Should().Be(1); 
+            goal.Priority.Should().Be(1);
             goal.IsCompleted.Should().BeFalse();
         }
 
@@ -24,7 +24,7 @@ namespace DAL.Tests.Models
         {
             var startTime = DateTime.UtcNow;
             var endTime = startTime.AddDays(7);
-            
+
             var goal = new Goal
             {
                 UserId = 1,

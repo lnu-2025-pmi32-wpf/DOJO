@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Windows.Input;
-using Presentation.Helpers;
 using BLL.Interfaces;
+using Presentation.Helpers;
 using Presentation.Views;
 
 namespace Presentation.ViewModels
@@ -144,7 +144,7 @@ namespace Presentation.ViewModels
         private async Task OnRegister()
         {
             // Перевіряємо чи всі поля заповнені
-            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password) || 
+            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password) ||
                 string.IsNullOrWhiteSpace(ConfirmPassword) || string.IsNullOrWhiteSpace(FullName))
             {
                 NotificationMessage = "Будь ласка, заповніть всі поля";
@@ -162,7 +162,7 @@ namespace Presentation.ViewModels
             {
                 // Викликаємо RegisterAsync з username
                 var user = await _userService.RegisterAsync(Email, Password, FullName);
-                
+
                 if (user == null)
                 {
                     // Користувач з таким email вже існує
@@ -170,7 +170,7 @@ namespace Presentation.ViewModels
                     IsNotificationSuccess = false;
                     return;
                 }
-                
+
                 // Успішна реєстрація
                 NotificationMessage = "Реєстрація пройшла успішно! Вхід в систему...";
                 IsNotificationSuccess = true;
@@ -180,10 +180,10 @@ namespace Presentation.ViewModels
 
                 // Затримка щоб показати повідомлення
                 await Task.Delay(500);
-                
+
                 // Встановлюємо IsLoading = false перед навігацією
                 IsLoading = false;
-                
+
                 // Перехід на Dashboard - просто замінюємо сторінку на AppShell
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
@@ -211,7 +211,7 @@ namespace Presentation.ViewModels
         {
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                if (Application.Current?.Windows.Count > 0 && 
+                if (Application.Current?.Windows.Count > 0 &&
                     Application.Current.Windows[0].Page is NavigationPage navPage)
                 {
                     await navPage.PopAsync();

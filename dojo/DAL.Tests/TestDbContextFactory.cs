@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using DAL;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Tests
 {
@@ -9,7 +9,7 @@ namespace DAL.Tests
         public static DojoDbContext CreateInMemoryContext()
         {
             var options = new DbContextOptionsBuilder<DojoDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) 
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             var context = new DojoDbContext(options);
